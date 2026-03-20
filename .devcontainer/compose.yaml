@@ -1,0 +1,38 @@
+services:
+  app:
+    environment:
+      - TZ=Asia/Tokyo
+    build:
+      context: ..
+      dockerfile: Dockerfile
+      target: dev
+    env_file:
+      - ../.env
+    ports:
+      - "8080:8080" # golang http server port
+    volumes:
+      - ../:/workspace:cached
+    # command: /bin/sh -c "while sleep 1000; do :; done"
+    command: sleep infinity
+    depends_on:
+      db:
+        condition: service_healthy
+  db:
+    image: postgres:18.3-alpine@sha256:4da1a4828be12604092fa55311276f08f9224a74a62dcb4708bd7439e2a03911
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: devdb
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: password
+      TZ: Asia/Tokyo
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres-data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD", "pg_isready"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+volumes:
+  postgres-data:

@@ -1,0 +1,10 @@
+.git
+.github
+.claude
+.vscode
+.zed
+.devcontainer
+node_modules
+.env
+compose.yaml
+README.md

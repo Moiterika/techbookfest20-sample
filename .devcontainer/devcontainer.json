@@ -1,0 +1,20 @@
+// .devcontainer/devcontainer.json
+{
+  "name": "Go 1.26 and Postgres 18.3 Alpine Custom",
+  "dockerComposeFile": "compose.yaml",
+  "service": "app",
+  "workspaceFolder": "/workspace",
+  // Dockerfileで作成した非rootユーザーで接続する
+  "remoteUser": "zeduser",
+  "appPort": ["4321:4321"],
+  "forwardPorts": [4321],
+  "customizations": {
+    "vscode": {
+      "extensions": ["astro", "biome"],
+      "settings": {
+        // ターミナルのデフォルトをbashに設定（Alpineデフォルトはash）
+        "terminal.integrated.defaultProfile.linux": "bash",
+      },
+    },
+  },
+}

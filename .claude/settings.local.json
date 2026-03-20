@@ -1,0 +1,19 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(bun pm ls --all 2>/dev/null | grep astrojs/node; curl -s https://registry.npmjs.org/@astrojs/node | python3 -c \"import sys,json; d=json.load\\(sys.stdin\\); print\\(list\\(d['versions'].keys\\(\\)\\)[-5:]\\)\" 2>/dev/null || bun x npm-view @astrojs/node version 2>/dev/null)",
+      "Bash(curl -s \"https://registry.npmjs.org/@astrojs/node\" 2>/dev/null | grep -o '\"latest\":\"[^\"]*\"')",
+      "Bash(ss -tlnp 2>/dev/null | grep 4321 || netstat -tlnp 2>/dev/null | grep 4321 || echo \"port 4321 not listening\")",
+      "Bash(cd /workspaces/20260223_genko/aha && bun install --force)",
+      "Bash(ls -la /workspaces/20260223_genko/aha/drizzle*)",
+      "Bash(cat > drizzle.config.ts << 'EOF'\nimport type { Config } from \"drizzle-kit\";\n\nexport default {\n  schema: \"./src/db/schema.ts\",\n  out: \"./src/db/migrations\",\n  dialect: \"sqlite\",\n  dbCredentials: {\n    url: \"./data/app.db\",\n  },\n} satisfies Config;\nEOF\ncat drizzle.config.ts)",
+      "Bash(pwd && cat > /workspaces/20260223_genko/aha/drizzle.config.ts << 'EOF'\nimport type { Config } from \"drizzle-kit\";\n\nexport default {\n  schema: \"./src/db/schema.ts\",\n  out: \"./src/db/migrations\",\n  dialect: \"sqlite\",\n  dbCredentials: {\n    url: \"./data/app.db\",\n  },\n} satisfies Config;\nEOF)",
+      "WebSearch",
+      "Bash(bun add -d bun-better-sqlite3)",
+      "Bash(bunx drizzle-kit generate)",
+      "Bash(bun run src/db/migrate.ts)",
+      "WebFetch(domain:docs.astro.build)",
+      "Bash(cd /workspaces/20260223_genko/aha && bun add @astrojs/tailwind tailwindcss)"
+    ]
+  }
+}

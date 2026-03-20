@@ -10,6 +10,7 @@ services:
       - ../.env
     ports:
       - "8080:8080" # golang http server port
+      - "4321:4321"
     volumes:
       - ../:/workspace:cached
     # command: /bin/sh -c "while sleep 1000; do :; done"

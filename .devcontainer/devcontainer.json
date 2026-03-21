@@ -10,7 +10,7 @@
   "forwardPorts": [4321],
   "customizations": {
     "vscode": {
-      "extensions": ["astro", "biome"],
+      "extensions": ["astro"],
       "settings": {
         // ターミナルのデフォルトをbashに設定（Alpineデフォルトはash）
         "terminal.integrated.defaultProfile.linux": "bash",

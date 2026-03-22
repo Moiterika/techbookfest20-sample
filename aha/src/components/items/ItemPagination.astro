@@ -1,0 +1,167 @@
+---
+import { css } from "../../../styled-system/css";
+import { btnSecondary, inputStyleSm } from "../../styles/common.css";
+
+interface Props {
+  currentPage: number;
+  totalPages: number;
+  pageSize: number;
+  oob?: boolean;
+}
+
+const { currentPage, totalPages, pageSize, oob = false } = Astro.props;
+
+const paginationBar = css({
+  display: "flex",
+  justifyContent: "space-between",
+  alignItems: "center",
+  py: "4",
+  flexWrap: "wrap",
+  gap: "3",
+});
+
+const pageBtns = css({
+  display: "flex",
+  alignItems: "center",
+  gap: "2",
+});
+
+const pageInfo = css({
+  fontSize: "sm",
+  color: "slate.600",
+});
+
+const sizeSelector = css({
+  display: "flex",
+  alignItems: "center",
+  gap: "2",
+  fontSize: "sm",
+  color: "slate.600",
+});
+
+const activeBtn = css({
+  fontSize: "sm",
+  py: "1.5",
+  px: "3",
+  rounded: "md",
+  fontWeight: "medium",
+  bg: "indigo.600",
+  color: "white",
+  border: "1px solid",
+  borderColor: "transparent",
+  cursor: "default",
+});
+
+const disabledBtn = css({
+  fontSize: "sm",
+  py: "1.5",
+  px: "3",
+  rounded: "md",
+  fontWeight: "medium",
+  border: "1px solid",
+  borderColor: "slate.200",
+  bg: "slate.50",
+  color: "slate.400",
+  cursor: "default",
+});
+
+const selectStyle = css({
+  border: "1px solid",
+  borderColor: "slate.300",
+  rounded: "md",
+  fontSize: "sm",
+  py: "1",
+  px: "2",
+  color: "slate.700",
+  bg: "white",
+  cursor: "pointer",
+  outline: "none",
+  _focus: {
+    borderColor: "indigo.500",
+    boxShadow: "0 0 0 1px token(colors.indigo.500)",
+  },
+});
+
+const oobAttr = oob ? "true" : undefined;
+const sizes = [20, 50, 100];
+
+function itemsUrl(page: number, size: number) {
+  return `/api/items?page=${page}&size=${size}`;
+}
+---
+
+<div
+  id="items-pagination"
+  class={paginationBar}
+  {...(oobAttr ? { "hx-swap-oob": oobAttr } : {})}
+>
+  <div class={sizeSelector}>
+    <span>表示件数:</span>
+    <select
+      class={selectStyle}
+      hx-get="/api/items"
+      hx-target="#items-body"
+      hx-swap="innerHTML"
+      hx-include="this"
+      name="size"
+      hx-vals='{"page": "1"}'
+    >
+      {sizes.map((s) => (
+        <option value={s} selected={s === pageSize}>{s}件</option>
+      ))}
+    </select>
+  </div>
+
+  {totalPages > 1 ? (
+    <div class={pageBtns}>
+      {currentPage > 1 ? (
+        <button
+          hx-get={itemsUrl(currentPage - 1, pageSize)}
+          hx-target="#items-body"
+          hx-swap="innerHTML"
+          class={btnSecondary}
+        >
+          前へ
+        </button>
+      ) : (
+        <span class={disabledBtn}>前へ</span>
+      )}
+
+      {Array.from({ length: totalPages }, (_, i) => i + 1).map((p) =>
+        p === currentPage ? (
+          <span class={activeBtn}>{p}</span>
+        ) : (
+          <button
+            hx-get={itemsUrl(p, pageSize)}
+            hx-target="#items-body"
+            hx-swap="innerHTML"
+            class={btnSecondary}
+          >
+            {p}
+          </button>
+        ),
+      )}
+
+      {currentPage < totalPages ? (
+        <button
+          hx-get={itemsUrl(currentPage + 1, pageSize)}
+          hx-target="#items-body"
+          hx-swap="innerHTML"
+          class={btnSecondary}
+        >
+          次へ
+        </button>
+      ) : (
+        <span class={disabledBtn}>次へ</span>
+      )}
+
+      <span class={pageInfo}>
+        {currentPage} / {totalPages} ページ
+      </span>
+    </div>
+  ) : (
+    <div class={pageBtns}>
+      <span class={pageInfo}>全 {totalPages} ページ</span>
+    </div>
+  )}
+</div>

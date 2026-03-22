@@ -2,22 +2,42 @@ import type { APIRoute } from "astro";
 import { experimental_AstroContainer as AstroContainer } from "astro/container";
 import { db } from "../../../db";
 import { items } from "../../../db/schema";
-import { desc } from "drizzle-orm";
+import { count, desc } from "drizzle-orm";
 import ItemRows from "../../../components/items/ItemRows.astro";
 import { errorText } from "../../../styles/common.css";
 
 const container = await AstroContainer.create();
+const PAGE_SIZES = [20, 50, 100] as const;
+const DEFAULT_PAGE_SIZE = 20;
 
-/** GET /api/items — 品目一覧を HTML 断片で返す */
-export const GET: APIRoute = async () => {
-  const rows = await db.select().from(items).orderBy(desc(items.id));
+/** ページネーション付きで品目一覧 HTML を返す */
+async function renderItemPage(page: number, pageSize: number) {
+  const size = PAGE_SIZES.includes(pageSize as any) ? pageSize : DEFAULT_PAGE_SIZE;
+  const [{ total }] = await db.select({ total: count() }).from(items);
+  const totalPages = Math.max(1, Math.ceil(total / size));
+  const currentPage = Math.min(Math.max(1, page), totalPages);
+
+  const rows = await db
+    .select()
+    .from(items)
+    .orderBy(desc(items.id))
+    .limit(size)
+    .offset((currentPage - 1) * size);
+
   const html = await container.renderToString(ItemRows, {
-    props: { items: rows },
+    props: { items: rows, currentPage, totalPages, pageSize: size },
   });
   return new Response(html, { headers: { "Content-Type": "text/html" } });
+}
+
+/** GET /api/items — 品目一覧を HTML 断片で返す */
+export const GET: APIRoute = async ({ url }) => {
+  const page = Number(url.searchParams.get("page")) || 1;
+  const size = Number(url.searchParams.get("size")) || DEFAULT_PAGE_SIZE;
+  return renderItemPage(page, size);
 };
 
-/** POST /api/items — 品目を追加し、一覧を返す */
+/** POST /api/items — 品目を追加し、一覧（1ページ目）を返す */
 export const POST: APIRoute = async ({ request }) => {
   const form = await request.formData();
   const name = form.get("name") as string;
@@ -33,9 +53,7 @@ export const POST: APIRoute = async ({ request }) => {
 
   await db.insert(items).values({ name, category, price });
 
-  const rows = await db.select().from(items).orderBy(desc(items.id));
-  const html = await container.renderToString(ItemRows, {
-    props: { items: rows },
-  });
-  return new Response(html, { headers: { "Content-Type": "text/html" } });
+  const url = new URL(request.url);
+  const size = Number(url.searchParams.get("size")) || DEFAULT_PAGE_SIZE;
+  return renderItemPage(1, size);
 };

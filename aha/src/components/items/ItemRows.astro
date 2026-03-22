@@ -2,12 +2,16 @@
 import type { Item } from "../../db/schema";
 import { css } from "../../../styled-system/css";
 import ItemRow from "./ItemRow.astro";
+import ItemPagination from "./ItemPagination.astro";
 
 interface Props {
   items: Item[];
+  currentPage?: number;
+  totalPages?: number;
+  pageSize?: number;
 }
 
-const { items } = Astro.props;
+const { items, currentPage = 1, totalPages = 1, pageSize = 20 } = Astro.props;
 
 const emptyCell = css({ textAlign: "center", py: "4" });
 ---
@@ -23,3 +27,10 @@ const emptyCell = css({ textAlign: "center", py: "4" });
     items.map((item) => <ItemRow item={item} />)
   )
 }
+
+<ItemPagination
+  currentPage={currentPage}
+  totalPages={totalPages}
+  pageSize={pageSize}
+  oob
+/>

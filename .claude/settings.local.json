@@ -13,7 +13,10 @@
       "Bash(bunx drizzle-kit generate)",
       "Bash(bun run src/db/migrate.ts)",
       "WebFetch(domain:docs.astro.build)",
-      "Bash(cd /workspaces/20260223_genko/aha && bun add @astrojs/tailwind tailwindcss)"
+      "Bash(cd /workspaces/20260223_genko/aha && bun add @astrojs/tailwind tailwindcss)",
+      "Bash(bunx panda:*)",
+      "Bash(bunx --bun astro sync)",
+      "Bash(bunx --bun astro check)"
     ]
   }
 }

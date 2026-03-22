@@ -1,7 +1,8 @@
 # syntax=docker/dockerfile:1
 # check=error=true
 
-ARG GO_VERSION=1.26-alpine@sha256:2389ebfa5b7f43eeafbd6be0c3700cc46690ef842ad962f6c5bd6be49ed82039
+# ARG GO_VERSION=1.26-alpine@sha256:2389ebfa5b7f43eeafbd6be0c3700cc46690ef842ad962f6c5bd6be49ed82039
+ARG GO_VERSION=1.26@sha256:595c7847cff97c9a9e76f015083c481d26078f961c9c8dca3923132f51fe12f1
 
 ### ----------------- ###
 ### Development image ###
@@ -11,22 +12,24 @@ FROM golang:${GO_VERSION} AS dev
 # インストール時にキャッシュを残さないための設定
 ENV MSG_PREF="no-cache"
 
-# 必要なパッケージのインストール
-RUN apk update && apk add --no-cache \
+# 必要なパッケージのインストール（astro language server用にnodejsとnpmもインストールする）
+RUN apt-get update \
+    && apt-get install -y --no-install-recommends \
     git \
     bash \
     sudo \
-    shadow \
-    build-base \
+    build-essential \
     curl \
     unzip \
-    coreutils
+    coreutils \
+    nodejs \
+    npm \
+    && rm -rf /var/lib/apt/lists/*
 
 # Bunのインストール
 RUN curl -fsSL https://bun.sh/install | bash \
     && mv /root/.bun/bin/bun /usr/local/bin/ \
     && ln -s /usr/local/bin/bun /usr/local/bin/bunx \
-    && ln -s /usr/local/bin/bun /usr/local/bin/node \
     && rm -rf /root/.bun
 
 # --- ユーザー設定セクション ---

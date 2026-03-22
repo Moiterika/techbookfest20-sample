@@ -12,8 +12,14 @@ const { items } = Astro.props;
 const emptyCell = css({ textAlign: "center", py: "4" });
 ---
 
-{items.length === 0 ? (
-  <tr><td colspan="4" class={emptyCell}>品目がありません</td></tr>
-) : (
-  items.map((item) => <ItemRow item={item} />)
-)}
+{
+  items.length === 0 ? (
+    <tr>
+      <td colspan="4" class={emptyCell}>
+        品目がありません
+      </td>
+    </tr>
+  ) : (
+    items.map((item) => <ItemRow item={item} />)
+  )
+}

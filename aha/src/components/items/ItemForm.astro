@@ -16,12 +16,17 @@ import {
     hx-post="/api/items"
     hx-target="#items-body"
     hx-swap="innerHTML"
-    hx-on--after-request="if(event.detail.successful) this.reset()"
+    @htmx:after-request="if($event.detail.successful) { $el.reset(); open = false }"
     class={css({ display: "flex", flexDirection: "column", gap: "4" })}
   >
     <label class={labelStyle}>
       <span>品目名 <span class={css({ color: "rose.500" })}>*</span></span>
-      <input name="name" required class={inputStyle} placeholder="例: ノートPC" />
+      <input
+        name="name"
+        required
+        class={inputStyle}
+        placeholder="例: ノートPC"
+      />
     </label>
     <label class={labelStyle}>
       カテゴリ
@@ -32,12 +37,7 @@ import {
       <input name="price" type="number" value="0" min="0" class={inputStyle} />
     </label>
     <div class={css({ mt: "2" })}>
-      <button
-        type="submit"
-        class:list={["btn", btnPrimary]}
-      >
-        登録する
-      </button>
+      <button type="submit" class:list={["btn", btnPrimary]}> 登録する </button>
     </div>
   </form>
 </div>

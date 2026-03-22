@@ -1,6 +1,6 @@
 ---
 import type { Item } from "../../db/schema";
-import { btnSm, btnDanger, tdCell, row } from "./styles.css";
+import { btnSecondary, btnDanger, tdCell, row, flexRow } from "../../styles/common.css";
 
 interface Props {
   item: Item;
@@ -14,16 +14,20 @@ const { item } = Astro.props;
   <td class={tdCell}>{item.category ?? ""}</td>
   <td class={tdCell}>{item.price.toLocaleString()}</td>
   <td class={tdCell}>
-    <button
-      hx-get={`/api/items/${item.id}/edit`}
-      hx-target={`#item-${item.id}`}
-      hx-swap="outerHTML"
-      class={btnSm}>編集</button>
-    <button
-      hx-delete={`/api/items/${item.id}`}
-      hx-target={`#item-${item.id}`}
-      hx-swap="outerHTML swap:0.3s"
-      hx-confirm={`「${item.name}」を削除しますか？`}
-      class={btnDanger}>削除</button>
+    <div class={flexRow}>
+      <button
+        hx-get={`/api/items/${item.id}/edit`}
+        hx-target={`#item-${item.id}`}
+        hx-swap="outerHTML"
+        class={btnSecondary}>編集</button
+      >
+      <button
+        hx-delete={`/api/items/${item.id}`}
+        hx-target={`#item-${item.id}`}
+        hx-swap="outerHTML swap:0.3s"
+        hx-confirm={`「${item.name}」を削除しますか？`}
+        class={btnDanger}>削除</button
+      >
+    </div>
   </td>
 </tr>

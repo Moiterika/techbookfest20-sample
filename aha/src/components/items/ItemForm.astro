@@ -1,70 +1,43 @@
 ---
 import { css } from "../../../styled-system/css";
-
-const inputStyle = css({
-  border: "1px solid",
-  borderColor: "gray.300",
-  rounded: "md",
-  px: "3",
-  py: "2",
-});
-const labelStyle = css({ display: "flex", flexDirection: "column", gap: "1" });
+import {
+  btnPrimary,
+  inputStyle,
+  labelStyle,
+  card,
+  cardTitle,
+} from "../../styles/common.css";
 ---
 
 <!-- Alpine.js: x-show + x-transition でスライド表示 -->
-<div
-  x-show="open"
-  x-transition
-  class={css({
-    mb: "6",
-    p: "4",
-    rounded: "lg",
-    border: "1px solid",
-    borderColor: "gray.200",
-    bg: "gray.50",
-  })}
->
-  <h2 class={css({ fontSize: "lg", fontWeight: "bold", mb: "3" })}>
-    新規品目
-  </h2>
+<div x-show="open" x-transition class={card}>
+  <h2 class={cardTitle}>新規品目登録</h2>
   <form
     hx-post="/api/items"
     hx-target="#items-body"
     hx-swap="innerHTML"
     hx-on--after-request="if(event.detail.successful) this.reset()"
-    class={css({ display: "flex", flexDirection: "column", gap: "3" })}
+    class={css({ display: "flex", flexDirection: "column", gap: "4" })}
   >
     <label class={labelStyle}>
-      品目名 <span class={css({ color: "red.500" })}>*</span>
-      <input name="name" required class={inputStyle} />
+      <span>品目名 <span class={css({ color: "rose.500" })}>*</span></span>
+      <input name="name" required class={inputStyle} placeholder="例: ノートPC" />
     </label>
     <label class={labelStyle}>
       カテゴリ
-      <input name="category" class={inputStyle} />
+      <input name="category" class={inputStyle} placeholder="例: 備品" />
     </label>
     <label class={labelStyle}>
-      単価
-      <input name="price" type="number" value="0" class={inputStyle} />
+      単価 (円)
+      <input name="price" type="number" value="0" min="0" class={inputStyle} />
     </label>
-    <button
-      type="submit"
-      class:list={[
-        "btn",
-        css({
-          alignSelf: "flex-start",
-          px: "6",
-          py: "2",
-          rounded: "md",
-          fontWeight: "bold",
-          cursor: "pointer",
-          bg: "green.600",
-          color: "white",
-          _hover: { bg: "green.700" },
-          transition: "colors",
-        }),
-      ]}
-    >
-      登録
-    </button>
+    <div class={css({ mt: "2" })}>
+      <button
+        type="submit"
+        class:list={["btn", btnPrimary]}
+      >
+        登録する
+      </button>
+    </div>
   </form>
 </div>

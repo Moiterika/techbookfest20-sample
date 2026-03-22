@@ -24,7 +24,14 @@
 
 ## CSS ルール
 - **CSS は直書きせず PandaCSS を使う**（`index.css` のみ例外）
-- コンポーネント間で共有するスタイルは `styles.css.ts` にまとめる
+- **共通スタイルは `src/styles/common.css.ts` に定義**し、各コンポーネントから import して使う
+  - ボタン: `btnPrimary`, `btnSecondary`, `btnDanger`
+  - フォーム: `inputStyle`, `inputStyleSm`, `labelStyle`
+  - カード: `card`, `cardTitle`
+  - テーブル: `thCell`, `tdCell`, `row`
+  - ユーティリティ: `flexRow`, `errorText`, `pageContainer`, `pageTitle`
+- **各コンポーネントでボタンや入力欄のスタイルをインライン `css()` で書かない** — `common.css.ts` の定義を使う
+- そのコンポーネント固有のレイアウト調整（gap, margin 等）のみインライン `css()` で書いてよい
 - API レスポンスの HTML 断片にも PandaCSS クラスを使う（AstroContainer 経由なのでカバーされる）
 
 ## API 設計方針

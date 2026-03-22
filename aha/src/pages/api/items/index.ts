@@ -4,7 +4,7 @@ import { db } from "../../../db";
 import { items } from "../../../db/schema";
 import { desc } from "drizzle-orm";
 import ItemRows from "../../../components/items/ItemRows.astro";
-import { errorText } from "../../../components/items/styles.css";
+import { errorText } from "../../../styles/common.css";
 
 const container = await AstroContainer.create();
 

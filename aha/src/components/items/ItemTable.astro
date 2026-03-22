@@ -1,0 +1,29 @@
+---
+import { css } from "../../../styled-system/css";
+---
+
+<div class={css({ overflowX: "auto" })}>
+  <table class={css({ w: "full", borderCollapse: "collapse" })}>
+    <thead>
+      <tr
+        class={css({
+          borderBottom: "2px solid",
+          borderColor: "gray.300",
+          textAlign: "left",
+        })}
+      >
+        <th class={css({ py: "2", px: "3" })}>品目名</th>
+        <th class={css({ py: "2", px: "3" })}>カテゴリ</th>
+        <th class={css({ py: "2", px: "3" })}>単価</th>
+        <th class={css({ py: "2", px: "3" })}>操作</th>
+      </tr>
+    </thead>
+    <tbody
+      id="items-body"
+      hx-get="/api/items"
+      hx-trigger="load"
+      hx-swap="innerHTML"
+    >
+    </tbody>
+  </table>
+</div>

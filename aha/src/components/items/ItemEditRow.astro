@@ -1,0 +1,33 @@
+---
+import type { Item } from "../../db/schema";
+import { css } from "../../../styled-system/css";
+import { btnSm, btnPrimary, tdCell, editInput, row } from "./styles.css";
+
+interface Props {
+  item: Item;
+}
+
+const { item } = Astro.props;
+---
+
+<tr id={`item-${item.id}`} class={row}>
+  <td class={tdCell}><input name="name" value={item.name} form={`edit-${item.id}`} required class={editInput} /></td>
+  <td class={tdCell}><input name="category" value={item.category ?? ""} form={`edit-${item.id}`} class={editInput} /></td>
+  <td class={tdCell}><input name="price" type="number" value={item.price} form={`edit-${item.id}`} class={editInput} /></td>
+  <td class={tdCell}>
+    <form
+      id={`edit-${item.id}`}
+      hx-put={`/api/items/${item.id}`}
+      hx-target={`#item-${item.id}`}
+      hx-swap="outerHTML"
+      class={css({ display: "inline" })}
+    >
+      <button type="submit" class={btnPrimary}>保存</button>
+    </form>
+    <button
+      hx-get="/api/items"
+      hx-target="#items-body"
+      hx-swap="innerHTML"
+      class={btnSm}>キャンセル</button>
+  </td>
+</tr>

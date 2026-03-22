@@ -1,0 +1,46 @@
+---
+import { css } from "../../../styled-system/css";
+---
+
+<!-- Alpine.js: フォーム開閉トグル + PandaCSS ボタンレイアウト -->
+<div class={css({ display: "flex", gap: "3", mb: "4", flexWrap: "wrap" })}>
+  <button
+    @click="open = !open"
+    x-text="open ? '閉じる' : '＋ 新規追加'"
+    class:list={[
+      "btn",
+      css({
+        px: "4",
+        py: "2",
+        rounded: "md",
+        fontWeight: "bold",
+        cursor: "pointer",
+        bg: "blue.600",
+        color: "white",
+        _hover: { bg: "blue.700" },
+        transition: "colors",
+      }),
+    ]}></button>
+
+  <button
+    hx-get="/api/items"
+    hx-target="#items-body"
+    hx-swap="innerHTML"
+    class:list={[
+      "btn",
+      css({
+        px: "4",
+        py: "2",
+        rounded: "md",
+        cursor: "pointer",
+        border: "1px solid",
+        borderColor: "gray.300",
+        bg: "white",
+        _hover: { bg: "gray.100" },
+        transition: "colors",
+      }),
+    ]}
+  >
+    更新
+  </button>
+</div>

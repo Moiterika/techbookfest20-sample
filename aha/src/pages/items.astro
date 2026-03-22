@@ -1,0 +1,24 @@
+---
+import Layout from "../layouts/Layout.astro";
+import { css } from "../../styled-system/css";
+import ItemToolbar from "../components/items/ItemToolbar.astro";
+import ItemForm from "../components/items/ItemForm.astro";
+import ItemTable from "../components/items/ItemTable.astro";
+import HtmxLoading from "../components/items/HtmxLoading.astro";
+---
+
+<Layout>
+  <main class={css({ maxWidth: "800px", mx: "auto", py: "8", px: "4" })}>
+    <h1 class={css({ fontSize: "2xl", fontWeight: "bold", mb: "6" })}>
+      品目管理
+    </h1>
+
+    <div x-data="{ open: false }">
+      <ItemToolbar />
+      <ItemForm />
+    </div>
+
+    <ItemTable />
+    <HtmxLoading />
+  </main>
+</Layout>

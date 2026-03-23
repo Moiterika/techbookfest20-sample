@@ -16,7 +16,22 @@
       "Bash(cd /workspaces/20260223_genko/aha && bun add @astrojs/tailwind tailwindcss)",
       "Bash(bunx panda:*)",
       "Bash(bunx --bun astro sync)",
-      "Bash(bunx --bun astro check)"
+      "Bash(bunx --bun astro check)",
+      "Bash(ls -la /workspace/aha/*.*)",
+      "Bash(grep -E \"\\\\.\\(ts|js|config|json\\)$\")",
+      "Read(//tmp/**)",
+      "mcp__panda__get_config",
+      "mcp__panda__get_tokens",
+      "mcp__panda__get_semantic_tokens",
+      "mcp__panda__get_recipes",
+      "mcp__panda__get_text_styles",
+      "mcp__panda__get_keyframes",
+      "mcp__panda__get_color_palette",
+      "mcp__panda__get_patterns",
+      "mcp__panda__get_layer_styles"
     ]
-  }
+  },
+  "enabledMcpjsonServers": [
+    "panda"
+  ]
 }

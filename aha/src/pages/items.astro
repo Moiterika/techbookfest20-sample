@@ -1,10 +1,21 @@
 ---
 import Layout from "../layouts/Layout.astro";
 import { pageContainer, pageTitle } from "../styles/common.css";
-import ItemToolbar from "../components/items/ItemToolbar.astro";
+import CrudToolbar from "../components/crud/CrudToolbar.astro";
+import CrudTable from "../components/crud/CrudTable.astro";
+import HtmxLoading from "../components/crud/HtmxLoading.astro";
 import ItemForm from "../components/items/ItemForm.astro";
-import ItemTable from "../components/items/ItemTable.astro";
-import HtmxLoading from "../components/items/HtmxLoading.astro";
+import ItemSearch from "../components/items/ItemSearch.astro";
+import type { Column } from "../components/crud/types";
+
+const columns: Column[] = [
+  { key: "code", label: "品目コード" },
+  { key: "name", label: "品目名" },
+  { key: "category", label: "カテゴリ" },
+  { key: "price", label: "単価", type: "number" },
+  { key: "barcode", label: "バーコード" },
+  { key: "_actions", label: "操作", width: "32" },
+];
 ---
 
 <Layout>
@@ -12,11 +23,23 @@ import HtmxLoading from "../components/items/HtmxLoading.astro";
     <h1 class={pageTitle}>品目管理</h1>
 
     <div x-data="{ open: false }">
-      <ItemToolbar />
+      <CrudToolbar
+        baseUrl="/api/items"
+        bodyTargetId="items-body"
+        tableId="items-table"
+        searchContainerId="items-search"
+      />
       <ItemForm />
     </div>
 
-    <ItemTable />
+    <ItemSearch />
+    <CrudTable
+      columns={columns}
+      bodyId="items-body"
+      baseUrl="/api/items"
+      paginationId="items-pagination"
+      tableId="items-table"
+    />
     <HtmxLoading />
   </main>
 </Layout>

@@ -1,15 +1,33 @@
 ---
 import { css } from "../../../styled-system/css";
-import { btnSecondary, inputStyleSm } from "../../styles/common.css";
+import { btnSecondary } from "../../styles/common.css";
 
 interface Props {
   currentPage: number;
   totalPages: number;
   pageSize: number;
+  /** API ベース URL（例: "/api/items"） */
+  baseUrl: string;
+  /** tbody の id（htmx target） */
+  bodyTargetId: string;
+  /** ページネーション要素自体の id */
+  paginationId: string;
+  /** hx-swap-oob を付けるかどうか */
   oob?: boolean;
+  /** ページURL に追加するパラメータ（検索クエリ等） */
+  extraParams?: Record<string, string>;
 }
 
-const { currentPage, totalPages, pageSize, oob = false } = Astro.props;
+const {
+  currentPage,
+  totalPages,
+  pageSize,
+  baseUrl,
+  bodyTargetId,
+  paginationId,
+  oob = false,
+  extraParams = {},
+} = Astro.props;
 
 const paginationBar = css({
   display: "flex",
@@ -85,13 +103,22 @@ const selectStyle = css({
 const oobAttr = oob ? "true" : undefined;
 const sizes = [20, 50, 100];
 
-function itemsUrl(page: number, size: number) {
-  return `/api/items?page=${page}&size=${size}`;
+function pageUrl(page: number, size: number) {
+  const params = new URLSearchParams({
+    page: String(page),
+    size: String(size),
+  });
+  for (const [k, v] of Object.entries(extraParams)) {
+    if (v) params.set(k, v);
+  }
+  return `${baseUrl}?${params}`;
 }
+
+const sizeHxVals = JSON.stringify({ page: "1", ...extraParams });
 ---
 
 <div
-  id="items-pagination"
+  id={paginationId}
   class={paginationBar}
   {...oobAttr ? { "hx-swap-oob": oobAttr } : {}}
 >
@@ -99,12 +126,12 @@ function itemsUrl(page: number, size: number) {
     <span>表示件数:</span>
     <select
       class={selectStyle}
-      hx-get="/api/items"
-      hx-target="#items-body"
+      hx-get={baseUrl}
+      hx-target={`#${bodyTargetId}`}
       hx-swap="innerHTML"
       hx-include="this"
       name="size"
-      hx-vals='{"page": "1"}'
+      hx-vals={sizeHxVals}
     >
       {
         sizes.map((s) => (
@@ -121,8 +148,8 @@ function itemsUrl(page: number, size: number) {
       <div class={pageBtns}>
         {currentPage > 1 ? (
           <button
-            hx-get={itemsUrl(currentPage - 1, pageSize)}
-            hx-target="#items-body"
+            hx-get={pageUrl(currentPage - 1, pageSize)}
+            hx-target={`#${bodyTargetId}`}
             hx-swap="innerHTML"
             class={btnSecondary}
           >
@@ -137,8 +164,8 @@ function itemsUrl(page: number, size: number) {
             <span class={activeBtn}>{p}</span>
           ) : (
             <button
-              hx-get={itemsUrl(p, pageSize)}
-              hx-target="#items-body"
+              hx-get={pageUrl(p, pageSize)}
+              hx-target={`#${bodyTargetId}`}
               hx-swap="innerHTML"
               class={btnSecondary}
             >
@@ -149,8 +176,8 @@ function itemsUrl(page: number, size: number) {
 
         {currentPage < totalPages ? (
           <button
-            hx-get={itemsUrl(currentPage + 1, pageSize)}
-            hx-target="#items-body"
+            hx-get={pageUrl(currentPage + 1, pageSize)}
+            hx-target={`#${bodyTargetId}`}
             hx-swap="innerHTML"
             class={btnSecondary}
           >

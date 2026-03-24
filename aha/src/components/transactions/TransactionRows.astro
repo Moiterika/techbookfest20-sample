@@ -1,39 +1,37 @@
 ---
-import type { Item } from "../../db/schema";
+import type { Transaction } from "../../db/schema";
 import { css } from "../../../styled-system/css";
-import ItemRow from "./ItemRow.astro";
+import TransactionRow from "./TransactionRow.astro";
 import CrudPagination from "../crud/CrudPagination.astro";
 
 interface Props {
-  items: Item[];
+  transactions: (Transaction & { itemCode?: string; itemName?: string })[];
   currentPage?: number;
   totalPages?: number;
   pageSize?: number;
-  query?: string;
+  extraParams?: Record<string, string>;
 }
 
 const {
-  items,
+  transactions,
   currentPage = 1,
   totalPages = 1,
   pageSize = 20,
-  query = "",
+  extraParams = {},
 } = Astro.props;
-
-const extraParams = query ? { q: query } : {};
 
 const emptyCell = css({ textAlign: "center", py: "4" });
 ---
 
 {
-  items.length === 0 ? (
+  transactions.length === 0 ? (
     <tr>
-      <td colspan="6" class={emptyCell}>
-        品目がありません
+      <td colspan="7" class={emptyCell}>
+        取引がありません
       </td>
     </tr>
   ) : (
-    items.map((item) => <ItemRow item={item} />)
+    transactions.map((tx) => <TransactionRow transaction={tx} />)
   )
 }
 
@@ -41,9 +39,9 @@ const emptyCell = css({ textAlign: "center", py: "4" });
   currentPage={currentPage}
   totalPages={totalPages}
   pageSize={pageSize}
-  baseUrl="/api/items"
-  bodyTargetId="items-body"
-  paginationId="items-pagination"
+  baseUrl="/api/transactions"
+  bodyTargetId="tx-body"
+  paginationId="tx-pagination"
   extraParams={extraParams}
   oob
 />

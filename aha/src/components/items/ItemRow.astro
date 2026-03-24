@@ -16,6 +16,7 @@ const { item } = Astro.props;
 ---
 
 <tr id={`item-${item.id}`} class={row}>
+  <td class={tdCell}>{item.code}</td>
   <td class={tdCell}>{item.name}</td>
   <td class={tdCell}>{item.category ?? ""}</td>
   <td class={tdCell}>{item.price.toLocaleString()}</td>

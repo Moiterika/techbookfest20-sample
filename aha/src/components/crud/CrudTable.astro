@@ -1,0 +1,65 @@
+---
+import { css } from "../../../styled-system/css";
+import { thCell } from "../../styles/common.css";
+import type { Column } from "./types";
+
+interface Props {
+  /** カラム定義 */
+  columns: Column[];
+  /** tbody の id（htmx target） */
+  bodyId: string;
+  /** API ベース URL */
+  baseUrl: string;
+  /** ページネーション表示先の id */
+  paginationId: string;
+  /** テーブル要素の id（コピー/ダウンロード用） */
+  tableId?: string;
+}
+
+const { columns, bodyId, baseUrl, paginationId, tableId } = Astro.props;
+
+const tableWrapper = css({
+  overflowX: "auto",
+  rounded: "xl",
+  border: "1px solid",
+  borderColor: "slate.200",
+  bg: "white",
+  boxShadow: "sm",
+});
+---
+
+<div class={tableWrapper}>
+  <table
+    id={tableId}
+    class={css({ w: "full", borderCollapse: "collapse", textAlign: "left" })}
+  >
+    <thead
+      class={css({
+        bg: "slate.50",
+        borderBottom: "1px solid",
+        borderColor: "slate.200",
+      })}
+    >
+      <tr>
+        {
+          columns.map((col) => (
+            <th
+              class={`${thCell}${col.width ? ` ${css({ w: col.width as any })}` : ""}`}
+            >
+              {col.label}
+            </th>
+          ))
+        }
+      </tr>
+    </thead>
+    <tbody
+      id={bodyId}
+      hx-get={baseUrl}
+      hx-trigger="load"
+      hx-swap="innerHTML"
+      class={css({ divideY: "1px", borderColor: "slate.200" })}
+    >
+    </tbody>
+  </table>
+</div>
+<div id={paginationId}></div>

@@ -19,6 +19,15 @@ const { item } = Astro.props;
 <tr id={`item-${item.id}`} class={row}>
   <td class={tdCell}
     ><input
+      name="code"
+      value={item.code}
+      form={`edit-${item.id}`}
+      required
+      class={inputStyleSm}
+    /></td
+  >
+  <td class={tdCell}
+    ><input
       name="name"
       value={item.name}
       form={`edit-${item.id}`}

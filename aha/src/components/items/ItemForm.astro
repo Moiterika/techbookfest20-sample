@@ -20,9 +20,18 @@ import {
     hx-post="/api/items"
     hx-target="#items-body"
     hx-swap="innerHTML"
-    @htmx:after-request="if($event.detail.successful) { $el.reset(); open = false }"
+    @htmx:after-request="if($event.detail.successful && $event.detail.elt === $el) { $el.reset(); open = false }"
     class={css({ display: "flex", flexDirection: "column", gap: "4" })}
   >
+    <label class={labelStyle}>
+      <span>品目コード <span class={css({ color: "rose.500" })}>*</span></span>
+      <input
+        name="code"
+        required
+        class={inputStyle}
+        placeholder="例: NPC-001"
+      />
+    </label>
     <label class={labelStyle}>
       <span>品目名 <span class={css({ color: "rose.500" })}>*</span></span>
       <input

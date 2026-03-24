@@ -1,4 +1,10 @@
-import { pgTable, serial, varchar, integer, timestamp } from "drizzle-orm/pg-core";
+import {
+  pgTable,
+  serial,
+  varchar,
+  integer,
+  timestamp,
+} from "drizzle-orm/pg-core";
 
 /** 品目テーブル */
 export const items = pgTable("items", {

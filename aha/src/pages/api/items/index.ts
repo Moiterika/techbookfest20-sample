@@ -12,7 +12,9 @@ const DEFAULT_PAGE_SIZE = 20;
 
 /** ページネーション付きで品目一覧 HTML を返す */
 async function renderItemPage(page: number, pageSize: number) {
-  const size = PAGE_SIZES.includes(pageSize as any) ? pageSize : DEFAULT_PAGE_SIZE;
+  const size = PAGE_SIZES.includes(pageSize as any)
+    ? pageSize
+    : DEFAULT_PAGE_SIZE;
   const [{ total }] = await db.select({ total: count() }).from(items);
   const totalPages = Math.max(1, Math.ceil(total / size));
   const currentPage = Math.min(Math.max(1, page), totalPages);

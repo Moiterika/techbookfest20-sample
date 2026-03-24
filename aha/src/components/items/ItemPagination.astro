@@ -93,7 +93,7 @@ function itemsUrl(page: number, size: number) {
 <div
   id="items-pagination"
   class={paginationBar}
-  {...(oobAttr ? { "hx-swap-oob": oobAttr } : {})}
+  {...oobAttr ? { "hx-swap-oob": oobAttr } : {}}
 >
   <div class={sizeSelector}>
     <span>表示件数:</span>
@@ -106,62 +106,68 @@ function itemsUrl(page: number, size: number) {
       name="size"
       hx-vals='{"page": "1"}'
     >
-      {sizes.map((s) => (
-        <option value={s} selected={s === pageSize}>{s}件</option>
-      ))}
+      {
+        sizes.map((s) => (
+          <option value={s} selected={s === pageSize}>
+            {s}件
+          </option>
+        ))
+      }
     </select>
   </div>
 
-  {totalPages > 1 ? (
-    <div class={pageBtns}>
-      {currentPage > 1 ? (
-        <button
-          hx-get={itemsUrl(currentPage - 1, pageSize)}
-          hx-target="#items-body"
-          hx-swap="innerHTML"
-          class={btnSecondary}
-        >
-          前へ
-        </button>
-      ) : (
-        <span class={disabledBtn}>前へ</span>
-      )}
-
-      {Array.from({ length: totalPages }, (_, i) => i + 1).map((p) =>
-        p === currentPage ? (
-          <span class={activeBtn}>{p}</span>
-        ) : (
+  {
+    totalPages > 1 ? (
+      <div class={pageBtns}>
+        {currentPage > 1 ? (
           <button
-            hx-get={itemsUrl(p, pageSize)}
+            hx-get={itemsUrl(currentPage - 1, pageSize)}
             hx-target="#items-body"
             hx-swap="innerHTML"
             class={btnSecondary}
           >
-            {p}
+            前へ
           </button>
-        ),
-      )}
+        ) : (
+          <span class={disabledBtn}>前へ</span>
+        )}
 
-      {currentPage < totalPages ? (
-        <button
-          hx-get={itemsUrl(currentPage + 1, pageSize)}
-          hx-target="#items-body"
-          hx-swap="innerHTML"
-          class={btnSecondary}
-        >
-          次へ
-        </button>
-      ) : (
-        <span class={disabledBtn}>次へ</span>
-      )}
+        {Array.from({ length: totalPages }, (_, i) => i + 1).map((p) =>
+          p === currentPage ? (
+            <span class={activeBtn}>{p}</span>
+          ) : (
+            <button
+              hx-get={itemsUrl(p, pageSize)}
+              hx-target="#items-body"
+              hx-swap="innerHTML"
+              class={btnSecondary}
+            >
+              {p}
+            </button>
+          ),
+        )}
 
-      <span class={pageInfo}>
-        {currentPage} / {totalPages} ページ
-      </span>
-    </div>
-  ) : (
-    <div class={pageBtns}>
-      <span class={pageInfo}>全 {totalPages} ページ</span>
-    </div>
-  )}
+        {currentPage < totalPages ? (
+          <button
+            hx-get={itemsUrl(currentPage + 1, pageSize)}
+            hx-target="#items-body"
+            hx-swap="innerHTML"
+            class={btnSecondary}
+          >
+            次へ
+          </button>
+        ) : (
+          <span class={disabledBtn}>次へ</span>
+        )}
+
+        <span class={pageInfo}>
+          {currentPage} / {totalPages} ページ
+        </span>
+      </div>
+    ) : (
+      <div class={pageBtns}>
+        <span class={pageInfo}>全 {totalPages} ページ</span>
+      </div>
+    )
+  }
 </div>

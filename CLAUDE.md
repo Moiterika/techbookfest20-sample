@@ -15,6 +15,7 @@
 - **PandaCSS codegen**: `bunx panda codegen`
 - **Drizzle push**: `bunx drizzle-kit push`
 - **型生成**: `bunx --bun astro sync`
+- **フォーマット**: `bun fmt`（Prettier — .astro, .ts を整形）
 
 ## Astro テンプレートでの記法
 - Alpine.js の `@click`, `@htmx:before-request.window` 等 **`@` ショートハンドはそのまま使ってよい**

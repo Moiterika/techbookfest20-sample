@@ -20,6 +20,9 @@ const { item } = Astro.props;
   <td class={tdCell}>{item.category ?? ""}</td>
   <td class={tdCell}>{item.price.toLocaleString()}</td>
   <td class={tdCell}>
+    {item.barcode ? <react-barcode value={item.barcode} /> : ""}
+  </td>
+  <td class={tdCell}>
     <div class={flexRow}>
       <button
         hx-get={`/api/items/${item.id}/edit`}

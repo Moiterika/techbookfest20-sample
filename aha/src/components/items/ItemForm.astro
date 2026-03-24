@@ -9,8 +9,12 @@ import {
 } from "../../styles/common.css";
 ---
 
+<script>
+  import "../ReactBarcodeWrapper.tsx";
+</script>
+
 <!-- Alpine.js: x-show + x-transition でスライド表示 -->
-<div x-show="open" x-transition class={card}>
+<div x-show="open" x-transition class={card} x-data="{ barcodeVal: '' }">
   <h2 class={cardTitle}>新規品目登録</h2>
   <form
     hx-post="/api/items"
@@ -36,6 +40,18 @@ import {
       単価 (円)
       <input name="price" type="number" value="0" min="0" class={inputStyle} />
     </label>
+    <label class={labelStyle}>
+      バーコード
+      <input
+        name="barcode"
+        class={inputStyle}
+        placeholder="例: 123456789"
+        x-model="barcodeVal"
+      />
+    </label>
+    <div class={css({ mt: "2", display: "flex", justifyContent: "center" })}>
+      <react-barcode x-bind:value="barcodeVal"></react-barcode>
+    </div>
     <div class={css({ mt: "2" })}>
       <button type="submit" class:list={["btn", btnPrimary]}> 登録する </button>
     </div>

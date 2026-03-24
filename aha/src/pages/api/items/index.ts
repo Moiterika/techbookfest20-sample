@@ -43,6 +43,7 @@ export const POST: APIRoute = async ({ request }) => {
   const name = form.get("name") as string;
   const category = form.get("category") as string;
   const price = Number(form.get("price")) || 0;
+  const barcode = form.get("barcode") as string;
 
   if (!name) {
     return new Response(`<p class="${errorText}">品目名は必須です</p>`, {
@@ -51,7 +52,7 @@ export const POST: APIRoute = async ({ request }) => {
     });
   }
 
-  await db.insert(items).values({ name, category, price });
+  await db.insert(items).values({ name, category, price, barcode });
 
   const url = new URL(request.url);
   const size = Number(url.searchParams.get("size")) || DEFAULT_PAGE_SIZE;

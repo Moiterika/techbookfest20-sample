@@ -15,6 +15,7 @@ export const PUT: APIRoute = async ({ params, request }) => {
   const name = form.get("name") as string;
   const category = form.get("category") as string;
   const price = Number(form.get("price")) || 0;
+  const barcode = form.get("barcode") as string;
 
   if (!name) {
     return new Response(`<p class="${errorText}">品目名は必須です</p>`, {
@@ -25,7 +26,7 @@ export const PUT: APIRoute = async ({ params, request }) => {
 
   await db
     .update(items)
-    .set({ name, category, price, updatedAt: new Date() })
+    .set({ name, category, price, barcode, updatedAt: new Date() })
     .where(eq(items.id, id));
 
   const [row] = await db.select().from(items).where(eq(items.id, id));

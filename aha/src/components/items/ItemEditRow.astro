@@ -43,6 +43,17 @@ const { item } = Astro.props;
       class={inputStyleSm}
     /></td
   >
+  <td
+    class={tdCell}
+    x-data={`{ barcodeVal: '${(item.barcode ?? "").replace(/'/g, "\\'")}' }`}
+    ><input
+      name="barcode"
+      x-model="barcodeVal"
+      form={`edit-${item.id}`}
+      class={inputStyleSm}
+    />
+    <react-barcode x-bind:value="barcodeVal"></react-barcode>
+  </td>
   <td class={tdCell}>
     <div class={flexRow}>
       <form

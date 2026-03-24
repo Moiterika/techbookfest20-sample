@@ -6,6 +6,7 @@ export const items = pgTable("items", {
   name: varchar("name", { length: 200 }).notNull(),
   category: varchar("category", { length: 100 }),
   price: integer("price").notNull().default(0),
+  barcode: varchar("barcode", { length: 100 }),
   createdAt: timestamp("created_at").defaultNow().notNull(),
   updatedAt: timestamp("updated_at").defaultNow().notNull(),
 });

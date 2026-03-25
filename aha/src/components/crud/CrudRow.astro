@@ -1,0 +1,79 @@
+---
+import type { Column, EntityConfig } from "./types";
+import {
+  btnSecondary,
+  btnDanger,
+  tdCell,
+  row,
+  flexRow,
+} from "../../styles/common.css";
+
+interface Props {
+  record: Record<string, any>;
+  columns: Column[];
+  entity: EntityConfig;
+}
+
+const { record, columns, entity } = Astro.props;
+const rowId = `${entity.idPrefix}-${record.id}`;
+
+function getDeleteConfirm(): string {
+  if (!entity.deleteConfirmTemplate) return "削除しますか？";
+  const name = entity.displayNameKey
+    ? (record[entity.displayNameKey] ?? "")
+    : "";
+  return entity.deleteConfirmTemplate.replace("{name}", name);
+}
+---
+
+<tr id={rowId} class={row}>
+  {
+    columns.map((col) => {
+      const type = col.type ?? "text";
+      const val = record[col.key];
+
+      if (type === "actions") {
+        return (
+          <td class={tdCell}>
+            <div class={flexRow}>
+              <button
+                hx-get={`${entity.baseUrl}/${record.id}/edit`}
+                hx-target={`#${rowId}`}
+                hx-swap="outerHTML"
+                class={btnSecondary}
+              >
+                編集
+              </button>
+              <button
+                hx-delete={`${entity.baseUrl}/${record.id}`}
+                hx-target={`#${rowId}`}
+                hx-swap="outerHTML swap:0.3s"
+                hx-confirm={getDeleteConfirm()}
+                class={btnDanger}
+              >
+                削除
+              </button>
+            </div>
+          </td>
+        );
+      }
+
+      if (type === "barcode") {
+        return (
+          <td class={tdCell}>{val ? <react-barcode value={val} /> : ""}</td>
+        );
+      }
+
+      if (type === "number" || type === "computed") {
+        const formatted =
+          (col as any).format && val != null
+            ? Number(val).toLocaleString()
+            : (val ?? "");
+        return <td class={tdCell}>{formatted}</td>;
+      }
+
+      // text, date, itemCode, readonlyLookup
+      return <td class={tdCell}>{val ?? ""}</td>;
+    })
+  }
+</tr>

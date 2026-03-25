@@ -1,0 +1,53 @@
+---
+import type { Column, EntityConfig } from "./types";
+import { css } from "../../../styled-system/css";
+import CrudRow from "./CrudRow.astro";
+import CrudPagination from "./CrudPagination.astro";
+
+interface Props {
+  records: Record<string, any>[];
+  columns: Column[];
+  entity: EntityConfig;
+  currentPage?: number;
+  totalPages?: number;
+  pageSize?: number;
+  extraParams?: Record<string, string>;
+}
+
+const {
+  records,
+  columns,
+  entity,
+  currentPage = 1,
+  totalPages = 1,
+  pageSize = 20,
+  extraParams = {},
+} = Astro.props;
+
+const emptyCell = css({ textAlign: "center", py: "4" });
+---
+
+{
+  records.length === 0 ? (
+    <tr>
+      <td colspan={columns.length.toString()} class={emptyCell}>
+        {entity.emptyMessage}
+      </td>
+    </tr>
+  ) : (
+    records.map((record) => (
+      <CrudRow record={record} columns={columns} entity={entity} />
+    ))
+  )
+}
+
+<CrudPagination
+  currentPage={currentPage}
+  totalPages={totalPages}
+  pageSize={pageSize}
+  baseUrl={entity.baseUrl}
+  bodyTargetId={entity.bodyTargetId}
+  paginationId={entity.paginationId}
+  extraParams={extraParams}
+  oob
+/>

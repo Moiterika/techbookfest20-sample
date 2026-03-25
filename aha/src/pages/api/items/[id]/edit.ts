@@ -3,7 +3,8 @@ import { experimental_AstroContainer as AstroContainer } from "astro/container";
 import { db } from "../../../../db";
 import { items } from "../../../../db/schema";
 import { eq } from "drizzle-orm";
-import ItemEditRow from "../../../../components/items/ItemEditRow.astro";
+import CrudEditRow from "../../../../components/crud/CrudEditRow.astro";
+import { itemColumns, itemEntity } from "../../../../entities/items";
 
 const container = await AstroContainer.create();
 
@@ -16,8 +17,8 @@ export const GET: APIRoute = async ({ params }) => {
     return new Response("", { status: 404 });
   }
 
-  const html = await container.renderToString(ItemEditRow, {
-    props: { item: row },
+  const html = await container.renderToString(CrudEditRow, {
+    props: { record: row, columns: itemColumns, entity: itemEntity },
   });
   return new Response(html, { headers: { "Content-Type": "text/html" } });
 };

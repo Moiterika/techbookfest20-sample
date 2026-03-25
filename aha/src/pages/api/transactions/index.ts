@@ -3,7 +3,8 @@ import { experimental_AstroContainer as AstroContainer } from "astro/container";
 import { db } from "../../../db";
 import { transactions, items } from "../../../db/schema";
 import { and, count, desc, eq, gte, lte } from "drizzle-orm";
-import TransactionRows from "../../../components/transactions/TransactionRows.astro";
+import CrudRows from "../../../components/crud/CrudRows.astro";
+import { txColumns, txEntity } from "../../../entities/transactions";
 import { errorText } from "../../../styles/common.css";
 
 const container = await AstroContainer.create();
@@ -62,9 +63,11 @@ async function renderTransactionPage(
   if (dateFrom) extraParams.dateFrom = dateFrom;
   if (dateTo) extraParams.dateTo = dateTo;
 
-  const html = await container.renderToString(TransactionRows, {
+  const html = await container.renderToString(CrudRows, {
     props: {
-      transactions: rows,
+      records: rows,
+      columns: txColumns,
+      entity: txEntity,
       currentPage,
       totalPages,
       pageSize: size,

@@ -1,0 +1,172 @@
+---
+import type { Column, EntityConfig } from "./types";
+import { css } from "../../../styled-system/css";
+import {
+  btnPrimary,
+  inputStyle,
+  labelStyle,
+  card,
+  cardTitle,
+} from "../../styles/common.css";
+import ItemTypeahead from "../items/ItemTypeahead.astro";
+
+interface Props {
+  columns: Column[];
+  entity: EntityConfig;
+}
+
+const { columns, entity } = Astro.props;
+
+// フォームに表示するカラム（actions と readonlyLookup と hideInForm を除く）
+const formColumns = columns.filter((col) => {
+  const type = col.type ?? "text";
+  if (type === "actions") return false;
+  if (type === "readonlyLookup") return false;
+  if (col.hideInForm) return false;
+  return true;
+});
+
+const today = new Date().toISOString().slice(0, 10);
+
+// Alpine x-data: alpineInitForm があればそれを使い、なければ空
+const xData = entity.alpineInitForm ?? "{}";
+
+// バーコード列がある場合は barcodeVal を x-data に含める
+const hasBarcode = columns.some((c) => c.type === "barcode");
+
+const requiredStar = css({ color: "rose.500" });
+const formLayout = css({ display: "flex", flexDirection: "column", gap: "4" });
+---
+
+<div
+  x-show="open"
+  x-transition
+  class={card}
+  x-data={xData}
+  {...entity.formExtraAttrs ?? {}}
+>
+  <h2 class={cardTitle}>{entity.formTitle}</h2>
+  <form
+    hx-post={entity.baseUrl}
+    hx-target={`#${entity.bodyTargetId}`}
+    hx-swap="innerHTML"
+    {...entity.formBeforeRequest
+      ? { "hx-on--before-request": entity.formBeforeRequest }
+      : {}}
+    {...entity.formAfterRequest
+      ? { "@htmx:after-request": entity.formAfterRequest }
+      : {}}
+    class={formLayout}
+  >
+    {
+      formColumns.map((col) => {
+        const type = col.type ?? "text";
+
+        if (type === "barcode") {
+          return (
+            <>
+              <label class={labelStyle}>
+                {col.label}
+                <input
+                  name={col.key}
+                  class={inputStyle}
+                  placeholder={col.placeholder ?? ""}
+                  x-model="barcodeVal"
+                />
+              </label>
+              <div
+                class={css({
+                  mt: "2",
+                  display: "flex",
+                  justifyContent: "center",
+                })}
+              >
+                <react-barcode x-bind:value="barcodeVal" />
+              </div>
+            </>
+          );
+        }
+
+        if (type === "itemCode") {
+          return (
+            <label class={labelStyle}>
+              <span>
+                {col.label}{" "}
+                {col.required && <span class={requiredStar}>*</span>}
+              </span>
+              <ItemTypeahead />
+            </label>
+          );
+        }
+
+        if (type === "computed") {
+          const expr = (col as any).expression;
+          return (
+            <div class={css({ fontSize: "sm", color: "slate.600" })}>
+              {col.label}: <strong x-text={`(${expr}).toLocaleString()`} /> 円
+            </div>
+          );
+        }
+
+        if (type === "number") {
+          const numCol = col as any;
+          return (
+            <label class={labelStyle}>
+              <span>
+                {col.label}{" "}
+                {col.required && <span class={requiredStar}>*</span>}
+              </span>
+              <input
+                name={col.key}
+                type="number"
+                {...(col.required ? { required: true } : {})}
+                {...(numCol.min != null ? { min: numCol.min } : {})}
+                value={col.defaultValue ?? "0"}
+                class={inputStyle}
+                {...(numCol.alpineModel
+                  ? { "x-model.number": numCol.alpineModel }
+                  : {})}
+              />
+            </label>
+          );
+        }
+
+        if (type === "date") {
+          return (
+            <label class={labelStyle}>
+              <span>
+                {col.label}{" "}
+                {col.required && <span class={requiredStar}>*</span>}
+              </span>
+              <input
+                name={col.key}
+                type="date"
+                {...(col.required ? { required: true } : {})}
+                value={col.defaultValue ?? today}
+                class={inputStyle}
+              />
+            </label>
+          );
+        }
+
+        // text (default)
+        return (
+          <label class={labelStyle}>
+            <span>
+              {col.label} {col.required && <span class={requiredStar}>*</span>}
+            </span>
+            <input
+              name={col.key}
+              {...(col.required ? { required: true } : {})}
+              class={inputStyle}
+              placeholder={col.placeholder ?? ""}
+            />
+          </label>
+        );
+      })
+    }
+    <div class={css({ mt: "2" })}>
+      <button type="submit" class:list={["btn", btnPrimary]}>登録する</button>
+    </div>
+  </form>
+</div>

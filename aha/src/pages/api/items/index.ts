@@ -3,7 +3,8 @@ import { experimental_AstroContainer as AstroContainer } from "astro/container";
 import { db } from "../../../db";
 import { items } from "../../../db/schema";
 import { count, desc, ilike, or } from "drizzle-orm";
-import ItemRows from "../../../components/items/ItemRows.astro";
+import CrudRows from "../../../components/crud/CrudRows.astro";
+import { itemColumns, itemEntity } from "../../../entities/items";
 import { errorText } from "../../../styles/common.css";
 
 const container = await AstroContainer.create();
@@ -39,13 +40,17 @@ async function renderItemPage(page: number, pageSize: number, query?: string) {
     .limit(size)
     .offset((currentPage - 1) * size);
 
-  const html = await container.renderToString(ItemRows, {
+  const extraParams = query ? { q: query } : {};
+
+  const html = await container.renderToString(CrudRows, {
     props: {
-      items: rows,
+      records: rows,
+      columns: itemColumns,
+      entity: itemEntity,
       currentPage,
       totalPages,
       pageSize: size,
-      query: query || "",
+      extraParams,
     },
   });
   return new Response(html, { headers: { "Content-Type": "text/html" } });

@@ -1,23 +1,13 @@
 ---
 import Layout from "../layouts/Layout.astro";
 import { css } from "../../styled-system/css";
-import { pageContainer, pageTitle } from "../styles/common.css";
+import { pageTitle } from "../styles/common.css";
 import CrudToolbar from "../components/crud/CrudToolbar.astro";
 import CrudTable from "../components/crud/CrudTable.astro";
+import CrudForm from "../components/crud/CrudForm.astro";
 import HtmxLoading from "../components/crud/HtmxLoading.astro";
-import TransactionForm from "../components/transactions/TransactionForm.astro";
 import TransactionSearch from "../components/transactions/TransactionSearch.astro";
-import type { Column } from "../components/crud/types";
-
-const columns: Column[] = [
-  { key: "date", label: "日付" },
-  { key: "itemCode", label: "品目コード" },
-  { key: "itemName", label: "品目名" },
-  { key: "unitPrice", label: "単価", type: "number" },
-  { key: "quantity", label: "数量", type: "number" },
-  { key: "amount", label: "金額", type: "number" },
-  { key: "_actions", label: "操作", width: "32" },
-];
+import { txColumns, txEntity } from "../entities/transactions";
 ---
 
 <Layout>
@@ -31,12 +21,12 @@ const columns: Column[] = [
         tableId="tx-table"
         searchContainerId="tx-search"
       />
-      <TransactionForm />
+      <CrudForm columns={txColumns} entity={txEntity} />
     </div>
 
     <TransactionSearch />
     <CrudTable
-      columns={columns}
+      columns={txColumns}
       bodyId="tx-body"
       baseUrl="/api/transactions"
       paginationId="tx-pagination"

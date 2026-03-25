@@ -3,20 +3,15 @@ import Layout from "../layouts/Layout.astro";
 import { pageContainer, pageTitle } from "../styles/common.css";
 import CrudToolbar from "../components/crud/CrudToolbar.astro";
 import CrudTable from "../components/crud/CrudTable.astro";
+import CrudForm from "../components/crud/CrudForm.astro";
 import HtmxLoading from "../components/crud/HtmxLoading.astro";
-import ItemForm from "../components/items/ItemForm.astro";
 import ItemSearch from "../components/items/ItemSearch.astro";
-import type { Column } from "../components/crud/types";
-
-const columns: Column[] = [
-  { key: "code", label: "品目コード" },
-  { key: "name", label: "品目名" },
-  { key: "category", label: "カテゴリ" },
-  { key: "price", label: "単価", type: "number" },
-  { key: "barcode", label: "バーコード" },
-  { key: "_actions", label: "操作", width: "32" },
-];
+import { itemColumns, itemEntity } from "../entities/items";
 ---
+
+<script>
+  import "../components/ReactBarcodeWrapper.tsx";
+</script>
 
 <Layout>
   <main class={pageContainer}>
@@ -29,12 +24,12 @@ const columns: Column[] = [
         tableId="items-table"
         searchContainerId="items-search"
       />
-      <ItemForm />
+      <CrudForm columns={itemColumns} entity={itemEntity} />
     </div>
 
     <ItemSearch />
     <CrudTable
-      columns={columns}
+      columns={itemColumns}
       bodyId="items-body"
       baseUrl="/api/items"
       paginationId="items-pagination"

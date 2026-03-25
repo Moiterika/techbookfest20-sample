@@ -3,7 +3,8 @@ import { experimental_AstroContainer as AstroContainer } from "astro/container";
 import { db } from "../../../../db";
 import { transactions, items } from "../../../../db/schema";
 import { eq } from "drizzle-orm";
-import TransactionRow from "../../../../components/transactions/TransactionRow.astro";
+import CrudRow from "../../../../components/crud/CrudRow.astro";
+import { txColumns, txEntity } from "../../../../entities/transactions";
 import { errorText } from "../../../../styles/common.css";
 
 const container = await AstroContainer.create();
@@ -53,8 +54,8 @@ export const PUT: APIRoute = async ({ params, request }) => {
     .leftJoin(items, eq(transactions.itemId, items.id))
     .where(eq(transactions.id, id));
 
-  const html = await container.renderToString(TransactionRow, {
-    props: { transaction: row },
+  const html = await container.renderToString(CrudRow, {
+    props: { record: row, columns: txColumns, entity: txEntity },
   });
   return new Response(html, { headers: { "Content-Type": "text/html" } });
 };

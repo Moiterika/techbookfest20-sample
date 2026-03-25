@@ -1,0 +1,182 @@
+---
+import type { Column, EntityConfig } from "./types";
+import { css } from "../../../styled-system/css";
+import {
+  btnSecondary,
+  btnPrimary,
+  tdCell,
+  inputStyleSm,
+  row,
+  flexRow,
+} from "../../styles/common.css";
+import ItemTypeahead from "../items/ItemTypeahead.astro";
+
+interface Props {
+  record: Record<string, any>;
+  columns: Column[];
+  entity: EntityConfig;
+}
+
+const { record, columns, entity } = Astro.props;
+const rowId = `${entity.idPrefix}-${record.id}`;
+const formId = `edit-${entity.idPrefix}-${record.id}`;
+
+// 編集行レベルの Alpine x-data
+const alpineData = entity.alpineInitEditRow
+  ? entity.alpineInitEditRow(record)
+  : undefined;
+
+// itemCode 列のバリデーション式
+function buildBeforeRequest(): string | undefined {
+  const hasItemCode = columns.some((c) => c.type === "itemCode");
+  if (!hasItemCode) return undefined;
+  return `
+    const itemId = document.querySelector('[form=${formId}][name=itemId]');
+    if (!itemId || !itemId.value) {
+      event.preventDefault();
+      alert('品目を選択してください');
+    }
+  `;
+}
+---
+
+<tr id={rowId} class={row} {...alpineData ? { "x-data": alpineData } : {}}>
+  {
+    columns.map((col) => {
+      const type = col.type ?? "text";
+      const val = record[col.key];
+
+      if (type === "actions") {
+        return (
+          <td class={tdCell}>
+            <div class={flexRow}>
+              <form
+                id={formId}
+                hx-put={`${entity.baseUrl}/${record.id}`}
+                hx-target={`#${rowId}`}
+                hx-swap="outerHTML"
+                {...(buildBeforeRequest()
+                  ? { "hx-on--before-request": buildBeforeRequest() }
+                  : {})}
+              >
+                <button type="submit" class={btnPrimary}>
+                  保存
+                </button>
+              </form>
+              <button
+                hx-get={entity.baseUrl}
+                hx-target={`#${entity.bodyTargetId}`}
+                hx-swap="innerHTML"
+                class={btnSecondary}
+              >
+                キャンセル
+              </button>
+            </div>
+          </td>
+        );
+      }
+
+      if (type === "barcode") {
+        const escaped = (val ?? "").toString().replace(/'/g, "\\'");
+        return (
+          <td class={tdCell} x-data={`{ barcodeVal: '${escaped}' }`}>
+            <input
+              name={col.key}
+              x-model="barcodeVal"
+              form={formId}
+              class={inputStyleSm}
+            />
+            <react-barcode x-bind:value="barcodeVal" />
+          </td>
+        );
+      }
+
+      if (type === "itemCode") {
+        const valueName = (col as any).valueName ?? "itemId";
+        return (
+          <td class={tdCell}>
+            <ItemTypeahead
+              name={valueName}
+              selectedId={record[valueName]}
+              selectedCode={val ?? ""}
+              selectedName={record.itemName ?? ""}
+              formId={formId}
+              compact
+              hideNameLabel
+            />
+          </td>
+        );
+      }
+
+      if (type === "readonlyLookup") {
+        return (
+          <td class={tdCell}>
+            <span class={css({ fontSize: "sm", color: "slate.500" })}>
+              {val ?? ""}
+            </span>
+          </td>
+        );
+      }
+
+      if (type === "computed") {
+        const expr = (col as any).expression;
+        return (
+          <td class={tdCell}>
+            <span
+              class={css({ fontWeight: "medium" })}
+              x-text={`(${expr}).toLocaleString()`}
+            />
+          </td>
+        );
+      }
+
+      if (type === "number") {
+        const numCol = col as any;
+        return (
+          <td class={tdCell}>
+            <input
+              name={col.key}
+              type="number"
+              value={val}
+              form={formId}
+              {...(col.required ? { required: true } : {})}
+              {...(numCol.min != null ? { min: numCol.min } : {})}
+              class={inputStyleSm}
+              {...(numCol.alpineModel
+                ? { "x-model.number": numCol.alpineModel }
+                : {})}
+            />
+          </td>
+        );
+      }
+
+      if (type === "date") {
+        return (
+          <td class={tdCell}>
+            <input
+              name={col.key}
+              type="date"
+              value={val}
+              form={formId}
+              {...(col.required ? { required: true } : {})}
+              class={inputStyleSm}
+            />
+          </td>
+        );
+      }
+
+      // text (default)
+      return (
+        <td class={tdCell}>
+          <input
+            name={col.key}
+            value={val ?? ""}
+            form={formId}
+            {...(col.required ? { required: true } : {})}
+            class={inputStyleSm}
+          />
+        </td>
+      );
+    })
+  }
+</tr>

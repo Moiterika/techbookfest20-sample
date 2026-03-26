@@ -21,10 +21,23 @@ const { columns, bodyId, baseUrl, paginationId, tableId } = Astro.props;
 const tableWrapper = css({
   overflowX: "auto",
   rounded: "xl",
-  border: "1px solid",
-  borderColor: "slate.200",
   bg: "white",
-  boxShadow: "sm",
+});
+
+const theadStyle = css({
+  bg: "#e6eeff",
+});
+
+const checkboxTh = css({
+  py: "4",
+  px: "6",
+  w: "10",
+});
+
+const checkboxStyle = css({
+  rounded: "sm",
+  cursor: "pointer",
+  accentColor: "#00288e",
 });
 ---
 
@@ -33,14 +46,15 @@ const tableWrapper = css({
     id={tableId}
     class={css({ w: "full", borderCollapse: "collapse", textAlign: "left" })}
   >
-    <thead
-      class={css({
-        bg: "slate.50",
-        borderBottom: "1px solid",
-        borderColor: "slate.200",
-      })}
-    >
+    <thead class={theadStyle}>
       <tr>
+        <th class={checkboxTh}>
+          <input
+            type="checkbox"
+            class={`crud-select-all ${checkboxStyle}`}
+            data-body-id={bodyId}
+          />
+        </th>
         {
           columns.map((col) => (
             <th
@@ -52,14 +66,35 @@ const tableWrapper = css({
         }
       </tr>
     </thead>
-    <tbody
-      id={bodyId}
-      hx-get={baseUrl}
-      hx-trigger="load"
-      hx-swap="innerHTML"
-      class={css({ divideY: "1px", borderColor: "slate.200" })}
-    >
+    <tbody id={bodyId} hx-get={baseUrl} hx-trigger="load" hx-swap="innerHTML">
     </tbody>
   </table>
 </div>
 <div id={paginationId}></div>
+
+<script>
+  // ── select-all チェックボックス制御 ──
+  document.addEventListener("change", (e) => {
+    const target = e.target as HTMLInputElement;
+    if (!target.classList.contains("crud-select-all")) return;
+
+    const bodyId = target.dataset.bodyId;
+    if (!bodyId) return;
+    const tbody = document.getElementById(bodyId);
+    if (!tbody) return;
+
+    const boxes = tbody.querySelectorAll<HTMLInputElement>(
+      'input[name="rowSelect"]',
+    );
+    boxes.forEach((cb) => (cb.checked = target.checked));
+  });
+
+  // htmx swap 後に select-all を解除
+  document.addEventListener("htmx:afterSwap", (e) => {
+    const target = e.target as HTMLElement;
+    const table = target.closest("table");
+    if (!table) return;
+    const selectAll = table.querySelector<HTMLInputElement>(".crud-select-all");
+    if (selectAll) selectAll.checked = false;
+  });
+</script>

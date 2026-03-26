@@ -41,6 +41,7 @@ function buildBeforeRequest(): string | undefined {
 ---
 
 <tr id={rowId} class={row} {...alpineData ? { "x-data": alpineData } : {}}>
+  <td class={css({ py: "4", px: "6" })}></td>
   {
     columns.map((col) => {
       const type = col.type ?? "text";
@@ -93,6 +94,10 @@ function buildBeforeRequest(): string | undefined {
 
       if (type === "itemCode") {
         const valueName = (col as any).valueName ?? "itemId";
+        const lookupCol = columns.find((c) => c.type === "readonlyLookup");
+        const lookupId = lookupCol
+          ? `lookup-${rowId}-${lookupCol.key}`
+          : undefined;
         return (
           <td class={tdCell}>
             <ItemTypeahead
@@ -103,15 +108,20 @@ function buildBeforeRequest(): string | undefined {
               formId={formId}
               compact
               hideNameLabel
+              lookupTargetId={lookupId}
             />
           </td>
         );
       }
 
       if (type === "readonlyLookup") {
+        const lookupId = `lookup-${rowId}-${col.key}`;
         return (
           <td class={tdCell}>
-            <span class={css({ fontSize: "sm", color: "slate.500" })}>
+            <span
+              id={lookupId}
+              class={css({ fontSize: "sm", color: "#757684" })}
+            >
               {val ?? ""}
             </span>
           </td>

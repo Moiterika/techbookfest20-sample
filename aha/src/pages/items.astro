@@ -6,7 +6,7 @@ import CrudTable from "../components/crud/CrudTable.astro";
 import CrudForm from "../components/crud/CrudForm.astro";
 import HtmxLoading from "../components/crud/HtmxLoading.astro";
 import ItemSearch from "../components/items/ItemSearch.astro";
-import { itemColumns, itemEntity } from "../entities/items";
+import { itemColumns, itemEntity } from "../features/items";
 ---
 
 <script>
@@ -16,6 +16,8 @@ import { itemColumns, itemEntity } from "../entities/items";
 <Layout>
   <main class={pageContainer}>
     <h1 class={pageTitle}>品目管理</h1>
+
+    <ItemSearch />
 
     <div x-data="{ open: false }">
       <CrudToolbar
@@ -27,7 +29,6 @@ import { itemColumns, itemEntity } from "../entities/items";
       <CrudForm columns={itemColumns} entity={itemEntity} />
     </div>
 
-    <ItemSearch />
     <CrudTable
       columns={itemColumns}
       bodyId="items-body"

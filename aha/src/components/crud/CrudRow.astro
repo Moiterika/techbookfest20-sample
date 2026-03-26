@@ -1,12 +1,8 @@
 ---
 import type { Column, EntityConfig } from "./types";
-import {
-  btnSecondary,
-  btnDanger,
-  tdCell,
-  row,
-  flexRow,
-} from "../../styles/common.css";
+import { css } from "../../../styled-system/css";
+import { tdCell, row } from "../../styles/common.css";
+import { Icon } from "astro-icon/components";
 
 interface Props {
   record: Record<string, any>;
@@ -24,9 +20,100 @@ function getDeleteConfirm(): string {
     : "";
   return entity.deleteConfirmTemplate.replace("{name}", name);
 }
+
+/* ── 行内アクションスタイル ── */
+const actionsCell = css({
+  py: "4",
+  px: "6",
+  textAlign: "right",
+});
+
+const actionsRow = css({
+  display: "flex",
+  alignItems: "center",
+  justifyContent: "flex-end",
+  gap: "2",
+});
+
+const editBtn = css({
+  display: "inline-flex",
+  alignItems: "center",
+  gap: "1",
+  color: "#00288e",
+  fontSize: "xs",
+  fontWeight: "bold",
+  px: "2",
+  py: "1",
+  rounded: "md",
+  cursor: "pointer",
+  border: "none",
+  bg: "transparent",
+  _hover: { bg: "rgba(0, 40, 142, 0.1)" },
+});
+
+const kebabBtn = css({
+  display: "inline-flex",
+  alignItems: "center",
+  justifyContent: "center",
+  w: "7",
+  h: "7",
+  rounded: "full",
+  cursor: "pointer",
+  color: "#757684",
+  border: "none",
+  bg: "transparent",
+  _hover: { color: "#121c2a", bg: "#eff3ff" },
+});
+
+const kebabMenu = css({
+  position: "absolute",
+  right: "0",
+  top: "100%",
+  zIndex: 20,
+  mt: "1",
+  bg: "white",
+  rounded: "lg",
+  boxShadow: "0 10px 30px -5px rgba(18, 28, 42, 0.08)",
+  py: "1",
+  minW: "120px",
+});
+
+const kebabItem = css({
+  display: "flex",
+  alignItems: "center",
+  gap: "2",
+  w: "full",
+  textAlign: "left",
+  px: "3",
+  py: "2",
+  fontSize: "sm",
+  cursor: "pointer",
+  color: "#ba1a1a",
+  border: "none",
+  bg: "transparent",
+  _hover: { bg: "rgba(255, 218, 214, 0.3)" },
+});
+const checkboxCell = css({
+  py: "4",
+  px: "6",
+});
+
+const checkboxStyle = css({
+  rounded: "sm",
+  cursor: "pointer",
+  accentColor: "#00288e",
+});
 ---
 
 <tr id={rowId} class={row}>
+  <td class={checkboxCell}>
+    <input
+      type="checkbox"
+      name="rowSelect"
+      value={record.id}
+      class={checkboxStyle}
+    />
+  </td>
   {
     columns.map((col) => {
       const type = col.type ?? "text";
@@ -34,25 +121,52 @@ function getDeleteConfirm(): string {
 
       if (type === "actions") {
         return (
-          <td class={tdCell}>
-            <div class={flexRow}>
+          <td class={actionsCell}>
+            <div class={actionsRow}>
               <button
                 hx-get={`${entity.baseUrl}/${record.id}/edit`}
                 hx-target={`#${rowId}`}
                 hx-swap="outerHTML"
-                class={btnSecondary}
+                class={editBtn}
               >
+                <Icon
+                  name="heroicons:pencil-square"
+                  class={css({ w: "3.5", h: "3.5" })}
+                />
                 編集
               </button>
-              <button
-                hx-delete={`${entity.baseUrl}/${record.id}`}
-                hx-target={`#${rowId}`}
-                hx-swap="outerHTML swap:0.3s"
-                hx-confirm={getDeleteConfirm()}
-                class={btnDanger}
+              <div
+                class={css({ position: "relative" })}
+                x-data="{ menuOpen: false }"
+                @click.outside="menuOpen = false"
               >
-                削除
-              </button>
+                <button
+                  class={kebabBtn}
+                  @click="menuOpen = !menuOpen"
+                  type="button"
+                >
+                  <Icon
+                    name="heroicons:ellipsis-vertical-solid"
+                    class={css({ w: "5", h: "5" })}
+                  />
+                </button>
+                <div class={kebabMenu} x-show="menuOpen" x-transition x-cloak>
+                  <button
+                    class={kebabItem}
+                    hx-delete={`${entity.baseUrl}/${record.id}`}
+                    hx-target={`#${rowId}`}
+                    hx-swap="outerHTML swap:0.3s"
+                    hx-confirm={getDeleteConfirm()}
+                    @click="menuOpen = false"
+                  >
+                    <Icon
+                      name="heroicons:trash"
+                      class={css({ w: "4", h: "4" })}
+                    />
+                    削除
+                  </button>
+                </div>
+              </div>
             </div>
           </td>
         );

@@ -9,14 +9,14 @@ const dropdownItem = css({
   py: "2",
   fontSize: "sm",
   cursor: "pointer",
-  _hover: { bg: "indigo.50" },
+  _hover: { bg: "#eff3ff" },
 });
 
 const noResult = css({
   px: "3",
   py: "2",
   fontSize: "sm",
-  color: "slate.400",
+  color: "#757684",
 });
 
 /** GET /api/items/search?q=... — 品目をコード・名前で検索し候補リストHTMLを返す */
@@ -53,7 +53,9 @@ export const GET: APIRoute = async ({ url }) => {
     .map(
       (r) =>
         `<li class="${dropdownItem}" ` +
-        `@click="selectedId = ${r.id}; selectedCode = '${escapeAttr(r.code)}'; selectedName = '${escapeAttr(r.name)}'; q = selectedCode; open = false; $dispatch('item-selected', { price: ${r.price} })">` +
+        `hx-get="/api/items/typeahead?action=select&amp;itemId=${r.id}" ` +
+        `hx-target="closest [data-typeahead]" ` +
+        `hx-swap="innerHTML">` +
         `<strong>${escapeHtml(r.code)}</strong> ${escapeHtml(r.name)}</li>`,
     )
     .join("");
@@ -67,8 +69,4 @@ function escapeHtml(s: string) {
     .replace(/</g, "&lt;")
     .replace(/>/g, "&gt;")
     .replace(/"/g, "&quot;");
-}
-
-function escapeAttr(s: string) {
-  return s.replace(/'/g, "\\'").replace(/\\/g, "\\\\");
 }

@@ -4,7 +4,7 @@ import { db } from "../../../../db";
 import { transactions, items } from "../../../../db/schema";
 import { eq } from "drizzle-orm";
 import CrudRow from "../../../../components/crud/CrudRow.astro";
-import { txColumns, txEntity } from "../../../../entities/transactions";
+import { txColumns, txEntity } from "../../../../features/transactions";
 import { errorText } from "../../../../styles/common.css";
 
 const container = await AstroContainer.create();

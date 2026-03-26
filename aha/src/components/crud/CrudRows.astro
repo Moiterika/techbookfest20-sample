@@ -24,13 +24,13 @@ const {
   extraParams = {},
 } = Astro.props;
 
-const emptyCell = css({ textAlign: "center", py: "4" });
+const emptyCell = css({ textAlign: "center", py: "8", color: "#757684" });
 ---
 
 {
   records.length === 0 ? (
     <tr>
-      <td colspan={columns.length.toString()} class={emptyCell}>
+      <td colspan={(columns.length + 1).toString()} class={emptyCell}>
         {entity.emptyMessage}
       </td>
     </tr>

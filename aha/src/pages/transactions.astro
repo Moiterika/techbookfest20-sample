@@ -1,18 +1,19 @@
 ---
 import Layout from "../layouts/Layout.astro";
-import { css } from "../../styled-system/css";
-import { pageTitle } from "../styles/common.css";
+import { pageContainer, pageTitle } from "../styles/common.css";
 import CrudToolbar from "../components/crud/CrudToolbar.astro";
 import CrudTable from "../components/crud/CrudTable.astro";
 import CrudForm from "../components/crud/CrudForm.astro";
 import HtmxLoading from "../components/crud/HtmxLoading.astro";
 import TransactionSearch from "../components/transactions/TransactionSearch.astro";
-import { txColumns, txEntity } from "../entities/transactions";
+import { txColumns, txEntity } from "../features/transactions";
 ---
 
 <Layout>
-  <main class={css({ maxWidth: "1000px", mx: "auto", py: "8", px: "4" })}>
+  <main class={pageContainer}>
     <h1 class={pageTitle}>取引管理</h1>
+
+    <TransactionSearch />
 
     <div x-data="{ open: false }">
       <CrudToolbar
@@ -24,7 +25,6 @@ import { txColumns, txEntity } from "../entities/transactions";
       <CrudForm columns={txColumns} entity={txEntity} />
     </div>
 
-    <TransactionSearch />
     <CrudTable
       columns={txColumns}
       bodyId="tx-body"

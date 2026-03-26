@@ -34,7 +34,7 @@ const xData = entity.alpineInitForm ?? "{}";
 // バーコード列がある場合は barcodeVal を x-data に含める
 const hasBarcode = columns.some((c) => c.type === "barcode");
 
-const requiredStar = css({ color: "rose.500" });
+const requiredStar = css({ color: "#ba1a1a" });
 const formLayout = css({ display: "flex", flexDirection: "column", gap: "4" });
 ---
 
@@ -102,7 +102,7 @@ const formLayout = css({ display: "flex", flexDirection: "column", gap: "4" });
         if (type === "computed") {
           const expr = (col as any).expression;
           return (
-            <div class={css({ fontSize: "sm", color: "slate.600" })}>
+            <div class={css({ fontSize: "sm", color: "#444653" })}>
               {col.label}: <strong x-text={`(${expr}).toLocaleString()`} /> 円
             </div>
           );

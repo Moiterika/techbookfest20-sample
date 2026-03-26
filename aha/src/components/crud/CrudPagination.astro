@@ -1,6 +1,5 @@
 ---
 import { css } from "../../../styled-system/css";
-import { btnSecondary } from "../../styles/common.css";
 
 interface Props {
   currentPage: number;
@@ -34,6 +33,9 @@ const paginationBar = css({
   justifyContent: "space-between",
   alignItems: "center",
   py: "4",
+  px: "6",
+  bg: "#eff3ff",
+  roundedBottom: "xl",
   flexWrap: "wrap",
   gap: "3",
 });
@@ -41,12 +43,14 @@ const paginationBar = css({
 const pageBtns = css({
   display: "flex",
   alignItems: "center",
-  gap: "2",
+  gap: "1",
 });
 
 const pageInfo = css({
   fontSize: "sm",
-  color: "slate.600",
+  fontWeight: "medium",
+  color: "#757684",
+  ml: "4",
 });
 
 const sizeSelector = css({
@@ -54,49 +58,61 @@ const sizeSelector = css({
   alignItems: "center",
   gap: "2",
   fontSize: "sm",
-  color: "slate.600",
+  color: "#444653",
 });
 
 const activeBtn = css({
-  fontSize: "sm",
-  py: "1.5",
-  px: "3",
-  rounded: "md",
-  fontWeight: "medium",
-  bg: "indigo.600",
+  w: "8",
+  h: "8",
+  display: "flex",
+  alignItems: "center",
+  justifyContent: "center",
+  fontSize: "xs",
+  fontWeight: "bold",
+  rounded: "lg",
+  background: "linear-gradient(135deg, #00288e, #1e40af)",
   color: "white",
-  border: "1px solid",
-  borderColor: "transparent",
   cursor: "default",
 });
 
+const inactiveBtn = css({
+  w: "8",
+  h: "8",
+  display: "flex",
+  alignItems: "center",
+  justifyContent: "center",
+  fontSize: "xs",
+  fontWeight: "bold",
+  rounded: "lg",
+  cursor: "pointer",
+  color: "#121c2a",
+  _hover: { bg: "#dee9fd" },
+});
+
 const disabledBtn = css({
-  fontSize: "sm",
-  py: "1.5",
-  px: "3",
-  rounded: "md",
-  fontWeight: "medium",
-  border: "1px solid",
-  borderColor: "slate.200",
-  bg: "slate.50",
-  color: "slate.400",
+  w: "8",
+  h: "8",
+  display: "flex",
+  alignItems: "center",
+  justifyContent: "center",
+  fontSize: "xs",
+  rounded: "lg",
+  color: "#c4c5d5",
   cursor: "default",
 });
 
 const selectStyle = css({
-  border: "1px solid",
-  borderColor: "slate.300",
+  bg: "white",
   rounded: "md",
   fontSize: "sm",
   py: "1",
   px: "2",
-  color: "slate.700",
-  bg: "white",
+  color: "#444653",
+  border: "none",
   cursor: "pointer",
   outline: "none",
   _focus: {
-    borderColor: "indigo.500",
-    boxShadow: "0 0 0 1px token(colors.indigo.500)",
+    boxShadow: "0 0 0 1px #00288e",
   },
 });
 
@@ -151,12 +167,12 @@ const sizeHxVals = JSON.stringify({ page: "1", ...extraParams });
             hx-get={pageUrl(currentPage - 1, pageSize)}
             hx-target={`#${bodyTargetId}`}
             hx-swap="innerHTML"
-            class={btnSecondary}
+            class={inactiveBtn}
           >
-            前へ
+            &lsaquo;
           </button>
         ) : (
-          <span class={disabledBtn}>前へ</span>
+          <span class={disabledBtn}>&lsaquo;</span>
         )}
 
         {Array.from({ length: totalPages }, (_, i) => i + 1).map((p) =>
@@ -167,7 +183,7 @@ const sizeHxVals = JSON.stringify({ page: "1", ...extraParams });
               hx-get={pageUrl(p, pageSize)}
               hx-target={`#${bodyTargetId}`}
               hx-swap="innerHTML"
-              class={btnSecondary}
+              class={inactiveBtn}
             >
               {p}
             </button>
@@ -179,12 +195,12 @@ const sizeHxVals = JSON.stringify({ page: "1", ...extraParams });
             hx-get={pageUrl(currentPage + 1, pageSize)}
             hx-target={`#${bodyTargetId}`}
             hx-swap="innerHTML"
-            class={btnSecondary}
+            class={inactiveBtn}
           >
-            次へ
+            &rsaquo;
           </button>
         ) : (
-          <span class={disabledBtn}>次へ</span>
+          <span class={disabledBtn}>&rsaquo;</span>
         )}
 
         <span class={pageInfo}>

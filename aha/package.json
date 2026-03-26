@@ -12,19 +12,22 @@
     "fmt": "bunx --bun astro sync && bunx --bun prettier --write 'src/**/*.{astro,ts}'"
   },
   "dependencies": {
+    "@iconify-json/heroicons": "^1.2.3",
     "@nurodev/astro-bun": "^2.1.2",
     "@types/alpinejs": "^3.13.11",
     "@types/react": "^19.2.14",
     "@types/react-dom": "^19.2.3",
     "alpinejs": "^3.15.8",
     "astro": "^6.0.8",
+    "astro-icon": "^1.1.5",
     "drizzle-orm": "^0.45.1",
     "htmx.org": "^2.0.8",
     "postgres": "^3.4.8",
     "react": "^19.2.4",
     "react-barcode": "^1.6.1",
     "react-dom": "^19.2.4",
-    "xlsx": "^0.18.5"
+    "xlsx": "^0.18.5",
+    "zod": "^4.3.6"
   },
   "devDependencies": {
     "@pandacss/dev": "^1.9.0",

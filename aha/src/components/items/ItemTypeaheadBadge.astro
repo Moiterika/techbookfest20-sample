@@ -1,0 +1,54 @@
+---
+import {
+  selectedRow,
+  badge,
+  badgeClear,
+  nameLabel,
+} from "./itemTypeaheadStyles";
+
+interface Props {
+  name?: string;
+  selectedId: number;
+  selectedCode: string;
+  selectedName: string;
+  selectedPrice?: number;
+  formId?: string;
+  hideNameLabel?: boolean;
+}
+
+const {
+  name = "itemId",
+  selectedId,
+  selectedCode,
+  selectedName,
+  selectedPrice,
+  formId,
+  hideNameLabel = false,
+} = Astro.props;
+---
+
+<div
+  class={selectedRow}
+  data-selected-name={selectedName}
+  {...selectedPrice != null
+    ? { "data-selected-price": String(selectedPrice) }
+    : {}}
+>
+  <span class={badge}>
+    {selectedCode}
+    <button
+      type="button"
+      class={badgeClear}
+      hx-get="/api/items/typeahead?action=clear"
+      hx-target="closest [data-typeahead]"
+      hx-swap="innerHTML">&times;</button
+    >
+  </span>
+  {!hideNameLabel && <span class={nameLabel}>{selectedName}</span>}
+</div>
+<input
+  type="hidden"
+  name={name}
+  value={String(selectedId)}
+  {...formId ? { form: formId } : {}}
+/>

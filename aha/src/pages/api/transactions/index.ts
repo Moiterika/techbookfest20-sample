@@ -2,9 +2,9 @@ import type { APIRoute } from "astro";
 import { experimental_AstroContainer as AstroContainer } from "astro/container";
 import { db } from "../../../db";
 import { transactions, items } from "../../../db/schema";
-import { and, count, desc, eq, gte, lte } from "drizzle-orm";
+import { and, count, desc, eq, gte, inArray, lte } from "drizzle-orm";
 import CrudRows from "../../../components/crud/CrudRows.astro";
-import { txColumns, txEntity } from "../../../entities/transactions";
+import { txColumns, txEntity } from "../../../features/transactions";
 import { errorText } from "../../../styles/common.css";
 
 const container = await AstroContainer.create();
@@ -115,4 +115,15 @@ export const POST: APIRoute = async ({ request }) => {
   const url = new URL(request.url);
   const size = Number(url.searchParams.get("size")) || DEFAULT_PAGE_SIZE;
   return renderTransactionPage(1, size);
+};
+
+/** DELETE /api/transactions — 選択された取引を一括削除 */
+export const DELETE: APIRoute = async ({ request }) => {
+  const { ids } = (await request.json()) as { ids: string[] };
+  const numIds = ids.map(Number).filter((n) => !isNaN(n));
+  if (numIds.length === 0) {
+    return new Response("", { status: 400 });
+  }
+  await db.delete(transactions).where(inArray(transactions.id, numIds));
+  return new Response("", { status: 200 });
 };

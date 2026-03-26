@@ -1,18 +1,48 @@
 ---
 import { css } from "../../../styled-system/css";
-import { inputStyle } from "../../styles/common.css";
+import { inputStyle, labelStyle } from "../../styles/common.css";
+
+const searchRow = css({
+  display: "flex",
+  gap: "4",
+  flexWrap: "wrap",
+});
 ---
 
-<div id="items-search" class={css({ mb: "4" })}>
-  <input
-    type="search"
-    name="q"
-    placeholder="品目コード・品目名・カテゴリで検索…"
-    class={inputStyle}
-    hx-get="/api/items"
-    hx-trigger="input changed delay:300ms, search"
-    hx-target="#items-body"
-    hx-swap="innerHTML"
-    hx-vals='{"page": "1"}'
-  />
+<div
+  id="items-search"
+  class={css({ mb: "6", bg: "white", rounded: "xl", p: "6" })}
+>
+  <div class={searchRow}>
+    <div class={`${labelStyle} ${css({ flex: "1", minW: "200px" })}`}>
+      <span>検索</span>
+      <input
+        type="search"
+        name="q"
+        placeholder="品目コード・品目名で検索…"
+        class={inputStyle}
+        hx-get="/api/items"
+        hx-trigger="input changed delay:300ms, search"
+        hx-target="#items-body"
+        hx-swap="innerHTML"
+        hx-include="#items-search"
+        hx-vals='{"page": "1"}'
+      />
+    </div>
+    <div class={`${labelStyle} ${css({ minW: "160px" })}`}>
+      <span>カテゴリ</span>
+      <input
+        type="search"
+        name="category"
+        placeholder="カテゴリ"
+        class={inputStyle}
+        hx-get="/api/items"
+        hx-trigger="input changed delay:300ms, search"
+        hx-target="#items-body"
+        hx-swap="innerHTML"
+        hx-include="#items-search"
+        hx-vals='{"page": "1"}'
+      />
+    </div>
+  </div>
 </div>

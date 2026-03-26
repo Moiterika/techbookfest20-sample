@@ -1,72 +1,83 @@
 import { css } from "../../styled-system/css";
 
+// ─── デザインシステムカラー（Architectural Ledger） ─────
+// surface:           #f9f9ff
+// surface-container: #e6eeff
+// surface-container-low: #eff3ff
+// surface-container-high: #dee9fd
+// surface-container-highest: #d9e3f7
+// surface-container-lowest: #ffffff
+// primary:           #00288e
+// primary-container: #1e40af
+// on-surface:        #121c2a
+// on-surface-variant:#444653
+// outline:           #757684
+// outline-variant:   #c4c5d5
+// error:             #ba1a1a
+// error-container:   #ffdad6
+// on-error-container:#93000a
+
 // ─── ボタン ───────────────────────────────────────
 
 const baseBtn = {
   fontSize: "sm",
-  py: "1.5",
-  px: "3",
-  rounded: "md",
+  py: "2",
+  px: "4",
+  rounded: "lg",
   cursor: "pointer",
-  fontWeight: "medium",
+  fontWeight: "semibold",
   transition: "all 0.2s",
   display: "inline-flex",
   alignItems: "center",
   justifyContent: "center",
-  boxShadow: "sm",
+  border: "none",
 };
 
-/** プライマリボタン（indigo） */
+/** プライマリボタン — グラデーション */
 export const btnPrimary = css({
   ...baseBtn,
-  border: "1px solid",
-  borderColor: "transparent",
-  bg: "indigo.600",
+  background: "linear-gradient(135deg, #00288e, #1e40af)",
   color: "white",
-  _hover: { bg: "indigo.700" },
-  _active: { bg: "indigo.800" },
+  _hover: { opacity: 0.9 },
+  _active: { opacity: 0.8 },
 });
 
-/** セカンダリボタン（白背景＋ボーダー） */
+/** セカンダリボタン — ゴースト */
 export const btnSecondary = css({
   ...baseBtn,
-  border: "1px solid",
-  borderColor: "slate.300",
-  bg: "white",
-  color: "slate.700",
-  _hover: { bg: "slate.50", borderColor: "slate.400" },
-  _active: { bg: "slate.100" },
+  bg: "transparent",
+  color: "#00288e",
+  _hover: { bg: "#dee9fd" },
+  _active: { bg: "#d9e3f7" },
 });
 
-/** 危険操作ボタン（rose） */
+/** 危険操作ボタン */
 export const btnDanger = css({
   ...baseBtn,
-  border: "1px solid",
-  borderColor: "transparent",
-  bg: "rose.600",
-  color: "white",
-  _hover: { bg: "rose.700" },
-  _active: { bg: "rose.800" },
+  bg: "rgba(186, 26, 26, 0.08)",
+  color: "#ba1a1a",
+  _hover: { bg: "rgba(186, 26, 26, 0.16)" },
+  _active: { bg: "rgba(186, 26, 26, 0.24)" },
 });
 
 // ─── フォーム ─────────────────────────────────────
 
 const baseInput = {
-  border: "1px solid",
-  borderColor: "slate.300",
-  rounded: "md",
+  rounded: "lg",
   fontSize: "sm",
-  color: "slate.900",
+  color: "#121c2a",
   outline: "none",
-  transition: "border-color 0.2s, box-shadow 0.2s",
+  bg: "#eff3ff",
+  border: "2px solid transparent",
+  transition: "border-color 0.2s, background-color 0.2s",
   _focus: {
-    borderColor: "indigo.500",
-    boxShadow: "0 0 0 1px token(colors.indigo.500)",
+    borderBottomColor: "#00288e",
+    bg: "white",
   },
 };
 
 /** フォーム用入力欄 */
-export const inputStyle = css({ ...baseInput, px: "3", py: "2" });
+export const inputStyle = css({ ...baseInput, px: "3", py: "2.5" });
 
 /** テーブル行内のコンパクト入力欄 */
 export const inputStyleSm = css({
@@ -80,60 +91,58 @@ export const inputStyleSm = css({
 export const labelStyle = css({
   display: "flex",
   flexDirection: "column",
-  gap: "1.5",
-  fontSize: "sm",
-  fontWeight: "medium",
-  color: "slate.700",
+  gap: "2",
+  fontSize: "0.625rem",
+  fontWeight: "bold",
+  textTransform: "uppercase",
+  letterSpacing: "wider",
+  color: "#757684",
 });
 
 // ─── カード ───────────────────────────────────────
 
-/** カードコンテナ */
+/** カードコンテナ — トーナルレイヤリング */
 export const card = css({
   mb: "6",
   p: "6",
   rounded: "xl",
-  border: "1px solid",
-  borderColor: "slate.200",
   bg: "white",
-  boxShadow: "sm",
 });
 
 /** カード内タイトル */
 export const cardTitle = css({
   fontSize: "lg",
-  fontWeight: "semibold",
-  color: "slate.900",
+  fontWeight: "bold",
+  color: "#121c2a",
   mb: "4",
+  letterSpacing: "tight",
 });
 
 // ─── テーブル ─────────────────────────────────────
 
 /** テーブルヘッダセル */
 export const thCell = css({
-  py: "3",
-  px: "4",
-  fontSize: "xs",
-  fontWeight: "semibold",
-  color: "slate.500",
+  py: "4",
+  px: "6",
+  fontSize: "0.625rem",
+  fontWeight: "bold",
+  color: "#444653",
   textTransform: "uppercase",
-  letterSpacing: "wider",
+  letterSpacing: "widest",
 });
 
 /** テーブルデータセル */
 export const tdCell = css({
-  py: "3",
-  px: "4",
-  borderBottom: "1px solid",
-  borderColor: "slate.200",
-  color: "slate.700",
+  py: "4",
+  px: "6",
+  color: "#444653",
   fontSize: "sm",
 });
 
 /** テーブル行（ホバー＋htmx swapping） */
 export const row = css({
   transition: "all 0.2s ease",
-  _hover: { bg: "slate.50" },
+  _hover: { bg: "#eff3ff" },
   "&.htmx-swapping": { opacity: 0 },
 });
 
@@ -143,19 +152,21 @@ export const row = css({
 export const flexRow = css({ display: "flex", gap: "2" });
 
 /** エラーテキスト */
-export const errorText = css({ color: "rose.600", fontSize: "sm" });
+export const errorText = css({ color: "#ba1a1a", fontSize: "sm" });
 
 /** ページコンテナ */
 export const pageContainer = css({
-  maxWidth: "800px",
+  maxWidth: "1200px",
   mx: "auto",
   py: "8",
-  px: "4",
+  px: "8",
 });
 
 /** ページタイトル */
 export const pageTitle = css({
-  fontSize: "2xl",
+  fontSize: "1.5rem",
   fontWeight: "bold",
-  mb: "6",
+  mb: "8",
+  color: "#121c2a",
+  letterSpacing: "tight",
 });

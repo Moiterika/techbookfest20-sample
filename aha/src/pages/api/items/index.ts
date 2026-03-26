@@ -2,9 +2,9 @@ import type { APIRoute } from "astro";
 import { experimental_AstroContainer as AstroContainer } from "astro/container";
 import { db } from "../../../db";
 import { items } from "../../../db/schema";
-import { count, desc, ilike, or } from "drizzle-orm";
+import { and, count, desc, ilike, inArray, or } from "drizzle-orm";
 import CrudRows from "../../../components/crud/CrudRows.astro";
-import { itemColumns, itemEntity } from "../../../entities/items";
+import { itemColumns, itemEntity } from "../../../features/items";
 import { errorText } from "../../../styles/common.css";
 
 const container = await AstroContainer.create();
@@ -12,18 +12,26 @@ const PAGE_SIZES = [20, 50, 100] as const;
 const DEFAULT_PAGE_SIZE = 20;
 
 /** ページネーション付きで品目一覧 HTML を返す */
-async function renderItemPage(page: number, pageSize: number, query?: string) {
+async function renderItemPage(
+  page: number,
+  pageSize: number,
+  query?: string,
+  category?: string,
+) {
   const size = PAGE_SIZES.includes(pageSize as any)
     ? pageSize
     : DEFAULT_PAGE_SIZE;
 
-  const searchFilter = query
-    ? or(
-        ilike(items.code, `%${query}%`),
-        ilike(items.name, `%${query}%`),
-        ilike(items.category, `%${query}%`),
-      )
-    : undefined;
+  const conditions = [];
+  if (query) {
+    conditions.push(
+      or(ilike(items.code, `%${query}%`), ilike(items.name, `%${query}%`)),
+    );
+  }
+  if (category) {
+    conditions.push(ilike(items.category, `%${category}%`));
+  }
+  const searchFilter = conditions.length > 0 ? and(...conditions) : undefined;
 
   const [{ total }] = await db
     .select({ total: count() })
@@ -40,7 +48,9 @@ async function renderItemPage(page: number, pageSize: number, query?: string) {
     .limit(size)
     .offset((currentPage - 1) * size);
 
-  const extraParams = query ? { q: query } : {};
+  const extraParams: Record<string, string> = {};
+  if (query) extraParams.q = query;
+  if (category) extraParams.category = category;
 
   const html = await container.renderToString(CrudRows, {
     props: {
@@ -61,7 +71,8 @@ export const GET: APIRoute = async ({ url }) => {
   const page = Number(url.searchParams.get("page")) || 1;
   const size = Number(url.searchParams.get("size")) || DEFAULT_PAGE_SIZE;
   const query = url.searchParams.get("q") || "";
-  return renderItemPage(page, size, query);
+  const category = url.searchParams.get("category") || "";
+  return renderItemPage(page, size, query, category);
 };
 
 /** POST /api/items — 品目を追加し、一覧（1ページ目）を返す */
@@ -86,4 +97,15 @@ export const POST: APIRoute = async ({ request }) => {
   const url = new URL(request.url);
   const size = Number(url.searchParams.get("size")) || DEFAULT_PAGE_SIZE;
   return renderItemPage(1, size);
+};
+
+/** DELETE /api/items — 選択された品目を一括削除 */
+export const DELETE: APIRoute = async ({ request }) => {
+  const { ids } = (await request.json()) as { ids: string[] };
+  const numIds = ids.map(Number).filter((n) => !isNaN(n));
+  if (numIds.length === 0) {
+    return new Response("", { status: 400 });
+  }
+  await db.delete(items).where(inArray(items.id, numIds));
+  return new Response("", { status: 200 });
 };

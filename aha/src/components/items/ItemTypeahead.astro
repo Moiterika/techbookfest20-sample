@@ -1,6 +1,7 @@
 ---
 import { css } from "../../../styled-system/css";
-import { inputStyle, inputStyleSm } from "../../styles/common.css";
+import ItemTypeaheadSearch from "./ItemTypeaheadSearch.astro";
+import ItemTypeaheadBadge from "./ItemTypeaheadBadge.astro";
 
 interface Props {
   /** hidden input の name 属性 */
@@ -11,12 +12,16 @@ interface Props {
   selectedCode?: string;
   /** 初期選択済み品目名（編集時） */
   selectedName?: string;
+  /** 初期選択済み品目単価（編集時） */
+  selectedPrice?: number;
   /** form 属性（EditRow から使う場合） */
   formId?: string;
   /** コンパクト表示（テーブル行内用） */
   compact?: boolean;
   /** 品目名ラベルを非表示にする（外部で名前列を別に表示する場合） */
   hideNameLabel?: boolean;
+  /** OOB で品目名を更新する先の要素 ID */
+  lookupTargetId?: string;
 }
 
 const {
@@ -24,108 +29,54 @@ const {
   selectedId,
   selectedCode = "",
   selectedName = "",
+  selectedPrice,
   formId,
   compact = false,
   hideNameLabel = false,
+  lookupTargetId,
 } = Astro.props;
 
-const wrapper = css({ position: "relative" });
-
-const dropdown = css({
-  position: "absolute",
-  zIndex: 10,
-  w: "full",
-  mt: "1",
-  bg: "white",
-  border: "1px solid",
-  borderColor: "slate.200",
-  rounded: "md",
-  boxShadow: "lg",
-  maxH: "200px",
-  overflowY: "auto",
+const hxVals = JSON.stringify({
+  taName: name,
+  taFormId: formId ?? "",
+  taCompact: String(compact),
+  taHideNameLabel: String(hideNameLabel),
+  taLookupId: lookupTargetId ?? "",
 });
 
-const selectedRow = css({
-  display: "flex",
-  alignItems: "center",
-  gap: "2",
-});
-
-const nameLabel = css({
-  fontSize: "sm",
-  color: "slate.600",
-  whiteSpace: "nowrap",
-});
-
-const clearBtn = css({
-  fontSize: "xs",
-  color: "slate.400",
-  cursor: "pointer",
-  px: "1.5",
-  py: "0.5",
-  rounded: "md",
-  _hover: { color: "slate.600", bg: "slate.100" },
-  flexShrink: 0,
-});
-
-const initData = JSON.stringify({
-  q: selectedCode,
-  selectedId: selectedId ?? null,
-  selectedCode: selectedCode,
-  selectedName: selectedName,
-  open: false,
-}).replace(/'/g, "\\'");
+const afterSwapHandler = [
+  "const el = this.querySelector('[data-selected-name]');",
+  "if (el) {",
+  "  const d = { name: el.dataset.selectedName, price: Number(el.dataset.selectedPrice || 0) };",
+  "  this.dispatchEvent(new CustomEvent('item-selected', { detail: d, bubbles: true }));",
+  "}",
+].join(" ");
 ---
 
 <div
-  class={wrapper}
-  x-data={initData}
-  @typeahead-reset.window="selectedId = null; selectedCode = ''; selectedName = ''; q = ''"
+  data-typeahead
+  class={css({ position: "relative" })}
+  hx-vals={hxVals}
+  hx-target="this"
+  hx-get="/api/items/typeahead?action=clear"
+  hx-trigger="typeahead-reset from:body"
+  hx-swap="innerHTML"
+  hx-disinherit="hx-target"
+  hx-on--after-swap={afterSwapHandler}
 >
-  <div class={selectedRow}>
-    {/* コード入力 / 検索 */}
-    <div class={css({ position: "relative", flex: "1" })}>
-      <input
-        type="text"
-        x-model="q"
-        placeholder="品目コード or 名前で検索…"
-        class={compact ? inputStyleSm : inputStyle}
-        autocomplete="off"
-        hx-get="/api/items/search"
-        hx-trigger="input changed delay:300ms"
-        hx-target="next ul"
-        hx-swap="innerHTML"
-        hx-include="this"
-        name="q"
-        x-bind:readonly="!!selectedId"
-        @focus="if(!selectedId) open = true"
-        @input="if(!selectedId) open = true"
-        @click.outside="open = false"
-        @keydown.escape="open = false"
+  {
+    selectedId ? (
+      <ItemTypeaheadBadge
+        name={name}
+        selectedId={selectedId}
+        selectedCode={selectedCode}
+        selectedName={selectedName}
+        selectedPrice={selectedPrice}
+        formId={formId}
+        hideNameLabel={hideNameLabel}
       />
-      <ul class={dropdown} x-show="open && !selectedId" x-transition></ul>
-    </div>
-    {/* 選択済み: 品目名 + クリアボタン */}
-    {
-      !hideNameLabel && (
-        <template x-if="selectedId">
-          <span class={nameLabel} x-text="selectedName" />
-        </template>
-      )
-    }
-    <template x-if="selectedId">
-      <button
-        type="button"
-        class={clearBtn}
-        @click="selectedId = null; selectedCode = ''; selectedName = ''; q = ''"
-        >&times;</button
-      >
-    </template>
-  </div>
-  <input
-    type="hidden"
-    name={name}
-    x-bind:value="selectedId"
-    {...formId ? { form: formId } : {}}
-  />
+    ) : (
+      <ItemTypeaheadSearch name={name} formId={formId} compact={compact} />
+    )
+  }
 </div>

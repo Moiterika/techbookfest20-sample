@@ -1,0 +1,12 @@
+{
+  "@img/sharp-libvips-linux-x64@1.2.4": {
+    "license": "Apache-2.0",
+    "licenseUrl": "https://github.com/lovell/sharp-libvips/blob/main/LICENSE",
+    "licenseText": "Apache License\nVersion 2.0, January 2004\nhttp://www.apache.org/licenses/\nSee: https://github.com/lovell/sharp-libvips/blob/main/LICENSE"
+  },
+  "@img/sharp-libvips-linuxmusl-x64@1.2.4": {
+    "license": "Apache-2.0",
+    "licenseUrl": "https://github.com/lovell/sharp-libvips/blob/main/LICENSE",
+    "licenseText": "Apache License\nVersion 2.0, January 2004\nhttp://www.apache.org/licenses/\nSee: https://github.com/lovell/sharp-libvips/blob/main/LICENSE"
+  }
+}

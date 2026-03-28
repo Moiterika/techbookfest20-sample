@@ -9,7 +9,8 @@
     "prepare": "panda codegen",
     "dev": "bunx --bun astro dev",
     "build": "bunx --bun astro build",
-    "fmt": "bunx --bun astro sync && bunx --bun prettier --write 'src/**/*.{astro,ts}'"
+    "fmt": "bunx --bun astro sync && bunx --bun prettier --write 'src/**/*.{astro,ts}'",
+    "gen:tpl": "bun third-party-license & bun run scripts/gen-licenses.ts"
   },
   "dependencies": {
     "@iconify-json/heroicons": "^1.2.3",
@@ -30,8 +31,9 @@
     "zod": "^4.3.6"
   },
   "devDependencies": {
-    "@pandacss/dev": "^1.9.0",
+    "@pandacss/dev": "^1.9.1",
     "drizzle-kit": "^0.31.10",
+    "node-module-license-output": "^1.0.0",
     "prettier": "^3.8.1",
     "prettier-plugin-astro": "^0.14.1"
   }

@@ -10,7 +10,9 @@
     "dev": "bunx --bun astro dev",
     "build": "bunx --bun astro build",
     "fmt": "bunx --bun astro sync && bunx --bun prettier --write 'src/**/*.{astro,ts}'",
-    "gen:tpl": "bun third-party-license & bun run scripts/gen-licenses.ts"
+    "gen:tpl": "bun third-party-license & bun run scripts/gen-licenses.ts",
+    "test:e2e": "bunx playwright test",
+    "test:e2e:ui": "bunx playwright test --ui"
   },
   "dependencies": {
     "@iconify-json/heroicons": "^1.2.3",
@@ -32,6 +34,7 @@
   },
   "devDependencies": {
     "@pandacss/dev": "^1.9.1",
+    "@playwright/test": "^1.58.2",
     "drizzle-kit": "^0.31.10",
     "node-module-license-output": "^1.0.0",
     "prettier": "^3.8.1",

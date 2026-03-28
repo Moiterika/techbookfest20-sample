@@ -1,0 +1,44 @@
+---
+import { css } from "../../styled-system/css";
+
+interface Props {
+  current?: "home" | "items" | "transactions";
+}
+
+const { current } = Astro.props;
+
+const nav = css({
+  display: "flex",
+  gap: "2",
+  mb: "6",
+});
+
+const linkBase = {
+  fontSize: "sm",
+  py: "2",
+  px: "4",
+  rounded: "lg",
+  fontWeight: "semibold",
+  textDecoration: "none",
+  transition: "all 0.2s",
+};
+
+const link = css({
+  ...linkBase,
+  color: "#00288e",
+  _hover: { bg: "#dee9fd" },
+});
+
+const linkActive = css({
+  ...linkBase,
+  background: "linear-gradient(135deg, #00288e, #1e40af)",
+  color: "white",
+  pointerEvents: "none",
+});
+---
+
+<nav class={nav}>
+  <a href="/" class={current === "home" ? linkActive : link}>ホーム</a>
+  <a href="/items" class={current === "items" ? linkActive : link}>品目管理</a>
+  <a href="/transactions" class={current === "transactions" ? linkActive : link}>取引管理</a>
+</nav>

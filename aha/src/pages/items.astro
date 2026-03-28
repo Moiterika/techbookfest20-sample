@@ -1,5 +1,6 @@
 ---
 import Layout from "../layouts/Layout.astro";
+import Nav from "../components/Nav.astro";
 import { pageContainer, pageTitle } from "../styles/common.css";
 import CrudToolbar from "../components/crud/CrudToolbar.astro";
 import CrudTable from "../components/crud/CrudTable.astro";
@@ -15,6 +16,7 @@ import { itemColumns, itemEntity } from "../features/items";
 
 <Layout>
   <main class={pageContainer}>
+    <Nav current="items" />
     <h1 class={pageTitle}>品目管理</h1>
 
     <ItemSearch />

@@ -1,5 +1,6 @@
 ---
 import Layout from "../layouts/Layout.astro";
+import Nav from "../components/Nav.astro";
 import { pageContainer, pageTitle } from "../styles/common.css";
 import CrudToolbar from "../components/crud/CrudToolbar.astro";
 import CrudTable from "../components/crud/CrudTable.astro";
@@ -11,6 +12,7 @@ import { txColumns, txEntity } from "../features/transactions";
 
 <Layout>
   <main class={pageContainer}>
+    <Nav current="transactions" />
     <h1 class={pageTitle}>取引管理</h1>
 
     <TransactionSearch />

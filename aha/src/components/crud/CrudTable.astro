@@ -22,6 +22,7 @@ const tableWrapper = css({
   overflowX: "auto",
   rounded: "xl",
   bg: "white",
+  WebkitOverflowScrolling: "touch",
 });
 
 const theadStyle = css({
@@ -39,12 +40,21 @@ const checkboxStyle = css({
   cursor: "pointer",
   accentColor: "#00288e",
 });
+
+/** カラムごとの th クラスを事前計算 */
+const thClasses = columns.map((col) => {
+  const extra: Record<string, string> = {};
+  if (col.width) extra.w = col.width;
+  if (col.minWidth) extra.minW = col.minWidth;
+  const sizeClass = Object.keys(extra).length > 0 ? ` ${css(extra)}` : "";
+  return `${thCell}${sizeClass}`;
+});
 ---
 
 <div class={tableWrapper}>
   <table
     id={tableId}
-    class={css({ w: "full", borderCollapse: "collapse", textAlign: "left" })}
+    class={css({ w: "full", minW: "50rem", borderCollapse: "collapse", textAlign: "left" })}
   >
     <thead class={theadStyle}>
       <tr>
@@ -56,10 +66,8 @@ const checkboxStyle = css({
           />
         </th>
         {
-          columns.map((col) => (
-            <th
-              class={`${thCell}${col.width ? ` ${css({ w: col.width as any })}` : ""}`}
-            >
+          columns.map((col, i) => (
+            <th class={thClasses[i]}>
               {col.label}
             </th>
           ))

@@ -26,6 +26,9 @@ export type NewItem = typeof items.$inferInsert;
 export const transactions = pgTable("transactions", {
   id: serial("id").primaryKey(),
   date: date("date").notNull(),
+  transactionTypeId: integer("transaction_type_id")
+    .notNull()
+    .references(() => transactionTypes.id),
   itemId: integer("item_id")
     .notNull()
     .references(() => items.id),
@@ -38,3 +41,17 @@ export const transactions = pgTable("transactions", {
 
 export type Transaction = typeof transactions.$inferSelect;
 export type NewTransaction = typeof transactions.$inferInsert;
+
+/** 取引区分テーブル */
+export const transactionTypes = pgTable("transaction_types", {
+  id: serial("id").primaryKey(),
+  code: varchar("code", { length: 50 }).notNull(),
+  name: varchar("name", { length: 200 }).notNull(),
+  /** 受払係数: -1, 0, 1 */
+  coefficient: integer("coefficient").notNull().default(0),
+  createdAt: timestamp("created_at").defaultNow().notNull(),
+  updatedAt: timestamp("updated_at").defaultNow().notNull(),
+});
+
+export type TransactionType = typeof transactionTypes.$inferSelect;
+export type NewTransactionType = typeof transactionTypes.$inferInsert;

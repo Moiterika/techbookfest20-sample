@@ -7,7 +7,14 @@ import CrudTable from "../components/crud/CrudTable.astro";
 import CrudForm from "../components/crud/CrudForm.astro";
 import HtmxLoading from "../components/crud/HtmxLoading.astro";
 import TransactionSearch from "../components/transactions/TransactionSearch.astro";
-import { txColumns, txEntity } from "../features/transactions";
+import {
+  getTxColumns,
+  fetchTxTypeOptions,
+  txEntity,
+} from "../features/transactions";
+
+const txTypeOptions = await fetchTxTypeOptions();
+const txColumns = getTxColumns(txTypeOptions);
 ---
 
 <Layout>

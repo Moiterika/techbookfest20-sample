@@ -30,7 +30,8 @@
       "mcp__panda__get_patterns",
       "mcp__panda__get_layer_styles",
       "Bash(find /workspace/aha -maxdepth 2 -name *.json -o -name .zed -o -name settings.json)",
-      "Bash(bun fmt:*)"
+      "Bash(bun fmt:*)",
+      "Bash(find /workspace/aha -name playwright* -o -name *test* -o -name *spec*)"
     ]
   },
   "enabledMcpjsonServers": [

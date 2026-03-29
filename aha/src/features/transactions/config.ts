@@ -1,44 +1,70 @@
 import type { Column, EntityConfig } from "../../components/crud/types";
+import { db } from "../../db";
+import { transactionTypes } from "../../db/schema";
 
-export const txColumns: Column[] = [
-  { key: "date", label: "日付", type: "date", required: true },
-  {
-    key: "itemCode",
-    label: "品目コード",
-    type: "itemCode",
-    valueName: "itemId",
-    required: true,
-  },
-  { key: "itemName", label: "品目名", type: "readonlyLookup" },
-  {
-    key: "unitPrice",
-    label: "単価",
-    type: "number",
-    format: true,
-    required: true,
-    min: 0,
-    alpineModel: "unitPrice",
-    defaultValue: 0,
-  },
-  {
-    key: "quantity",
-    label: "数量",
-    type: "number",
-    format: true,
-    required: true,
-    min: 1,
-    alpineModel: "quantity",
-    defaultValue: 1,
-  },
-  {
-    key: "amount",
-    label: "金額",
-    type: "computed",
-    expression: "unitPrice * quantity",
-    format: true,
-  },
-  { key: "_actions", label: "操作", type: "actions", width: "32" },
-];
+/** 取引区分テーブルから select 用の選択肢を取得 */
+export async function fetchTxTypeOptions(): Promise<
+  { value: string; label: string }[]
+> {
+  const rows = await db.select().from(transactionTypes);
+  return rows.map((r) => ({
+    value: String(r.id),
+    label: `${r.code} ${r.name}`,
+  }));
+}
+
+/** 動的に取引区分の選択肢を含むカラム定義を生成 */
+export function getTxColumns(
+  txTypeOptions: { value: string; label: string }[],
+): Column[] {
+  return [
+    { key: "date", label: "日付", type: "date", required: true },
+    {
+      key: "transactionTypeId",
+      label: "取引区分",
+      type: "select",
+      required: true,
+      minWidth: "11.25rem",
+      options: [{ value: "", label: "-- 選択 --" }, ...txTypeOptions],
+    },
+    {
+      key: "itemCode",
+      label: "品目コード",
+      type: "itemCode",
+      valueName: "itemId",
+      required: true,
+    },
+    { key: "itemName", label: "品目名", type: "readonlyLookup" },
+    {
+      key: "unitPrice",
+      label: "単価",
+      type: "number",
+      format: true,
+      required: true,
+      min: 0,
+      alpineModel: "unitPrice",
+      defaultValue: 0,
+    },
+    {
+      key: "quantity",
+      label: "数量",
+      type: "number",
+      format: true,
+      required: true,
+      min: 1,
+      alpineModel: "quantity",
+      defaultValue: 1,
+    },
+    {
+      key: "amount",
+      label: "金額",
+      type: "computed",
+      expression: "unitPrice * quantity",
+      format: true,
+    },
+    { key: "_actions", label: "操作", type: "actions", width: "32" },
+  ];
+}
 
 export const txEntity: EntityConfig = {
   idPrefix: "tx",

@@ -149,6 +149,32 @@ const formLayout = css({ display: "flex", flexDirection: "column", gap: "4" });
           );
         }
 
+        if (type === "select") {
+          const selCol = col as any;
+          return (
+            <label class={labelStyle}>
+              <span>
+                {col.label}{" "}
+                {col.required && <span class={requiredStar}>*</span>}
+              </span>
+              <select
+                name={col.key}
+                {...(col.required ? { required: true } : {})}
+                class={inputStyle}
+              >
+                {selCol.options.map((opt: any) => (
+                  <option
+                    value={opt.value}
+                    selected={String(col.defaultValue) === opt.value}
+                  >
+                    {opt.label}
+                  </option>
+                ))}
+              </select>
+            </label>
+          );
+        }
+
         // text (default)
         return (
           <label class={labelStyle}>

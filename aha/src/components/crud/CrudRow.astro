@@ -13,6 +13,14 @@ interface Props {
 const { record, columns, entity } = Astro.props;
 const rowId = `${entity.idPrefix}-${record.id}`;
 
+/** カラムの minWidth を反映した td クラス��返す */
+function cellCls(col: { minWidth?: string }): string {
+  if (col.minWidth) {
+    return `${tdCell} ${css({ minW: col.minWidth as any })}`;
+  }
+  return tdCell;
+}
+
 function getDeleteConfirm(): string {
   if (!entity.deleteConfirmTemplate) return "削除しますか？";
   const name = entity.displayNameKey
@@ -174,7 +182,9 @@ const checkboxStyle = css({
 
       if (type === "barcode") {
         return (
-          <td class={tdCell}>{val ? <react-barcode value={val} /> : ""}</td>
+          <td class={cellCls(col)}>
+            {val ? <react-barcode value={val} /> : ""}
+          </td>
         );
       }
 
@@ -183,11 +193,19 @@ const checkboxStyle = css({
           (col as any).format && val != null
             ? Number(val).toLocaleString()
             : (val ?? "");
-        return <td class={tdCell}>{formatted}</td>;
+        return <td class={cellCls(col)}>{formatted}</td>;
+      }
+
+      if (type === "select") {
+        const selCol = col as any;
+        const opt = selCol.options.find(
+          (o: any) => String(o.value) === String(val),
+        );
+        return <td class={cellCls(col)}>{opt ? opt.label : (val ?? "")}</td>;
       }
 
       // text, date, itemCode, readonlyLookup
-      return <td class={tdCell}>{val ?? ""}</td>;
+      return <td class={cellCls(col)}>{val ?? ""}</td>;
     })
   }
 </tr>

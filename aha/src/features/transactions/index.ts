@@ -4,4 +4,4 @@ export {
   fromTransactionDto,
   calcAmount,
 } from "./dto";
-export { txColumns, txEntity } from "./config";
+export { getTxColumns, fetchTxTypeOptions, txEntity } from "./config";

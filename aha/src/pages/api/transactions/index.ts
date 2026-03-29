@@ -1,10 +1,14 @@
 import type { APIRoute } from "astro";
 import { experimental_AstroContainer as AstroContainer } from "astro/container";
 import { db } from "../../../db";
-import { transactions, items } from "../../../db/schema";
+import { transactions, items, transactionTypes } from "../../../db/schema";
 import { and, count, desc, eq, gte, inArray, lte } from "drizzle-orm";
 import CrudRows from "../../../components/crud/CrudRows.astro";
-import { txColumns, txEntity } from "../../../features/transactions";
+import {
+  getTxColumns,
+  fetchTxTypeOptions,
+  txEntity,
+} from "../../../features/transactions";
 import { errorText } from "../../../styles/common.css";
 
 const container = await AstroContainer.create();
@@ -43,6 +47,7 @@ async function renderTransactionPage(
     .select({
       id: transactions.id,
       date: transactions.date,
+      transactionTypeId: transactions.transactionTypeId,
       itemId: transactions.itemId,
       unitPrice: transactions.unitPrice,
       quantity: transactions.quantity,
@@ -62,6 +67,9 @@ async function renderTransactionPage(
   const extraParams: Record<string, string> = {};
   if (dateFrom) extraParams.dateFrom = dateFrom;
   if (dateTo) extraParams.dateTo = dateTo;
+
+  const txTypeOptions = await fetchTxTypeOptions();
+  const txColumns = getTxColumns(txTypeOptions);
 
   const html = await container.renderToString(CrudRows, {
     props: {
@@ -90,6 +98,7 @@ export const GET: APIRoute = async ({ url }) => {
 export const POST: APIRoute = async ({ request }) => {
   const form = await request.formData();
   const date = form.get("date") as string;
+  const transactionTypeId = Number(form.get("transactionTypeId")) || null;
   const itemId = Number(form.get("itemId"));
   const unitPrice = Number(form.get("unitPrice")) || 0;
   const quantity = Number(form.get("quantity")) || 1;
@@ -99,6 +108,12 @@ export const POST: APIRoute = async ({ request }) => {
       status: 422,
       headers: { "Content-Type": "text/html" },
     });
+  }
+  if (!transactionTypeId) {
+    return new Response(
+      `<p class="${errorText}">取引区分を選択してください</p>`,
+      { status: 422, headers: { "Content-Type": "text/html" } },
+    );
   }
   if (!itemId) {
     return new Response(`<p class="${errorText}">品目を選択してください</p>`, {
@@ -110,7 +125,7 @@ export const POST: APIRoute = async ({ request }) => {
   const amount = unitPrice * quantity;
   await db
     .insert(transactions)
-    .values({ date, itemId, unitPrice, quantity, amount });
+    .values({ date, transactionTypeId, itemId, unitPrice, quantity, amount });
 
   const url = new URL(request.url);
   const size = Number(url.searchParams.get("size")) || DEFAULT_PAGE_SIZE;

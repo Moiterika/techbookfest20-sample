@@ -2,7 +2,7 @@
 import { css } from "../../styled-system/css";
 
 interface Props {
-  current?: "home" | "items" | "transactions";
+  current?: "home" | "items" | "transactions" | "transaction-types";
 }
 
 const { current } = Astro.props;
@@ -40,5 +40,11 @@ const linkActive = css({
 <nav class={nav}>
   <a href="/" class={current === "home" ? linkActive : link}>ホーム</a>
   <a href="/items" class={current === "items" ? linkActive : link}>品目管理</a>
-  <a href="/transactions" class={current === "transactions" ? linkActive : link}>取引管理</a>
+  <a href="/transactions" class={current === "transactions" ? linkActive : link}
+    >取引管理</a
+  >
+  <a
+    href="/transaction-types"
+    class={current === "transaction-types" ? linkActive : link}>取引区分管理</a
+  >
 </nav>

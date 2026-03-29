@@ -4,7 +4,11 @@ import { db } from "../../../../db";
 import { transactions, items } from "../../../../db/schema";
 import { eq } from "drizzle-orm";
 import CrudRow from "../../../../components/crud/CrudRow.astro";
-import { txColumns, txEntity } from "../../../../features/transactions";
+import {
+  getTxColumns,
+  fetchTxTypeOptions,
+  txEntity,
+} from "../../../../features/transactions";
 import { errorText } from "../../../../styles/common.css";
 
 const container = await AstroContainer.create();
@@ -14,6 +18,7 @@ export const PUT: APIRoute = async ({ params, request }) => {
   const id = Number(params.id);
   const form = await request.formData();
   const date = form.get("date") as string;
+  const transactionTypeId = Number(form.get("transactionTypeId")) || null;
   const itemId = Number(form.get("itemId"));
   const unitPrice = Number(form.get("unitPrice")) || 0;
   const quantity = Number(form.get("quantity")) || 1;
@@ -23,6 +28,12 @@ export const PUT: APIRoute = async ({ params, request }) => {
       status: 422,
       headers: { "Content-Type": "text/html" },
     });
+  }
+  if (!transactionTypeId) {
+    return new Response(
+      `<p class="${errorText}">取引区分を選択してください</p>`,
+      { status: 422, headers: { "Content-Type": "text/html" } },
+    );
   }
   if (!itemId) {
     return new Response(`<p class="${errorText}">品目を選択してください</p>`, {
@@ -34,13 +45,22 @@ export const PUT: APIRoute = async ({ params, request }) => {
   const amount = unitPrice * quantity;
   await db
     .update(transactions)
-    .set({ date, itemId, unitPrice, quantity, amount, updatedAt: new Date() })
+    .set({
+      date,
+      transactionTypeId,
+      itemId,
+      unitPrice,
+      quantity,
+      amount,
+      updatedAt: new Date(),
+    })
     .where(eq(transactions.id, id));
 
   const [row] = await db
     .select({
       id: transactions.id,
       date: transactions.date,
+      transactionTypeId: transactions.transactionTypeId,
       itemId: transactions.itemId,
       unitPrice: transactions.unitPrice,
       quantity: transactions.quantity,
@@ -53,6 +73,9 @@ export const PUT: APIRoute = async ({ params, request }) => {
     .from(transactions)
     .leftJoin(items, eq(transactions.itemId, items.id))
     .where(eq(transactions.id, id));
+
+  const txTypeOptions = await fetchTxTypeOptions();
+  const txColumns = getTxColumns(txTypeOptions);
 
   const html = await container.renderToString(CrudRow, {
     props: { record: row, columns: txColumns, entity: txEntity },

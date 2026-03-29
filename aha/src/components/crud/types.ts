@@ -6,6 +6,8 @@ interface ColumnBase {
   label: string;
   /** PandaCSS の w トークン値 */
   width?: string;
+  /** PandaCSS の minW トークン値（編集行の最小幅） */
+  minWidth?: string;
   /** フォームで必須か */
   required?: boolean;
   /** プレースホルダ */
@@ -60,6 +62,13 @@ interface ComputedColumn extends ColumnBase {
   format?: boolean;
 }
 
+/** セレクトボックス */
+interface SelectColumn extends ColumnBase {
+  type: "select";
+  /** 選択肢 { value, label } の配列 */
+  options: { value: string; label: string }[];
+}
+
 /** 操作列 (編集/削除ボタン) */
 interface ActionsColumn extends ColumnBase {
   type: "actions";
@@ -73,6 +82,7 @@ export type Column =
   | ItemCodeColumn
   | ReadonlyLookupColumn
   | ComputedColumn
+  | SelectColumn
   | ActionsColumn;
 
 /** エンティティ固有の設定 */

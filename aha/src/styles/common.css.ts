@@ -85,6 +85,7 @@ export const inputStyleSm = css({
   py: "1.5",
   px: "2.5",
   w: "full",
+  minW: "7.5rem",
 });
 
 /** ラベル（縦並び） */
@@ -156,7 +157,7 @@ export const errorText = css({ color: "#ba1a1a", fontSize: "sm" });
 
 /** ページコンテナ */
 export const pageContainer = css({
-  maxWidth: "1200px",
+  maxWidth: "87.5rem",
   mx: "auto",
   py: "8",
   px: "8",

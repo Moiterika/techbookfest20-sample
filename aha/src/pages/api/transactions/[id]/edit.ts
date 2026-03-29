@@ -4,7 +4,11 @@ import { db } from "../../../../db";
 import { transactions, items } from "../../../../db/schema";
 import { eq } from "drizzle-orm";
 import CrudEditRow from "../../../../components/crud/CrudEditRow.astro";
-import { txColumns, txEntity } from "../../../../features/transactions";
+import {
+  getTxColumns,
+  fetchTxTypeOptions,
+  txEntity,
+} from "../../../../features/transactions";
 
 const container = await AstroContainer.create();
 
@@ -16,6 +20,7 @@ export const GET: APIRoute = async ({ params }) => {
     .select({
       id: transactions.id,
       date: transactions.date,
+      transactionTypeId: transactions.transactionTypeId,
       itemId: transactions.itemId,
       unitPrice: transactions.unitPrice,
       quantity: transactions.quantity,
@@ -32,6 +37,9 @@ export const GET: APIRoute = async ({ params }) => {
   if (!row) {
     return new Response("Not found", { status: 404 });
   }
+
+  const txTypeOptions = await fetchTxTypeOptions();
+  const txColumns = getTxColumns(txTypeOptions);
 
   const html = await container.renderToString(CrudEditRow, {
     props: { record: row, columns: txColumns, entity: txEntity },

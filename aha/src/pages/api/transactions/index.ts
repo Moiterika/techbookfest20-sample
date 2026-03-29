@@ -129,7 +129,12 @@ export const POST: APIRoute = async ({ request }) => {
 
   const url = new URL(request.url);
   const size = Number(url.searchParams.get("size")) || DEFAULT_PAGE_SIZE;
-  return renderTransactionPage(1, size);
+  const resp = await renderTransactionPage(1, size);
+  resp.headers.set(
+    "HX-Trigger",
+    JSON.stringify({ "show-toast": "登録しました" }),
+  );
+  return resp;
 };
 
 /** DELETE /api/transactions — 選択された取引を一括削除 */

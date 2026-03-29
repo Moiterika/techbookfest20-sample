@@ -96,7 +96,12 @@ export const POST: APIRoute = async ({ request }) => {
 
   const url = new URL(request.url);
   const size = Number(url.searchParams.get("size")) || DEFAULT_PAGE_SIZE;
-  return renderItemPage(1, size);
+  const resp = await renderItemPage(1, size);
+  resp.headers.set(
+    "HX-Trigger",
+    JSON.stringify({ "show-toast": "登録しました" }),
+  );
+  return resp;
 };
 
 /** DELETE /api/items — 選択された品目を一括削除 */

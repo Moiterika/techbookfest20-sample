@@ -1,0 +1,143 @@
+---
+import { css } from "../../../styled-system/css";
+import { tdCell, row, inputStyleSm } from "../../styles/common.css";
+import { unitLabels, type Unit } from "../../features/shared/types/unit";
+import ItemTypeahead from "../items/ItemTypeahead.astro";
+
+interface Props {
+  section: "output" | "input";
+  rowKey: string;
+  itemId?: number;
+  itemCode?: string;
+  itemName?: string;
+  quantity?: string;
+  unit?: string;
+  refBomCode?: string;
+  refBomVersion?: string;
+}
+
+const {
+  section,
+  rowKey,
+  itemId,
+  itemCode,
+  itemName,
+  quantity = "",
+  unit = "pcs",
+  refBomCode = "",
+  refBomVersion = "",
+} = Astro.props;
+
+const lineType = section === "output" ? "2" : "1";
+const unitOptions = Object.entries(unitLabels) as [Unit, string][];
+const lookupId = `lookup-${rowKey}-itemName`;
+
+const cellSelect = css({
+  rounded: "lg",
+  fontSize: "sm",
+  color: "#121c2a",
+  outline: "none",
+  bg: "#eff3ff",
+  border: "2px solid transparent",
+  transition: "border-color 0.2s, background-color 0.2s",
+  _focus: { borderBottomColor: "#00288e", bg: "white" },
+  py: "1.5",
+  px: "2.5",
+  minW: "5rem",
+});
+
+const removeBtn = css({
+  display: "inline-flex",
+  alignItems: "center",
+  justifyContent: "center",
+  w: "1.75rem",
+  h: "1.75rem",
+  rounded: "full",
+  cursor: "pointer",
+  color: "#ba1a1a",
+  border: "none",
+  bg: "transparent",
+  fontSize: "sm",
+  _hover: { bg: "rgba(186, 26, 26, 0.1)" },
+});
+
+const lookupText = css({ fontSize: "sm", color: "#757684" });
+---
+
+<tr id={`bom-line-${rowKey}`} class={row}>
+  <input type="hidden" name="lineType" value={lineType} />
+  <td class={tdCell}>
+    <ItemTypeahead
+      name="lineItemId"
+      selectedId={itemId}
+      selectedCode={itemCode ?? ""}
+      selectedName={itemName ?? ""}
+      compact
+      hideNameLabel
+      lookupTargetId={lookupId}
+    />
+  </td>
+  <td class={tdCell}>
+    <span id={lookupId} class={lookupText}>{itemName ?? ""}</span>
+  </td>
+  <td class={tdCell}>
+    <input
+      type="number"
+      step="0.0001"
+      min="0"
+      name="lineQuantity"
+      value={quantity}
+      class={inputStyleSm}
+      placeholder="0"
+    />
+  </td>
+  <td class={tdCell}>
+    <select name="lineUnit" class={cellSelect}>
+      {
+        unitOptions.map(([val, label]) => (
+          <option value={val} selected={val === unit}>
+            {label}
+          </option>
+        ))
+      }
+    </select>
+  </td>
+  {
+    section === "input" ? (
+      <>
+        <td class={tdCell}>
+          <input
+            type="text"
+            name="lineRefBomCode"
+            value={refBomCode}
+            class={inputStyleSm}
+            placeholder="BOMコード"
+          />
+        </td>
+        <td class={tdCell}>
+          <input
+            type="text"
+            name="lineRefBomVersion"
+            value={refBomVersion}
+            class={inputStyleSm}
+            placeholder="版"
+          />
+        </td>
+      </>
+    ) : (
+      <>
+        <input type="hidden" name="lineRefBomCode" value="" />
+        <input type="hidden" name="lineRefBomVersion" value="" />
+      </>
+    )
+  }
+  <td class={tdCell}>
+    <button
+      type="button"
+      class={removeBtn}
+      onclick="this.closest('tr').remove()"
+    >
+      &times;
+    </button>
+  </td>
+</tr>

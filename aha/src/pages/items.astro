@@ -5,7 +5,6 @@ import { pageContainer, pageTitle } from "../styles/common.css";
 import CrudToolbar from "../components/crud/CrudToolbar.astro";
 import CrudTable from "../components/crud/CrudTable.astro";
 import CrudForm from "../components/crud/CrudForm.astro";
-import HtmxLoading from "../components/crud/HtmxLoading.astro";
 import ItemSearch from "../components/items/ItemSearch.astro";
 import { itemColumns, itemEntity } from "../features/items";
 ---
@@ -38,6 +37,5 @@ import { itemColumns, itemEntity } from "../features/items";
       paginationId="items-pagination"
       tableId="items-table"
     />
-    <HtmxLoading />
   </main>
 </Layout>

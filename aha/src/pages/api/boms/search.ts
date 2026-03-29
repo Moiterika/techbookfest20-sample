@@ -1,6 +1,6 @@
 import type { APIRoute } from "astro";
 import { db } from "../../../db";
-import { items } from "../../../db/schema";
+import { boms } from "../../../db/schema";
 import { ilike, or, asc } from "drizzle-orm";
 import { css } from "../../../../styled-system/css";
 
@@ -19,7 +19,7 @@ const noResult = css({
   color: "#757684",
 });
 
-/** GET /api/items/search?q=... — 品目をコード・名前で検索し候補リストHTMLを返す */
+/** GET /api/boms/search?q=... — BOMをコード・名前で検索し候補リストHTMLを返す */
 export const GET: APIRoute = async ({ url }) => {
   const q = (url.searchParams.get("q") || "").trim();
 
@@ -32,19 +32,19 @@ export const GET: APIRoute = async ({ url }) => {
 
   const rows = await db
     .select({
-      id: items.id,
-      code: items.code,
-      name: items.name,
-      price: items.price,
+      id: boms.id,
+      code: boms.code,
+      version: boms.version,
+      name: boms.name,
     })
-    .from(items)
-    .where(or(ilike(items.code, `%${q}%`), ilike(items.name, `%${q}%`)))
-    .orderBy(asc(items.code))
+    .from(boms)
+    .where(or(ilike(boms.code, `%${q}%`), ilike(boms.name, `%${q}%`)))
+    .orderBy(asc(boms.code))
     .limit(10);
 
   if (rows.length === 0) {
     return new Response(
-      `<li class="${noResult}">該当する品目がありません</li>`,
+      `<li class="${noResult}">該当するBOMがありません</li>`,
       { headers: { "Content-Type": "text/html" } },
     );
   }
@@ -53,13 +53,13 @@ export const GET: APIRoute = async ({ url }) => {
     .map(
       (r) =>
         `<li class="${dropdownItem}" ` +
-        `data-item-id="${r.id}" ` +
-        `data-item-code="${escapeHtml(r.code)}" ` +
-        `data-item-name="${escapeHtml(r.name)}" ` +
-        `hx-get="/api/items/typeahead?action=select&amp;itemId=${r.id}" ` +
-        `hx-target="closest [data-typeahead]" ` +
-        `hx-swap="innerHTML">` +
-        `<strong>${escapeHtml(r.code)}</strong> ${escapeHtml(r.name)}</li>`,
+        `data-bom-code="${escapeHtml(r.code)}" ` +
+        `data-bom-version="${escapeHtml(r.version)}" ` +
+        `data-bom-name="${escapeHtml(r.name)}" ` +
+        `@click="line.refBomCode = '${escapeJs(r.code)}'; ` +
+        `line.refBomVersion = '${escapeJs(r.version)}'; ` +
+        `line.bomSearchOpen = false">` +
+        `<strong>${escapeHtml(r.code)}</strong> v${escapeHtml(r.version)} ${escapeHtml(r.name)}</li>`,
     )
     .join("");
 
@@ -72,4 +72,8 @@ function escapeHtml(s: string) {
     .replace(/</g, "&lt;")
     .replace(/>/g, "&gt;")
     .replace(/"/g, "&quot;");
+}
+
+function escapeJs(s: string) {
+  return s.replace(/\\/g, "\\\\").replace(/'/g, "\\'");
 }

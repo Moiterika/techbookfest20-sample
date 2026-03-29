@@ -80,7 +80,12 @@ export const PUT: APIRoute = async ({ params, request }) => {
   const html = await container.renderToString(CrudRow, {
     props: { record: row, columns: txColumns, entity: txEntity },
   });
-  return new Response(html, { headers: { "Content-Type": "text/html" } });
+  return new Response(html, {
+    headers: {
+      "Content-Type": "text/html",
+      "HX-Trigger": JSON.stringify({ "show-toast": "更新しました" }),
+    },
+  });
 };
 
 /** DELETE /api/transactions/:id — 取引を削除（空レスポンスで行が消える） */

@@ -2,7 +2,7 @@
 import { css } from "../../styled-system/css";
 
 interface Props {
-  current?: "home" | "items" | "transactions" | "transaction-types";
+  current?: "home" | "items" | "transactions" | "transaction-types" | "boms";
 }
 
 const { current } = Astro.props;
@@ -47,4 +47,5 @@ const linkActive = css({
     href="/transaction-types"
     class={current === "transaction-types" ? linkActive : link}>取引区分管理</a
   >
+  <a href="/boms" class={current === "boms" ? linkActive : link}>BOM管理</a>
 </nav>

@@ -5,7 +5,6 @@ import { pageContainer, pageTitle } from "../styles/common.css";
 import CrudToolbar from "../components/crud/CrudToolbar.astro";
 import CrudTable from "../components/crud/CrudTable.astro";
 import CrudForm from "../components/crud/CrudForm.astro";
-import HtmxLoading from "../components/crud/HtmxLoading.astro";
 import { txTypeColumns, txTypeEntity } from "../features/transaction-types";
 ---
 
@@ -30,6 +29,5 @@ import { txTypeColumns, txTypeEntity } from "../features/transaction-types";
       paginationId="txtypes-pagination"
       tableId="txtypes-table"
     />
-    <HtmxLoading />
   </main>
 </Layout>

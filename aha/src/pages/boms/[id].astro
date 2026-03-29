@@ -1,0 +1,85 @@
+---
+import Layout from "../../layouts/Layout.astro";
+import Nav from "../../components/Nav.astro";
+import BomForm from "../../components/boms/BomForm.astro";
+import { pageContainer, pageTitle } from "../../styles/common.css";
+import { db } from "../../db";
+import { boms, bomLines, items } from "../../db/schema";
+import { eq } from "drizzle-orm";
+
+const id = Number(Astro.params.id);
+if (!id) return Astro.redirect("/boms");
+
+const showSavedToast = Astro.url.searchParams.has("saved");
+
+const [bom] = await db.select().from(boms).where(eq(boms.id, id)).limit(1);
+if (!bom) return Astro.redirect("/boms");
+
+const lines = await db
+  .select({
+    id: bomLines.id,
+    type: bomLines.type,
+    itemId: bomLines.itemId,
+    quantity: bomLines.quantity,
+    unit: bomLines.unit,
+    refBomCode: bomLines.refBomCode,
+    refBomVersion: bomLines.refBomVersion,
+    itemCode: items.code,
+    itemName: items.name,
+  })
+  .from(bomLines)
+  .leftJoin(items, eq(bomLines.itemId, items.id))
+  .where(eq(bomLines.bomId, id));
+
+const outputLines = lines
+  .filter((l) => l.type === 2)
+  .map((l) => ({
+    itemId: l.itemId,
+    itemCode: l.itemCode || "",
+    itemName: l.itemName || "",
+    quantity: l.quantity,
+    unit: l.unit,
+  }));
+
+const inputLines = lines
+  .filter((l) => l.type === 1)
+  .map((l) => ({
+    itemId: l.itemId,
+    itemCode: l.itemCode || "",
+    itemName: l.itemName || "",
+    quantity: l.quantity,
+    unit: l.unit,
+    refBomCode: l.refBomCode || "",
+    refBomVersion: l.refBomVersion || "",
+  }));
+---
+
+<Layout>
+  <main class={pageContainer}>
+    <Nav current="boms" />
+    <h1 class={pageTitle}>BOM編集</h1>
+    <BomForm
+      mode="edit"
+      bomId={bom.id}
+      code={bom.code}
+      version={bom.version}
+      name={bom.name}
+      outputLines={outputLines}
+      inputLines={inputLines}
+    />
+  </main>
+</Layout>
+
+{showSavedToast && (
+  <script>
+    document.addEventListener("DOMContentLoaded", () => {
+      window.dispatchEvent(
+        new CustomEvent("show-toast", { detail: { value: "保存しました" } }),
+      );
+      // URLから ?saved=1 を除去
+      const url = new URL(window.location.href);
+      url.searchParams.delete("saved");
+      history.replaceState(null, "", url.pathname);
+    });
+  </script>
+)}

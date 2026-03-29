@@ -80,7 +80,12 @@ export const POST: APIRoute = async ({ request }) => {
 
   const url = new URL(request.url);
   const size = Number(url.searchParams.get("size")) || DEFAULT_PAGE_SIZE;
-  return renderPage(1, size);
+  const resp = await renderPage(1, size);
+  resp.headers.set(
+    "HX-Trigger",
+    JSON.stringify({ "show-toast": "登録しました" }),
+  );
+  return resp;
 };
 
 /** DELETE /api/transaction-types — 選択された取引区分を一括削除 */

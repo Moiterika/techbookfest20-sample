@@ -1,0 +1,192 @@
+---
+import { css } from "../../styled-system/css";
+
+/* ── 共通オーバーレイ ── */
+const overlay = css({
+  position: "fixed",
+  inset: "0",
+  bg: "rgba(18, 28, 42, 0.4)",
+  zIndex: 1000,
+  display: "flex",
+  alignItems: "center",
+  justifyContent: "center",
+});
+
+/* ── エラーダイアログ ── */
+const dialogBox = css({
+  bg: "white",
+  rounded: "xl",
+  p: "6",
+  maxW: "28rem",
+  w: "90%",
+  boxShadow: "0 20px 60px -10px rgba(18, 28, 42, 0.25)",
+});
+
+const dialogTitle = css({
+  fontSize: "md",
+  fontWeight: "bold",
+  color: "#ba1a1a",
+  mb: "3",
+  display: "flex",
+  alignItems: "center",
+  gap: "2",
+});
+
+const dialogBody = css({
+  fontSize: "sm",
+  color: "#444653",
+  mb: "5",
+  lineHeight: "1.6",
+});
+
+const dialogFooter = css({
+  display: "flex",
+  justifyContent: "flex-end",
+});
+
+const dialogCloseBtn = css({
+  fontSize: "sm",
+  fontWeight: "semibold",
+  px: "4",
+  py: "2",
+  rounded: "lg",
+  border: "none",
+  cursor: "pointer",
+  background: "linear-gradient(135deg, #00288e, #1e40af)",
+  color: "white",
+  _hover: { opacity: 0.9 },
+});
+
+/* ── 成功トースト ── */
+const toastStyle = css({
+  position: "fixed",
+  bottom: "4",
+  right: "4",
+  zIndex: 1000,
+  bg: "#065f46",
+  color: "white",
+  px: "4",
+  py: "2.5",
+  rounded: "lg",
+  fontSize: "sm",
+  fontWeight: "semibold",
+  boxShadow: "0 10px 30px -5px rgba(18, 28, 42, 0.15)",
+  display: "flex",
+  alignItems: "center",
+  gap: "2",
+});
+
+/* ── ローディング ── */
+const loadingStyle = css({
+  position: "fixed",
+  bottom: "4",
+  right: "4",
+  zIndex: 999,
+  background: "linear-gradient(135deg, #00288e, #1e40af)",
+  color: "white",
+  px: "4",
+  py: "2",
+  rounded: "lg",
+  fontSize: "sm",
+  boxShadow: "0 10px 30px -5px rgba(18, 28, 42, 0.08)",
+});
+---
+
+<div
+  id="notifications"
+  x-data="{
+    loading: false,
+    error: null,
+    toast: null,
+    toastTimer: null,
+
+    showError(msg) {
+      this.error = msg;
+    },
+    closeError() {
+      this.error = null;
+    },
+    showToast(msg) {
+      this.toast = msg;
+      clearTimeout(this.toastTimer);
+      this.toastTimer = setTimeout(() => { this.toast = null; }, 3000);
+    }
+  }"
+  @notify-error.window="showError($event.detail)"
+  @show-toast.window="showToast($event.detail.value || '保存しました')"
+  @htmx:before-request.window="loading = true"
+  @htmx:after-request.window="loading = false"
+>
+  <!-- ローディング -->
+  <div x-show="loading && !error" x-transition.opacity class={loadingStyle}>
+    読み込み中…
+  </div>
+
+  <!-- 成功トースト -->
+  <div x-show="toast" x-transition.opacity class={toastStyle}>
+    <svg width="16" height="16" viewBox="0 0 20 20" fill="currentColor">
+      <path
+        fill-rule="evenodd"
+        d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z"
+        clip-rule="evenodd"></path>
+    </svg>
+    <span x-text="toast"></span>
+  </div>
+
+  <!-- エラーダイアログ -->
+  <div
+    x-show="error"
+    x-transition.opacity
+    class={overlay}
+    @click.self="closeError()"
+    @keydown.escape.window="closeError()"
+  >
+    <div class={dialogBox} x-transition.scale.90>
+      <div class={dialogTitle}>
+        <svg width="20" height="20" viewBox="0 0 20 20" fill="#ba1a1a">
+          <path
+            fill-rule="evenodd"
+            d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7 4a1 1 0 11-2 0 1 1 0 012 0zm-1-9a1 1 0 00-1 1v4a1 1 0 102 0V6a1 1 0 00-1-1z"
+            clip-rule="evenodd"></path>
+        </svg>
+        エラー
+      </div>
+      <div class={dialogBody} x-html="error"></div>
+      <div class={dialogFooter}>
+        <button class={dialogCloseBtn} @click="closeError()">閉じる</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+  // htmx エラーハンドリング — HTML属性内の正規表現問題を回避するため script で処理
+  const pTagRegex = /<p[^>]*>(.*?)<\/p>/;
+
+  function notifyError(msg: string) {
+    window.dispatchEvent(new CustomEvent("notify-error", { detail: msg }));
+  }
+
+  // 4xx: バリデーションエラー等
+  document.addEventListener("htmx:beforeSwap", (e: any) => {
+    const xhr = e.detail.xhr;
+    if (xhr && xhr.status >= 400 && xhr.status < 500) {
+      const text = xhr.responseText || "";
+      const match = text.match(pTagRegex);
+      const msg = match ? match[1] : "リクエストエラー（" + xhr.status + "）";
+      notifyError(msg);
+      e.detail.shouldSwap = false;
+    }
+  });
+
+  // 5xx, ネットワークエラー
+  document.addEventListener("htmx:responseError", (e: any) => {
+    const xhr = e.detail.xhr;
+    const status = xhr ? xhr.status : 0;
+    if (status >= 500) {
+      notifyError("サーバーエラーが発生しました（" + status + "）");
+    } else if (status === 0) {
+      notifyError("サーバーに接続できませんでした");
+    }
+  });
+</script>

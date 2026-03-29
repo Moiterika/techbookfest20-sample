@@ -1,17 +1,5 @@
 import { test, expect, type Page } from "@playwright/test";
-
-/** 指定URLパターンへの htmx リクエスト完了を待ちつつアクションを実行 */
-async function withHtmx(page: Page, urlPattern: string, action: () => Promise<void>) {
-  await Promise.all([
-    page.waitForResponse((r) => r.url().includes(urlPattern) && r.ok()),
-    action(),
-  ]);
-}
-
-/** htmx がテーブル本体を読み込むまで待つ */
-async function waitForTableLoad(page: Page) {
-  await page.waitForResponse((r) => r.url().includes("/api/items") && r.ok());
-}
+import { withHtmx, gotoAndWaitForTable } from "./helpers";
 
 /** 品目を追加するヘルパー */
 async function addItem(
@@ -23,13 +11,13 @@ async function addItem(
   const form = page.locator("form[hx-post='/api/items']");
   await expect(form).toBeVisible();
 
-  await form.locator("input[name='code']").fill(data.code);
-  await form.locator("input[name='name']").fill(data.name);
+  await form.getByLabel("品目コード").fill(data.code);
+  await form.getByLabel("品目名").fill(data.name);
   if (data.category) {
-    await form.locator("input[name='category']").fill(data.category);
+    await form.getByLabel("カテゴリ").fill(data.category);
   }
   if (data.price) {
-    await form.locator("input[name='price']").fill(data.price);
+    await form.getByLabel("単価").fill(data.price);
   }
 
   await withHtmx(page, "/api/items", () => form.getByText("登録する").click());
@@ -37,15 +25,14 @@ async function addItem(
 
 test.describe("品目管理", () => {
   test.beforeEach(async ({ page }) => {
-    await page.goto("/items");
-    await waitForTableLoad(page);
+    await gotoAndWaitForTable(page, "/items", "/api/items");
   });
 
   test("品目管理ページが表示される", async ({ page }) => {
     await expect(page.getByRole("heading", { name: "品目管理", level: 1 })).toBeVisible();
     await expect(page.getByText("＋ 新規追加")).toBeVisible();
     await expect(
-      page.locator("input[placeholder*='品目コード']"),
+      page.getByPlaceholder("品目コード・品目名で検索…"),
     ).toBeVisible();
   });
 
@@ -114,7 +101,7 @@ test.describe("品目管理", () => {
     await addItem(page, { code: `${prefix}-A`, name: "りんご", category: "果物" });
     await addItem(page, { code: `${prefix}-B`, name: "にんじん", category: "野菜" });
 
-    const searchInput = page.locator("#items-search input[name='q']");
+    const searchInput = page.getByPlaceholder("品目コード・品目名で検索…");
     await withHtmx(page, "/api/items", () => searchInput.fill("りんご"));
 
     await expect(page.locator("#items-body")).toContainText("りんご");
@@ -127,10 +114,10 @@ test.describe("品目管理", () => {
 
     // 検索欄をクリアしてからカテゴリで絞り込む
     // clear() + カテゴリ fill を1つの htmx レスポンスで待つ
-    const searchInput = page.locator("#items-search input[name='q']");
+    const searchInput = page.getByPlaceholder("品目コード・品目名で検索…");
     await searchInput.clear();
 
-    const categoryInput = page.locator("#items-search input[name='category']");
+    const categoryInput = page.getByPlaceholder("カテゴリ");
     await withHtmx(page, "/api/items", () => categoryInput.fill(tag));
 
     await expect(page.locator("#items-body")).toContainText("カテゴリテスト品目");
@@ -146,7 +133,7 @@ test.describe("品目管理", () => {
     await addItem(page, { code, name: "選択テスト品目" });
 
     const row = page.locator("#items-body tr", { hasText: code });
-    await row.locator("input[name='rowSelect']").check();
+    await row.getByRole("checkbox").check();
 
     await expect(page.getByText("選択コピー")).toBeEnabled();
     await expect(page.getByText("選択削除")).toBeEnabled();

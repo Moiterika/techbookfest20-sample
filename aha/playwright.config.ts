@@ -15,11 +15,15 @@ export default defineConfig({
   timeout: 30_000,
   expect: { timeout: 10_000 },
   fullyParallel: false,
-  retries: 0,
+  retries: process.env.CI ? 1 : 0,
   globalSetup: "./e2e/global-setup.ts",
   use: {
     baseURL: `http://localhost:${e2ePort}`,
     headless: true,
+    trace: "retain-on-failure",
+    screenshot: "only-on-failure",
+    locale: "ja-JP",
+    timezoneId: "Asia/Tokyo",
   },
   projects: [{ name: "chromium", use: { browserName: "chromium" } }],
   webServer: {

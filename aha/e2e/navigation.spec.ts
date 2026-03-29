@@ -8,14 +8,14 @@ test.describe("ナビゲーション", () => {
 
   test("ホームから品目管理へ遷移できる", async ({ page }) => {
     await page.goto("/");
-    await page.click('a[href="/items"]');
+    await page.getByRole("link", { name: "品目管理", exact: true }).click();
     await expect(page).toHaveURL("/items");
     await expect(page.getByRole("heading", { name: "品目管理", level: 1 })).toBeVisible();
   });
 
   test("ホームから取引管理へ遷移できる", async ({ page }) => {
     await page.goto("/");
-    await page.click('a[href="/transactions"]');
+    await page.getByRole("link", { name: "取引管理", exact: true }).click();
     await expect(page).toHaveURL("/transactions");
     await expect(page.getByRole("heading", { name: "取引管理", level: 1 })).toBeVisible();
   });

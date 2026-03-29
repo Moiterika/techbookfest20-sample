@@ -32,6 +32,31 @@ async function ensureItem(page: Page): Promise<{ code: string }> {
   return { code };
 }
 
+/** 取引区分を先に登録（取引に取引区分が必要） */
+async function ensureTxType(page: Page): Promise<void> {
+  await page.goto("/transaction-types");
+  await page.waitForResponse(
+    (r) => r.url().includes("/api/transaction-types") && r.ok(),
+  );
+
+  // 既に取引区分があればスキップ
+  const body = page.locator("#txtypes-body");
+  const text = await body.textContent();
+  if (text && !text.includes("取引区分がありません") && text.trim() !== "") return;
+
+  await page.getByText("＋ 新規追加").click();
+  const form = page.locator("form[hx-post='/api/transaction-types']");
+  await expect(form).toBeVisible();
+
+  await form.locator("input[name='code']").fill("IN");
+  await form.locator("input[name='name']").fill("入庫");
+  await form.locator("select[name='coefficient']").selectOption("1");
+
+  await withHtmx(page, "/api/transaction-types", () =>
+    form.getByText("登録する").click(),
+  );
+}
+
 test.describe("取引管理", () => {
   test.beforeEach(async ({ page }) => {
     await page.goto("/transactions");
@@ -54,12 +79,20 @@ test.describe("取引管理", () => {
   });
 
   test("取引を新規登録できる（品目タイプアヘッド経由）", async ({ page }) => {
+    // 取引区分・品目を事前登録
+    await ensureTxType(page);
     const { code } = await ensureItem(page);
     await page.goto("/transactions");
     await waitForTableLoad(page);
 
     await page.getByText("＋ 新規追加").click();
     await expect(page.getByText("新規取引登録")).toBeVisible();
+
+    const form = page.locator("form[hx-post='/api/transactions']");
+
+    // 取引区分を選択
+    const txTypeSelect = form.locator("select[name='transactionTypeId']");
+    await txTypeSelect.selectOption({ index: 1 });
 
     // タイプアヘッド: 品目コードで検索
     const typeahead = page.locator("[data-typeahead]").first();
@@ -71,7 +104,6 @@ test.describe("取引管理", () => {
     await withHtmx(page, "/api/items/typeahead", () => listItem.click());
 
     // 単価・数量を入力
-    const form = page.locator("form[hx-post='/api/transactions']");
     await form.locator("input[name='unitPrice']").fill("500");
     await form.locator("input[name='quantity']").fill("3");
 

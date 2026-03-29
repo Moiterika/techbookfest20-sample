@@ -54,7 +54,12 @@ const thClasses = columns.map((col) => {
 <div class={tableWrapper}>
   <table
     id={tableId}
-    class={css({ w: "full", minW: "50rem", borderCollapse: "collapse", textAlign: "left" })}
+    class={css({
+      w: "full",
+      minW: "50rem",
+      borderCollapse: "collapse",
+      textAlign: "left",
+    })}
   >
     <thead class={theadStyle}>
       <tr>
@@ -65,13 +70,7 @@ const thClasses = columns.map((col) => {
             data-body-id={bodyId}
           />
         </th>
-        {
-          columns.map((col, i) => (
-            <th class={thClasses[i]}>
-              {col.label}
-            </th>
-          ))
-        }
+        {columns.map((col, i) => <th class={thClasses[i]}>{col.label}</th>)}
       </tr>
     </thead>
     <tbody id={bodyId} hx-get={baseUrl} hx-trigger="load" hx-swap="innerHTML">

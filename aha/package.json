@@ -29,7 +29,7 @@
     "react": "^19.2.4",
     "react-barcode": "^1.6.1",
     "react-dom": "^19.2.4",
-    "xlsx": "^0.18.5",
+    "xlsx": "https://cdn.sheetjs.com/xlsx-0.20.3/xlsx-0.20.3.tgz",
     "zod": "^4.3.6"
   },
   "devDependencies": {
@@ -39,5 +39,8 @@
     "node-module-license-output": "^1.0.0",
     "prettier": "^3.8.1",
     "prettier-plugin-astro": "^0.14.1"
+  },
+  "overrides": {
+    "xlsx": "https://cdn.sheetjs.com/xlsx-0.20.3/xlsx-0.20.3.tgz"
   }
 }

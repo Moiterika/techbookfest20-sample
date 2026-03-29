@@ -65,14 +65,14 @@ WORKDIR /app
 # 依存関係のダウンロードとビルド
 # bind mountsとcacheを活用してビルドを高速化＆レイヤーをきれいに保つ
 RUN --mount=type=cache,target=/go/pkg/mod/,sharing=locked \
-    --mount=type=bind,source=go.sum,target=go.sum \
-    --mount=type=bind,source=go.mod,target=go.mod \
+    --mount=type=bind,source=goth/go.sum,target=go.sum \
+    --mount=type=bind,source=goth/go.mod,target=go.mod \
     go mod download -x || true
 
 # アプリケーションのビルド
 # -s ldflagsのみで十分（Go 1.22以降）
 RUN --mount=type=cache,target=/go/pkg/mod/ \
-    --mount=type=bind,target=. \
+    --mount=type=bind,source=goth,target=. \
     CGO_ENABLED=0 GOOS=linux go build -ldflags="-s" -trimpath -o /bin/server .
 
 ### ---------------- ###

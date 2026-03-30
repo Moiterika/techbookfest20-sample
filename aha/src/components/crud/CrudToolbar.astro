@@ -1,6 +1,5 @@
 ---
-import { css } from "../../../styled-system/css";
-import { btnPrimary } from "../../styles/common.css";
+import { button } from "../../styles/common";
 import { Icon } from "astro-icon/components";
 
 interface Props {
@@ -17,98 +16,24 @@ interface Props {
 const { baseUrl, bodyTargetId, tableId, searchContainerId } = Astro.props;
 
 /* ── レイアウト ── */
-const toolbarRow = css({
-  display: "flex",
-  justifyContent: "space-between",
-  alignItems: "center",
-  mb: "6",
-  flexWrap: "wrap",
-  gap: "4",
-});
-
-const leftGroup = css({
-  display: "flex",
-  alignItems: "center",
-  gap: "3",
-  flexWrap: "wrap",
-});
+const toolbarRow = "flex justify-between items-center mb-6 flex-wrap gap-4";
+const leftGroup = "flex items-center gap-3 flex-wrap";
 
 /* ── ゴーストボタン（左側の操作系） ── */
-const ghostBtn = css({
-  display: "inline-flex",
-  alignItems: "center",
-  gap: "2",
-  px: "4",
-  py: "2",
-  rounded: "lg",
-  fontSize: "sm",
-  fontWeight: "semibold",
-  cursor: "pointer",
-  transition: "all 0.15s",
-  color: "#00288e",
-  bg: "transparent",
-  border: "none",
-  _hover: { bg: "#dee9fd" },
-  _disabled: {
-    opacity: 0.4,
-    cursor: "not-allowed",
-    _hover: { bg: "transparent" },
-  },
-});
-
-const ghostBtnDanger = css({
-  display: "inline-flex",
-  alignItems: "center",
-  gap: "2",
-  px: "4",
-  py: "2",
-  rounded: "lg",
-  fontSize: "sm",
-  fontWeight: "semibold",
-  cursor: "pointer",
-  transition: "all 0.15s",
-  color: "#ba1a1a",
-  bg: "rgba(255, 218, 214, 0.2)",
-  border: "none",
-  _hover: { bg: "rgba(255, 218, 214, 0.4)" },
-  _disabled: {
-    opacity: 0.4,
-    cursor: "not-allowed",
-    _hover: { bg: "rgba(255, 218, 214, 0.2)" },
-  },
-});
+const ghostBtn =
+  "inline-flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-semibold cursor-pointer transition-all duration-150 text-primary bg-transparent border-none hover:bg-surface-container-high disabled:opacity-40 disabled:cursor-not-allowed disabled:hover:bg-transparent";
+const ghostBtnDanger =
+  "inline-flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-semibold cursor-pointer transition-all duration-150 text-error bg-error-container/20 border-none hover:bg-error-container/40 disabled:opacity-40 disabled:cursor-not-allowed disabled:hover:bg-error-container/20";
 
 /* ── ドロップダウン ── */
-const dropdownWrapper = css({
-  position: "relative",
-});
-
-const dropdownMenu = css({
-  position: "absolute",
-  zIndex: 10,
-  mt: "1",
-  bg: "white",
-  rounded: "lg",
-  boxShadow: "0 10px 30px -5px rgba(18, 28, 42, 0.08)",
-  py: "1",
-  minW: "120px",
-});
-
-const dropdownItem = css({
-  display: "block",
-  w: "full",
-  textAlign: "left",
-  px: "3",
-  py: "1.5",
-  fontSize: "sm",
-  cursor: "pointer",
-  border: "none",
-  bg: "transparent",
-  _hover: { bg: "#eff3ff" },
-});
+const dropdownWrapper = "relative";
+const dropdownMenu =
+  "absolute z-10 mt-1 bg-white rounded-lg shadow-[0_10px_30px_-5px_rgba(18,28,42,0.08)] py-1 min-w-[120px]";
+const dropdownItem =
+  "block w-full text-left px-3 py-1.5 text-sm cursor-pointer border-none bg-transparent hover:bg-surface-container-low";
 
 /* ── アイコン ── */
-const iconSm = css({ w: "4.5", h: "4.5" });
+const iconSm = "w-4.5 h-4.5";
 ---
 
 <div
@@ -192,7 +117,7 @@ const iconSm = css({ w: "4.5", h: "4.5" });
     <button
       @click="open = !open"
       x-text="open ? '閉じる' : '＋ 新規追加'"
-      class:list={["btn", btnPrimary]}></button>
+      class:list={["btn", button({ intent: "primary" })]}></button>
   </div>
 </div>
 

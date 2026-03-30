@@ -1,6 +1,4 @@
 ---
-import { css } from "../../../styled-system/css";
-
 interface Props {
   currentPage: number;
   totalPages: number;
@@ -28,93 +26,21 @@ const {
   extraParams = {},
 } = Astro.props;
 
-const paginationBar = css({
-  display: "flex",
-  justifyContent: "space-between",
-  alignItems: "center",
-  py: "4",
-  px: "6",
-  bg: "#eff3ff",
-  roundedBottom: "xl",
-  flexWrap: "wrap",
-  gap: "3",
-});
+const paginationBar =
+  "flex justify-between items-center py-4 px-6 bg-surface-container-low rounded-b-xl flex-wrap gap-3";
+const pageBtns = "flex items-center gap-1";
+const pageInfo = "text-sm font-medium text-outline ml-4";
+const sizeSelector = "flex items-center gap-2 text-sm text-on-surface-variant";
 
-const pageBtns = css({
-  display: "flex",
-  alignItems: "center",
-  gap: "1",
-});
+const activeBtn =
+  "w-8 h-8 flex items-center justify-center text-xs font-bold rounded-lg bg-gradient-to-br from-primary to-primary-dark text-white cursor-default";
+const inactiveBtn =
+  "w-8 h-8 flex items-center justify-center text-xs font-bold rounded-lg cursor-pointer text-on-surface hover:bg-surface-container-high";
+const disabledBtn =
+  "w-8 h-8 flex items-center justify-center text-xs rounded-lg text-outline-variant cursor-default";
 
-const pageInfo = css({
-  fontSize: "sm",
-  fontWeight: "medium",
-  color: "#757684",
-  ml: "4",
-});
-
-const sizeSelector = css({
-  display: "flex",
-  alignItems: "center",
-  gap: "2",
-  fontSize: "sm",
-  color: "#444653",
-});
-
-const activeBtn = css({
-  w: "8",
-  h: "8",
-  display: "flex",
-  alignItems: "center",
-  justifyContent: "center",
-  fontSize: "xs",
-  fontWeight: "bold",
-  rounded: "lg",
-  background: "linear-gradient(135deg, #00288e, #1e40af)",
-  color: "white",
-  cursor: "default",
-});
-
-const inactiveBtn = css({
-  w: "8",
-  h: "8",
-  display: "flex",
-  alignItems: "center",
-  justifyContent: "center",
-  fontSize: "xs",
-  fontWeight: "bold",
-  rounded: "lg",
-  cursor: "pointer",
-  color: "#121c2a",
-  _hover: { bg: "#dee9fd" },
-});
-
-const disabledBtn = css({
-  w: "8",
-  h: "8",
-  display: "flex",
-  alignItems: "center",
-  justifyContent: "center",
-  fontSize: "xs",
-  rounded: "lg",
-  color: "#c4c5d5",
-  cursor: "default",
-});
-
-const selectStyle = css({
-  bg: "white",
-  rounded: "md",
-  fontSize: "sm",
-  py: "1",
-  px: "2",
-  color: "#444653",
-  border: "none",
-  cursor: "pointer",
-  outline: "none",
-  _focus: {
-    boxShadow: "0 0 0 1px #00288e",
-  },
-});
+const selectStyle =
+  "bg-white rounded-md text-sm py-1 px-2 text-on-surface-variant border-none cursor-pointer outline-none focus:shadow-[0_0_0_1px_var(--color-primary)]";
 
 const oobAttr = oob ? "true" : undefined;
 const sizes = [20, 50, 100];

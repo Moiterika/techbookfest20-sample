@@ -1,6 +1,5 @@
 ---
 import type { Column, EntityConfig } from "./types";
-import { css } from "../../../styled-system/css";
 import CrudRow from "./CrudRow.astro";
 import CrudPagination from "./CrudPagination.astro";
 
@@ -24,7 +23,7 @@ const {
   extraParams = {},
 } = Astro.props;
 
-const emptyCell = css({ textAlign: "center", py: "8", color: "#757684" });
+const emptyCell = "text-center py-8 text-outline";
 ---
 
 {

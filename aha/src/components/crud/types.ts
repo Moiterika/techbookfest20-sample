@@ -4,9 +4,9 @@
 interface ColumnBase {
   key: string;
   label: string;
-  /** PandaCSS の w トークン値 */
+  /** Tailwind の width クラス値 */
   width?: string;
-  /** PandaCSS の minW トークン値（編集行の最小幅） */
+  /** Tailwind の min-width クラス値（編集行の最小幅） */
   minWidth?: string;
   /** フォームで必須か */
   required?: boolean;

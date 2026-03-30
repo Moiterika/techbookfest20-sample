@@ -1,6 +1,5 @@
 ---
-import { css } from "../../../styled-system/css";
-import { thCell } from "../../styles/common.css";
+import { thCell } from "../../styles/common";
 import type { Column } from "./types";
 
 interface Props {
@@ -18,48 +17,25 @@ interface Props {
 
 const { columns, bodyId, baseUrl, paginationId, tableId } = Astro.props;
 
-const tableWrapper = css({
-  overflowX: "auto",
-  rounded: "xl",
-  bg: "white",
-  WebkitOverflowScrolling: "touch",
-});
+const tableWrapper =
+  "overflow-x-auto rounded-xl bg-white [-webkit-overflow-scrolling:touch]";
+const theadStyle = "bg-surface-container";
+const checkboxTh = "py-4 px-6 w-10";
+const checkboxStyle = "rounded-sm cursor-pointer accent-primary";
 
-const theadStyle = css({
-  bg: "#e6eeff",
-});
-
-const checkboxTh = css({
-  py: "4",
-  px: "6",
-  w: "10",
-});
-
-const checkboxStyle = css({
-  rounded: "sm",
-  cursor: "pointer",
-  accentColor: "#00288e",
-});
-
-/** カラムごとの th クラスを事前計算 */
-const thClasses = columns.map((col) => {
-  const extra: Record<string, string> = {};
-  if (col.width) extra.w = col.width;
-  if (col.minWidth) extra.minW = col.minWidth;
-  const sizeClass = Object.keys(extra).length > 0 ? ` ${css(extra)}` : "";
-  return `${thCell}${sizeClass}`;
-});
+/** カラムごとの th スタイルを事前計算（width/minWidth は style 属性で） */
+function thStyle(col: Column): string | undefined {
+  const parts: string[] = [];
+  if (col.width) parts.push(`width:${col.width}`);
+  if (col.minWidth) parts.push(`min-width:${col.minWidth}`);
+  return parts.length > 0 ? parts.join(";") : undefined;
+}
 ---
 
 <div class={tableWrapper}>
   <table
     id={tableId}
-    class={css({
-      w: "full",
-      minW: "50rem",
-      borderCollapse: "collapse",
-      textAlign: "left",
-    })}
+    class="w-full min-w-[50rem] border-collapse text-left"
   >
     <thead class={theadStyle}>
       <tr>
@@ -70,7 +46,7 @@ const thClasses = columns.map((col) => {
             data-body-id={bodyId}
           />
         </th>
-        {columns.map((col, i) => <th class={thClasses[i]}>{col.label}</th>)}
+        {columns.map((col) => <th class={thCell} style={thStyle(col)}>{col.label}</th>)}
       </tr>
     </thead>
     <tbody id={bodyId} hx-get={baseUrl} hx-trigger="load" hx-swap="innerHTML">

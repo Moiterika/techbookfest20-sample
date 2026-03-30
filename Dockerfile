@@ -42,6 +42,9 @@ RUN groupadd --gid $USER_GID $USERNAME \
     && echo "$USERNAME ALL=(ALL) NOPASSWD:ALL" > /etc/sudoers.d/$USERNAME \
     && chmod 0440 /etc/sudoers.d/$USERNAME
 
+# templ CLI のインストール
+RUN go install github.com/a-h/templ/cmd/templ@latest
+
 # Goのモジュールキャッシュなどを非rootユーザーが書き込めるように権限調整
 RUN mkdir -p /go/pkg/mod && chown -R $USER_UID:$USER_GID /go
 

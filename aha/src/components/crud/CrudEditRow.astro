@@ -1,15 +1,13 @@
 ---
 import type { Column, EntityConfig } from "./types";
-import { css } from "../../../styled-system/css";
 import {
-  btnSecondary,
-  btnPrimary,
+  button,
   tdCell,
   inputStyleSm,
   row,
   flexRow,
-} from "../../styles/common.css";
-import ItemTypeahead from "../items/ItemTypeahead.astro";
+} from "../../styles/common";
+import Typeahead品目 from "../品目/Typeahead品目.astro";
 
 interface Props {
   record: Record<string, any>;
@@ -26,12 +24,9 @@ const alpineData = entity.alpineInitEditRow
   ? entity.alpineInitEditRow(record)
   : undefined;
 
-/** カラムの minWidth を反映した td クラスを返す */
-function cellClass(col: Column): string {
-  if (col.minWidth) {
-    return `${tdCell} ${css({ minW: col.minWidth as any })}`;
-  }
-  return tdCell;
+/** カラムの minWidth を反映した style 属性 */
+function cellStyle(col: Column): string | undefined {
+  return col.minWidth ? `min-width:${col.minWidth}` : undefined;
 }
 
 // itemCode 列のバリデーション式
@@ -49,7 +44,7 @@ function buildBeforeRequest(): string | undefined {
 ---
 
 <tr id={rowId} class={row} {...alpineData ? { "x-data": alpineData } : {}}>
-  <td class={css({ py: "4", px: "6" })}></td>
+  <td class="py-4 px-6"></td>
   {
     columns.map((col) => {
       const type = col.type ?? "text";
@@ -68,7 +63,7 @@ function buildBeforeRequest(): string | undefined {
                   ? { "hx-on--before-request": buildBeforeRequest() }
                   : {})}
               >
-                <button type="submit" class={btnPrimary}>
+                <button type="submit" class={button({ intent: "primary" })}>
                   保存
                 </button>
               </form>
@@ -76,7 +71,7 @@ function buildBeforeRequest(): string | undefined {
                 hx-get={entity.baseUrl}
                 hx-target={`#${entity.bodyTargetId}`}
                 hx-swap="innerHTML"
-                class={btnSecondary}
+                class={button({ intent: "secondary" })}
               >
                 キャンセル
               </button>
@@ -88,7 +83,7 @@ function buildBeforeRequest(): string | undefined {
       if (type === "barcode") {
         const escaped = (val ?? "").toString().replace(/'/g, "\\'");
         return (
-          <td class={cellClass(col)} x-data={`{ barcodeVal: '${escaped}' }`}>
+          <td class={tdCell} style={cellStyle(col)} x-data={`{ barcodeVal: '${escaped}' }`}>
             <input
               name={col.key}
               x-model="barcodeVal"
@@ -107,8 +102,8 @@ function buildBeforeRequest(): string | undefined {
           ? `lookup-${rowId}-${lookupCol.key}`
           : undefined;
         return (
-          <td class={cellClass(col)}>
-            <ItemTypeahead
+          <td class={tdCell} style={cellStyle(col)}>
+            <Typeahead品目
               name={valueName}
               selectedId={record[valueName]}
               selectedCode={val ?? ""}
@@ -125,11 +120,8 @@ function buildBeforeRequest(): string | undefined {
       if (type === "readonlyLookup") {
         const lookupId = `lookup-${rowId}-${col.key}`;
         return (
-          <td class={cellClass(col)}>
-            <span
-              id={lookupId}
-              class={css({ fontSize: "sm", color: "#757684" })}
-            >
+          <td class={tdCell} style={cellStyle(col)}>
+            <span id={lookupId} class="text-sm text-outline">
               {val ?? ""}
             </span>
           </td>
@@ -139,9 +131,9 @@ function buildBeforeRequest(): string | undefined {
       if (type === "computed") {
         const expr = (col as any).expression;
         return (
-          <td class={cellClass(col)}>
+          <td class={tdCell} style={cellStyle(col)}>
             <span
-              class={css({ fontWeight: "medium" })}
+              class="font-medium"
               x-text={`(${expr}).toLocaleString()`}
             />
           </td>
@@ -151,7 +143,7 @@ function buildBeforeRequest(): string | undefined {
       if (type === "number") {
         const numCol = col as any;
         return (
-          <td class={cellClass(col)}>
+          <td class={tdCell} style={cellStyle(col)}>
             <input
               name={col.key}
               type="number"
@@ -170,7 +162,7 @@ function buildBeforeRequest(): string | undefined {
 
       if (type === "date") {
         return (
-          <td class={cellClass(col)}>
+          <td class={tdCell} style={cellStyle(col)}>
             <input
               name={col.key}
               type="date"
@@ -186,7 +178,7 @@ function buildBeforeRequest(): string | undefined {
       if (type === "select") {
         const selCol = col as any;
         return (
-          <td class={cellClass(col)}>
+          <td class={tdCell} style={cellStyle(col)}>
             <select
               name={col.key}
               form={formId}
@@ -205,7 +197,7 @@ function buildBeforeRequest(): string | undefined {
 
       // text (default)
       return (
-        <td class={cellClass(col)}>
+        <td class={tdCell} style={cellStyle(col)}>
           <input
             name={col.key}
             value={val ?? ""}

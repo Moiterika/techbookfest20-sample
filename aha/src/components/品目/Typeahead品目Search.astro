@@ -1,0 +1,33 @@
+---
+import { inputStyle, inputStyleSm } from "../../styles/common";
+import { dropdown } from "./typeaheadStyles";
+
+interface Props {
+  name?: string;
+  formId?: string;
+  compact?: boolean;
+}
+
+const { name = "itemId", formId, compact = false } = Astro.props;
+---
+
+<div x-data="{ open: false }" class="relative">
+  <input
+    type="text"
+    placeholder="品目コード or 名前で検索…"
+    class={compact ? inputStyleSm : inputStyle}
+    autocomplete="off"
+    hx-get="/api/品目/search"
+    hx-trigger="input changed delay:300ms"
+    hx-target="next ul"
+    hx-swap="innerHTML"
+    hx-include="this"
+    name="q"
+    @focus="open = true"
+    @input="open = true"
+    @click.outside="open = false"
+    @keydown.escape="open = false"
+  />
+  <ul class={dropdown} x-show="open" x-transition></ul>
+</div>
+<input type="hidden" name={name} value="" {...formId ? { form: formId } : {}} />

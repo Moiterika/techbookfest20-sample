@@ -6,13 +6,12 @@
 - **アダプタ**: @nurodev/astro-bun
 - **DB**: PostgreSQL（devcontainer の `db` サービス, devdb/postgres/password）
 - **ORM**: Drizzle ORM（postgres.js ドライバ）
-- **CSS**: PandaCSS（`styled-system/` に生成、`css()` で利用）
+- **CSS**: Tailwind CSS v4（`@tailwindcss/vite`）+ tailwind-variants（TV）
 - **クライアント**: htmx + Alpine.js
 
 ## コマンド
 - **dev**: `bunx --bun astro dev`（`bun run dev`）
 - **astro CLI**: 必ず `bunx --bun astro <command>` で実行する（`astro` 直接や `bunx astro` は Node.js バージョン不足でエラーになる）
-- **PandaCSS codegen**: `bunx panda codegen`
 - **Drizzle push**: `bunx drizzle-kit push`
 - **型生成**: `bunx --bun astro sync`
 - **フォーマット**: `bun fmt`（Prettier — .astro, .ts を整形）
@@ -24,16 +23,17 @@
   - NG: `hx-on::after-request="..."`
 
 ## CSS ルール
-- **CSS は直書きせず PandaCSS を使う**（`index.css` のみ例外）
-- **共通スタイルは `src/styles/common.css.ts` に定義**し、各コンポーネントから import して使う
-  - ボタン: `btnPrimary`, `btnSecondary`, `btnDanger`
-  - フォーム: `inputStyle`, `inputStyleSm`, `labelStyle`
+- **CSS は Tailwind CSS のユーティリティクラスを使う**
+- **デザイントークンは `src/index.css` の `@theme` で定義**（カスタムカラー: primary, error, surface 系等）
+- **共通スタイルは `src/styles/common.ts` に定義**し、各コンポーネントから import して使う
+  - ボタン: `button`（TV）— `button({ intent: "primary" })`, `button({ intent: "secondary" })`, `button({ intent: "danger" })`
+  - フォーム: `input`（TV）— `input({ size: "default" })` / 後方互換: `inputStyle`, `inputStyleSm`, `labelStyle`
   - カード: `card`, `cardTitle`
   - テーブル: `thCell`, `tdCell`, `row`
   - ユーティリティ: `flexRow`, `errorText`, `pageContainer`, `pageTitle`
-- **各コンポーネントでボタンや入力欄のスタイルをインライン `css()` で書かない** — `common.css.ts` の定義を使う
-- そのコンポーネント固有のレイアウト調整（gap, margin 等）のみインライン `css()` で書いてよい
-- API レスポンスの HTML 断片にも PandaCSS クラスを使う（AstroContainer 経由なのでカバーされる）
+- バリアント管理には **tailwind-variants（TV）の `tv()`** を使う
+- コンポーネント固有のスタイルは Tailwind クラス文字列をローカル変数に定義して使う
+- API レスポンスの HTML 断片にも Tailwind クラスを使う
 
 ## API 設計方針
 - JSON は使わず、**htmx による HTML 断片の受け渡し**で CRUD を行う

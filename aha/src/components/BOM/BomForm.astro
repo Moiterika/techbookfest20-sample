@@ -1,0 +1,213 @@
+---
+import {
+  card,
+  cardTitle,
+  inputStyle,
+  labelStyle,
+  button,
+  thCell,
+  errorText,
+} from "../../styles/common";
+import BomLineRow from "./BomLineRow.astro";
+
+interface BomLineData {
+  itemId: number;
+  itemCode: string;
+  itemName: string;
+  quantity: string;
+  unit: string;
+  refBomCode?: string;
+  refBomVersion?: string;
+}
+
+interface Props {
+  mode: "create" | "edit";
+  bomId?: number;
+  code?: string;
+  version?: string;
+  name?: string;
+  outputLines?: BomLineData[];
+  inputLines?: BomLineData[];
+}
+
+const {
+  mode,
+  bomId,
+  code = "",
+  version = "",
+  name = "",
+  outputLines = [],
+  inputLines = [],
+} = Astro.props;
+
+const isEdit = mode === "edit";
+const actionUrl = isEdit ? `/api/boms/${bomId}` : "/api/boms";
+const httpMethod = isEdit ? "hx-put" : "hx-post";
+
+const inputStyleWide =
+  "rounded-lg text-sm text-on-surface outline-none bg-surface-container-low border-2 border-transparent transition-[border-color,background-color] duration-200 focus:border-b-primary focus:bg-white px-3 py-2.5 w-full";
+const addBtn =
+  "inline-flex items-center gap-1 text-sm text-primary font-semibold cursor-pointer border-none bg-transparent px-2 py-1.5 rounded-md hover:bg-surface-container-high";
+const sectionTitle =
+  "text-base font-bold text-on-surface mb-3 flex items-center gap-2";
+const sectionBadge = "text-xs font-bold px-2 py-0.5 rounded-full text-white";
+const tableWrapper = "w-full overflow-visible";
+const headGrid = "grid grid-cols-[1fr_1fr_2fr] gap-4 mb-2";
+const footerBar = "flex gap-3 justify-end mt-6";
+const errorArea = "min-h-6 mb-2";
+---
+
+<form
+  {...{ [httpMethod]: actionUrl }}
+  hx-swap="innerHTML"
+  hx-target="#bom-error"
+>
+  <!-- エラー表示 -->
+  <div id="bom-error" class={errorArea}></div>
+
+  <!-- ヘッダーセクション -->
+  <div class={card}>
+    <h2 class={cardTitle}>{isEdit ? "BOM情報" : "新規BOM"}</h2>
+    <div class={headGrid}>
+      <label class={labelStyle}>
+        BOMコード
+        <input
+          type="text"
+          name="code"
+          class={inputStyleWide}
+          value={code}
+          placeholder="例: BOM-001"
+          required
+        />
+      </label>
+      <label class={labelStyle}>
+        版
+        <input
+          type="text"
+          name="version"
+          class={inputStyleWide}
+          value={version}
+          placeholder="例: 1"
+          required
+        />
+      </label>
+      <label class={labelStyle}>
+        名称
+        <input
+          type="text"
+          name="name"
+          class={inputStyleWide}
+          value={name}
+          placeholder="例: 製品A 部品表"
+          required
+        />
+      </label>
+    </div>
+  </div>
+
+  <!-- 製造セクション -->
+  <div class={card}>
+    <div class={sectionTitle}>
+      <span class={sectionBadge} style="background: #1e40af;">製造</span>
+      製造品目（アウトプット）
+    </div>
+    <div class={tableWrapper}>
+      <table style="width: 100%; border-collapse: collapse;">
+        <thead>
+          <tr>
+            <th class={thCell}>品目コード</th>
+            <th class={thCell}>品目名</th>
+            <th class={thCell} style="width: 8rem;">数量</th>
+            <th class={thCell} style="width: 7rem;">単位</th>
+            <th class={thCell} style="width: 3rem;"></th>
+          </tr>
+        </thead>
+        <tbody id="output-lines">
+          {
+            outputLines.map((l, i) => (
+              <BomLineRow
+                section="output"
+                rowKey={`out-${i}`}
+                itemId={l.itemId}
+                itemCode={l.itemCode}
+                itemName={l.itemName}
+                quantity={l.quantity}
+                unit={l.unit}
+              />
+            ))
+          }
+        </tbody>
+      </table>
+    </div>
+    <div style="margin-top: 0.5rem;">
+      <button
+        type="button"
+        class={addBtn}
+        hx-get="/api/boms/line-row?section=output"
+        hx-target="#output-lines"
+        hx-swap="beforeend"
+      >
+        + 行追加
+      </button>
+    </div>
+  </div>
+
+  <!-- 投入セクション -->
+  <div class={card}>
+    <div class={sectionTitle}>
+      <span class={sectionBadge} style="background: #b45309;">投入</span>
+      投入品目（インプット）
+    </div>
+    <div class={tableWrapper}>
+      <table style="width: 100%; border-collapse: collapse;">
+        <thead>
+          <tr>
+            <th class={thCell}>品目コード</th>
+            <th class={thCell}>品目名</th>
+            <th class={thCell} style="width: 7rem;">数量</th>
+            <th class={thCell} style="width: 6rem;">単位</th>
+            <th class={thCell}>BOMコード</th>
+            <th class={thCell} style="width: 5rem;">版</th>
+            <th class={thCell} style="width: 3rem;"></th>
+          </tr>
+        </thead>
+        <tbody id="input-lines">
+          {
+            inputLines.map((l, i) => (
+              <BomLineRow
+                section="input"
+                rowKey={`in-${i}`}
+                itemId={l.itemId}
+                itemCode={l.itemCode}
+                itemName={l.itemName}
+                quantity={l.quantity}
+                unit={l.unit}
+                refBomCode={l.refBomCode}
+                refBomVersion={l.refBomVersion}
+              />
+            ))
+          }
+        </tbody>
+      </table>
+    </div>
+    <div style="margin-top: 0.5rem;">
+      <button
+        type="button"
+        class={addBtn}
+        hx-get="/api/boms/line-row?section=input"
+        hx-target="#input-lines"
+        hx-swap="beforeend"
+      >
+        + 行追加
+      </button>
+    </div>
+  </div>
+
+  <!-- フッター -->
+  <div class={footerBar}>
+    <a href="/boms" class={button({ intent: "secondary" })}>キャンセル</a>
+    <button type="submit" class={button({ intent: "primary" })}>
+      {isEdit ? "更新" : "登録"}
+    </button>
+  </div>
+</form>

@@ -1,0 +1,3 @@
+package goth
+
+//go:generate templ generate ./...

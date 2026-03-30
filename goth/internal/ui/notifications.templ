@@ -1,0 +1,18 @@
+package ui
+
+templ Notifications() {
+	<div
+		id="notifications"
+		x-data="{ messages: [] }"
+		hx-on--after-request="if(event.detail.xhr) { try { let t = JSON.parse(event.detail.xhr.getResponseHeader('HX-Trigger')); if(t['show-toast']) { $data.messages.push(t['show-toast']); setTimeout(() => $data.messages.shift(), 3000); } } catch(e){} }"
+		style="position:fixed;top:1rem;right:1rem;z-index:50;"
+	>
+		<template x-for="(msg, i) in messages" :key="i">
+			<div
+				class="mb-2 p-4 rounded-lg bg-gradient-to-br from-primary to-primary-dark text-white text-sm font-semibold min-w-[200px]"
+				x-text="msg"
+				x-transition
+			></div>
+		</template>
+	</div>
+}

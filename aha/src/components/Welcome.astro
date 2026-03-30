@@ -1,36 +1,12 @@
 ---
-import { css } from "../../styled-system/css";
-import { pageContainer, pageTitle } from "../styles/common.css";
+import { pageContainer, pageTitle } from "../styles/common";
 import Nav from "./Nav.astro";
 
-const grid = css({
-  display: "grid",
-  gridTemplateColumns: "repeat(auto-fill, minmax(280px, 1fr))",
-  gap: "6",
-});
-
-const cardLink = css({
-  display: "block",
-  p: "6",
-  rounded: "xl",
-  bg: "white",
-  textDecoration: "none",
-  transition: "all 0.2s",
-  _hover: { bg: "#dee9fd", transform: "translateY(-2px)" },
-});
-
-const cardHeading = css({
-  fontSize: "lg",
-  fontWeight: "bold",
-  color: "#00288e",
-  mb: "2",
-});
-
-const cardDesc = css({
-  fontSize: "sm",
-  color: "#444653",
-  lineHeight: "1.6",
-});
+const grid = "grid grid-cols-[repeat(auto-fill,minmax(280px,1fr))] gap-6";
+const cardLink =
+  "block p-6 rounded-xl bg-white no-underline transition-all duration-200 hover:bg-surface-container-high hover:-translate-y-0.5";
+const cardHeading = "text-lg font-bold text-primary mb-2";
+const cardDesc = "text-sm text-on-surface-variant leading-relaxed";
 ---
 
 <div class={pageContainer}>
@@ -38,11 +14,11 @@ const cardDesc = css({
   <h1 class={pageTitle}>aha</h1>
 
   <div class={grid}>
-    <a href="/items" class={cardLink}>
+    <a href="/品目" class={cardLink}>
       <h2 class={cardHeading}>品目管理</h2>
       <p class={cardDesc}>品目の登録・編集・削除を行います。</p>
     </a>
-    <a href="/transactions" class={cardLink}>
+    <a href="/取引" class={cardLink}>
       <h2 class={cardHeading}>取引管理</h2>
       <p class={cardDesc}>取引の登録・編集・削除を行います。</p>
     </a>

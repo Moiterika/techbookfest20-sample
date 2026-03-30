@@ -1,95 +1,25 @@
 ---
-import { css } from "../../styled-system/css";
-
 /* ── 共通オーバーレイ ── */
-const overlay = css({
-  position: "fixed",
-  inset: "0",
-  bg: "rgba(18, 28, 42, 0.4)",
-  zIndex: 1000,
-  display: "flex",
-  alignItems: "center",
-  justifyContent: "center",
-});
+const overlay =
+  "fixed inset-0 bg-[rgba(18,28,42,0.4)] z-[1000] flex items-center justify-center";
 
 /* ── エラーダイアログ ── */
-const dialogBox = css({
-  bg: "white",
-  rounded: "xl",
-  p: "6",
-  maxW: "28rem",
-  w: "90%",
-  boxShadow: "0 20px 60px -10px rgba(18, 28, 42, 0.25)",
-});
-
-const dialogTitle = css({
-  fontSize: "md",
-  fontWeight: "bold",
-  color: "#ba1a1a",
-  mb: "3",
-  display: "flex",
-  alignItems: "center",
-  gap: "2",
-});
-
-const dialogBody = css({
-  fontSize: "sm",
-  color: "#444653",
-  mb: "5",
-  lineHeight: "1.6",
-});
-
-const dialogFooter = css({
-  display: "flex",
-  justifyContent: "flex-end",
-});
-
-const dialogCloseBtn = css({
-  fontSize: "sm",
-  fontWeight: "semibold",
-  px: "4",
-  py: "2",
-  rounded: "lg",
-  border: "none",
-  cursor: "pointer",
-  background: "linear-gradient(135deg, #00288e, #1e40af)",
-  color: "white",
-  _hover: { opacity: 0.9 },
-});
+const dialogBox =
+  "bg-white rounded-xl p-6 max-w-[28rem] w-[90%] shadow-[0_20px_60px_-10px_rgba(18,28,42,0.25)]";
+const dialogTitle =
+  "text-base font-bold text-error mb-3 flex items-center gap-2";
+const dialogBody = "text-sm text-on-surface-variant mb-5 leading-relaxed";
+const dialogFooter = "flex justify-end";
+const dialogCloseBtn =
+  "text-sm font-semibold px-4 py-2 rounded-lg border-none cursor-pointer bg-gradient-to-br from-primary to-primary-dark text-white hover:opacity-90";
 
 /* ── 成功トースト ── */
-const toastStyle = css({
-  position: "fixed",
-  bottom: "4",
-  right: "4",
-  zIndex: 1000,
-  bg: "#065f46",
-  color: "white",
-  px: "4",
-  py: "2.5",
-  rounded: "lg",
-  fontSize: "sm",
-  fontWeight: "semibold",
-  boxShadow: "0 10px 30px -5px rgba(18, 28, 42, 0.15)",
-  display: "flex",
-  alignItems: "center",
-  gap: "2",
-});
+const toastStyle =
+  "fixed bottom-4 right-4 z-[1000] bg-[#065f46] text-white px-4 py-2.5 rounded-lg text-sm font-semibold shadow-[0_10px_30px_-5px_rgba(18,28,42,0.15)] flex items-center gap-2";
 
 /* ── ローディング ── */
-const loadingStyle = css({
-  position: "fixed",
-  bottom: "4",
-  right: "4",
-  zIndex: 999,
-  background: "linear-gradient(135deg, #00288e, #1e40af)",
-  color: "white",
-  px: "4",
-  py: "2",
-  rounded: "lg",
-  fontSize: "sm",
-  boxShadow: "0 10px 30px -5px rgba(18, 28, 42, 0.08)",
-});
+const loadingStyle =
+  "fixed bottom-4 right-4 z-[999] bg-gradient-to-br from-primary to-primary-dark text-white px-4 py-2 rounded-lg text-sm shadow-[0_10px_30px_-5px_rgba(18,28,42,0.08)]";
 ---
 
 <div
@@ -113,7 +43,7 @@ const loadingStyle = css({
     }
   }"
   @notify-error.window="showError($event.detail)"
-  @show-toast.window="showToast($event.detail.value || '保存しました')"
+  @show-toast.window="showToast(decodeURIComponent($event.detail.value || '保存しました'))"
   @htmx:before-request.window="loading = true"
   @htmx:after-request.window="loading = false"
 >

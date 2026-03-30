@@ -1,0 +1,41 @@
+---
+import Layout from "../layouts/Layout.astro";
+import Nav from "../components/Nav.astro";
+import { pageContainer, pageTitle } from "../styles/common";
+import CrudToolbar from "../components/crud/CrudToolbar.astro";
+import CrudTable from "../components/crud/CrudTable.astro";
+import CrudForm from "../components/crud/CrudForm.astro";
+import Search品目 from "../components/品目/Search品目.astro";
+import { 品目カラム, 品目エンティティ } from "../features/品目";
+---
+
+<script>
+  import "../components/ReactBarcodeWrapper.tsx";
+</script>
+
+<Layout>
+  <main class={pageContainer}>
+    <Nav current="items" />
+    <h1 class={pageTitle}>品目管理</h1>
+
+    <Search品目 />
+
+    <div x-data="{ open: false }">
+      <CrudToolbar
+        baseUrl="/api/品目"
+        bodyTargetId="items-body"
+        tableId="items-table"
+        searchContainerId="items-search"
+      />
+      <CrudForm columns={品目カラム} entity={品目エンティティ} />
+    </div>
+
+    <CrudTable
+      columns={品目カラム}
+      bodyId="items-body"
+      baseUrl="/api/品目"
+      paginationId="items-pagination"
+      tableId="items-table"
+    />
+  </main>
+</Layout>

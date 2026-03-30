@@ -1,0 +1,29 @@
+package ui
+
+templ Base(title string) {
+	<!DOCTYPE html>
+	<html lang="ja">
+	<head>
+		<meta charset="UTF-8"/>
+		<meta name="viewport" content="width=device-width"/>
+		<link rel="icon" type="image/svg+xml" href="/favicon.svg"/>
+		<link rel="icon" href="/favicon.ico"/>
+		<link
+			href="https://fonts.googleapis.com/css2?family=Inter:wght@100;300;400;500;600;700;800;900&display=swap"
+			rel="stylesheet"
+		/>
+		<title>{ title } - aha</title>
+		<link rel="stylesheet" href="/static/css/aha.css"/>
+		<script src="/static/js/htmx.min.js"></script>
+		<script src="/static/js/alpine.min.js" defer></script>
+		<script src="/static/js/crud.js" defer></script>
+		<script src="/static/js/react-barcode.min.js" defer></script>
+		<script>
+			document.addEventListener('alpine:init', () => {});
+		</script>
+	</head>
+	<body>
+		{ children... }
+	</body>
+	</html>
+}

@@ -1,7 +1,6 @@
 ---
 import type { Column, EntityConfig } from "./types";
-import { css } from "../../../styled-system/css";
-import { tdCell, row } from "../../styles/common.css";
+import { tdCell, row } from "../../styles/common";
 import { Icon } from "astro-icon/components";
 
 interface Props {
@@ -13,12 +12,14 @@ interface Props {
 const { record, columns, entity } = Astro.props;
 const rowId = `${entity.idPrefix}-${record.id}`;
 
-/** カラムの minWidth を反映した td クラス��返す */
+/** カラムの minWidth を反映した td クラスを返す */
 function cellCls(col: { minWidth?: string }): string {
-  if (col.minWidth) {
-    return `${tdCell} ${css({ minW: col.minWidth as any })}`;
-  }
   return tdCell;
+}
+
+/** minWidth が指定されている場合の style 属性 */
+function cellStyle(col: { minWidth?: string }): string | undefined {
+  return col.minWidth ? `min-width:${col.minWidth}` : undefined;
 }
 
 function getDeleteConfirm(): string {
@@ -30,87 +31,18 @@ function getDeleteConfirm(): string {
 }
 
 /* ── 行内アクションスタイル ── */
-const actionsCell = css({
-  py: "4",
-  px: "6",
-  textAlign: "right",
-});
-
-const actionsRow = css({
-  display: "flex",
-  alignItems: "center",
-  justifyContent: "flex-end",
-  gap: "2",
-});
-
-const editBtn = css({
-  display: "inline-flex",
-  alignItems: "center",
-  gap: "1",
-  color: "#00288e",
-  fontSize: "xs",
-  fontWeight: "bold",
-  px: "2",
-  py: "1",
-  rounded: "md",
-  cursor: "pointer",
-  border: "none",
-  bg: "transparent",
-  _hover: { bg: "rgba(0, 40, 142, 0.1)" },
-});
-
-const kebabBtn = css({
-  display: "inline-flex",
-  alignItems: "center",
-  justifyContent: "center",
-  w: "7",
-  h: "7",
-  rounded: "full",
-  cursor: "pointer",
-  color: "#757684",
-  border: "none",
-  bg: "transparent",
-  _hover: { color: "#121c2a", bg: "#eff3ff" },
-});
-
-const kebabMenu = css({
-  position: "absolute",
-  right: "0",
-  top: "100%",
-  zIndex: 20,
-  mt: "1",
-  bg: "white",
-  rounded: "lg",
-  boxShadow: "0 10px 30px -5px rgba(18, 28, 42, 0.08)",
-  py: "1",
-  minW: "120px",
-});
-
-const kebabItem = css({
-  display: "flex",
-  alignItems: "center",
-  gap: "2",
-  w: "full",
-  textAlign: "left",
-  px: "3",
-  py: "2",
-  fontSize: "sm",
-  cursor: "pointer",
-  color: "#ba1a1a",
-  border: "none",
-  bg: "transparent",
-  _hover: { bg: "rgba(255, 218, 214, 0.3)" },
-});
-const checkboxCell = css({
-  py: "4",
-  px: "6",
-});
-
-const checkboxStyle = css({
-  rounded: "sm",
-  cursor: "pointer",
-  accentColor: "#00288e",
-});
+const actionsCell = "py-4 px-6 text-right";
+const actionsRow = "flex items-center justify-end gap-2";
+const editBtn =
+  "inline-flex items-center gap-1 text-primary text-xs font-bold px-2 py-1 rounded-md cursor-pointer border-none bg-transparent hover:bg-primary/10";
+const kebabBtn =
+  "inline-flex items-center justify-center w-7 h-7 rounded-full cursor-pointer text-outline border-none bg-transparent hover:text-on-surface hover:bg-surface-container-low";
+const kebabMenu =
+  "absolute right-0 top-full z-20 mt-1 bg-white rounded-lg shadow-[0_10px_30px_-5px_rgba(18,28,42,0.08)] py-1 min-w-[120px]";
+const kebabItem =
+  "flex items-center gap-2 w-full text-left px-3 py-2 text-sm cursor-pointer text-error border-none bg-transparent hover:bg-error-container/30";
+const checkboxCell = "py-4 px-6";
+const checkboxStyle = "rounded-sm cursor-pointer accent-primary";
 ---
 
 <tr id={rowId} class={row}>
@@ -137,14 +69,11 @@ const checkboxStyle = css({
                 hx-swap="outerHTML"
                 class={editBtn}
               >
-                <Icon
-                  name="heroicons:pencil-square"
-                  class={css({ w: "3.5", h: "3.5" })}
-                />
+                <Icon name="heroicons:pencil-square" class="w-3.5 h-3.5" />
                 編集
               </button>
               <div
-                class={css({ position: "relative" })}
+                class="relative"
                 x-data="{ menuOpen: false }"
                 @click.outside="menuOpen = false"
               >
@@ -155,7 +84,7 @@ const checkboxStyle = css({
                 >
                   <Icon
                     name="heroicons:ellipsis-vertical-solid"
-                    class={css({ w: "5", h: "5" })}
+                    class="w-5 h-5"
                   />
                 </button>
                 <div class={kebabMenu} x-show="menuOpen" x-transition x-cloak>
@@ -167,10 +96,7 @@ const checkboxStyle = css({
                     hx-confirm={getDeleteConfirm()}
                     @click="menuOpen = false"
                   >
-                    <Icon
-                      name="heroicons:trash"
-                      class={css({ w: "4", h: "4" })}
-                    />
+                    <Icon name="heroicons:trash" class="w-4 h-4" />
                     削除
                   </button>
                 </div>
@@ -182,7 +108,7 @@ const checkboxStyle = css({
 
       if (type === "barcode") {
         return (
-          <td class={cellCls(col)}>
+          <td class={cellCls(col)} style={cellStyle(col)}>
             {val ? <react-barcode value={val} /> : ""}
           </td>
         );
@@ -193,7 +119,11 @@ const checkboxStyle = css({
           (col as any).format && val != null
             ? Number(val).toLocaleString()
             : (val ?? "");
-        return <td class={cellCls(col)}>{formatted}</td>;
+        return (
+          <td class={cellCls(col)} style={cellStyle(col)}>
+            {formatted}
+          </td>
+        );
       }
 
       if (type === "select") {
@@ -201,11 +131,19 @@ const checkboxStyle = css({
         const opt = selCol.options.find(
           (o: any) => String(o.value) === String(val),
         );
-        return <td class={cellCls(col)}>{opt ? opt.label : (val ?? "")}</td>;
+        return (
+          <td class={cellCls(col)} style={cellStyle(col)}>
+            {opt ? opt.label : (val ?? "")}
+          </td>
+        );
       }
 
       // text, date, itemCode, readonlyLookup
-      return <td class={cellCls(col)}>{val ?? ""}</td>;
+      return (
+        <td class={cellCls(col)} style={cellStyle(col)}>
+          {val ?? ""}
+        </td>
+      );
     })
   }
 </tr>

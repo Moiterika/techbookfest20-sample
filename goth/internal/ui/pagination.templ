@@ -1,0 +1,46 @@
+package ui
+
+import "fmt"
+
+type PaginationProps struct {
+	CurrentPage int
+	TotalPages  int
+	PageSize    int
+	BaseURL     string
+	TargetID    string
+	ExtraParams map[string]string
+}
+
+templ Pagination(p PaginationProps) {
+	if p.TotalPages > 1 {
+		<nav class="flex gap-2 items-center justify-center mt-4">
+			for i := 1; i <= p.TotalPages; i++ {
+				if i == p.CurrentPage {
+					<button
+						class="text-sm py-1.5 px-3 rounded-lg font-semibold bg-gradient-to-br from-primary to-primary-dark text-white border-none cursor-pointer"
+						disabled
+					>
+						{ fmt.Sprintf("%d", i) }
+					</button>
+				} else {
+					<button
+						class="text-sm py-1.5 px-3 rounded-lg font-semibold bg-transparent text-primary border-none cursor-pointer hover:bg-surface-container-high"
+						hx-get={ buildPaginationURL(p.BaseURL, i, p.PageSize, p.ExtraParams) }
+						hx-target={ "#" + p.TargetID }
+						hx-swap="innerHTML"
+					>
+						{ fmt.Sprintf("%d", i) }
+					</button>
+				}
+			}
+		</nav>
+	}
+}
+
+func buildPaginationURL(base string, page, size int, extra map[string]string) string {
+	url := fmt.Sprintf("%s?page=%d&size=%d", base, page, size)
+	for k, v := range extra {
+		url += fmt.Sprintf("&%s=%s", k, v)
+	}
+	return url
+}

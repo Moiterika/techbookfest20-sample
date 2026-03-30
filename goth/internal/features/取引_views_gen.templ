@@ -22,7 +22,7 @@ templ RenderPage取引() {
 				</div>
 			</div>
 			<div x-data="{ open: false }">
-				<div class="flex justify-between items-center mb-6 flex-wrap gap-4" x-data="{ hasSelection: false, updateSelection() { const tbody = document.getElementById('tx-body'); this.hasSelection = tbody ? tbody.querySelectorAll('input[name=\'rowSelect\']:checked').length > 0 : false; } }" @change.window="updateSelection()" hx-on--after-swap.window="$nextTick(() => this.updateSelection())">
+				<div class="flex justify-between items-center mb-6 flex-wrap gap-4" x-data="{ hasSelection: false, updateSelection() { const tbody = document.getElementById('tx-body'); this.hasSelection = tbody ? tbody.querySelectorAll('input[name=\'rowSelect\']:checked').length > 0 : false; } }" @change.window="updateSelection()" @htmx:after-swap.window="setTimeout(() => updateSelection(), 0)">
 					<div class="flex items-center gap-3 flex-wrap">
 						<button class="inline-flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-semibold cursor-pointer transition-all duration-150 text-error bg-error-container/20 border-none hover:bg-error-container/40 disabled:opacity-40 disabled:cursor-not-allowed disabled:hover:bg-error-container/20" data-bulk-delete="/api/取引" data-body-target="tx-body" :disabled="!hasSelection">選択削除</button>
 					</div>

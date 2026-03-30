@@ -66,6 +66,7 @@ const loadingStyle =
   <!-- エラーダイアログ -->
   <div
     x-show="error"
+    x-cloak
     x-transition.opacity
     class={overlay}
     @click.self="closeError()"

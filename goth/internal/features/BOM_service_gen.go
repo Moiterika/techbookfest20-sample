@@ -16,14 +16,18 @@ func (h *HandlerBOM) Get一覧BOM(ctx context.Context, input 一覧InputBOM) (Li
 	return Execute一覧SQLBOM(ctx, h.DB, input)
 }
 
-func (h *HandlerBOM) Execute登録BOM(ctx context.Context, input 作成InputBOM) (ResponseBOM, error) {
+func (h *HandlerBOM) GetByIDBOM詳細(ctx context.Context, id int) (ResponseBOM詳細, error) {
+	return GetByIDBOM詳細SQL(ctx, h.DB, id)
+}
+
+func (h *HandlerBOM) Execute登録BOM(ctx context.Context, input 作成InputBOMWithLines) (ResponseBOM, error) {
 	if err := Validate登録BOM(ctx, h.DB, input); err != nil {
 		return ResponseBOM{}, err
 	}
 	return Execute登録SQLBOM(ctx, h.DB, input)
 }
 
-func (h *HandlerBOM) Execute更新BOM(ctx context.Context, input 更新InputBOM) (ResponseBOM, error) {
+func (h *HandlerBOM) Execute更新BOM(ctx context.Context, input 更新InputBOMWithLines) (ResponseBOM, error) {
 	if err := Validate更新BOM(ctx, h.DB, input); err != nil {
 		return ResponseBOM{}, err
 	}
@@ -36,8 +40,4 @@ func (h *HandlerBOM) Execute削除BOM(ctx context.Context, input 削除InputBOM)
 
 func (h *HandlerBOM) Execute一括削除BOM(ctx context.Context, input 一括削除InputBOM) error {
 	return Execute一括削除SQLBOM(ctx, h.DB, input)
-}
-
-func (h *HandlerBOM) GetByIDBOM(ctx context.Context, id int) (ResponseBOM, error) {
-	return GetByIDSQLBOM(ctx, h.DB, id)
 }

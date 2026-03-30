@@ -1,0 +1,185 @@
+---
+import type { HeaderBodyConfig, ChildEntityConfig } from "../crud/types";
+import {
+  card,
+  cardTitle,
+  labelStyle,
+  button,
+  thCell,
+  errorText,
+} from "../../styles/common";
+import HeaderBodyLineRow from "./HeaderBodyLineRow.astro";
+
+interface ChildData {
+  records: Record<string, any>[];
+}
+
+interface Props {
+  config: HeaderBodyConfig;
+  mode: "create" | "edit";
+  recordId?: number;
+  headerValues?: Record<string, any>;
+  childrenData?: ChildData[];
+}
+
+const {
+  config,
+  mode,
+  recordId,
+  headerValues = {},
+  childrenData = config.children.map(() => ({ records: [] })),
+} = Astro.props;
+
+const isEdit = mode === "edit";
+const actionUrl = isEdit ? `${config.baseUrl}/${recordId}` : config.baseUrl;
+const httpMethod = isEdit ? "hx-put" : "hx-post";
+
+const inputStyleWide =
+  "rounded-lg text-sm text-on-surface outline-none bg-surface-container-low border-2 border-transparent transition-[border-color,background-color] duration-200 focus:border-b-primary focus:bg-white px-3 py-2.5 w-full";
+const addBtn =
+  "inline-flex items-center gap-1 text-sm text-primary font-semibold cursor-pointer border-none bg-transparent px-2 py-1.5 rounded-md hover:bg-surface-container-high";
+const sectionTitle =
+  "text-base font-bold text-on-surface mb-3 flex items-center gap-2";
+const sectionBadge = "text-xs font-bold px-2 py-0.5 rounded-full text-white";
+const tableWrapper = "w-full overflow-visible";
+const footerBar = "flex gap-3 justify-end mt-6";
+const errorArea = "min-h-6 mb-2";
+
+// badge colors for each child section
+const badgeColors = ["#1e40af", "#b45309", "#0e7490", "#7c3aed"];
+
+// Compute grid cols from headerColumns count
+const colCount = config.headerColumns.length;
+const headGrid = `grid grid-cols-${colCount <= 3 ? colCount : 3} gap-4 mb-2`;
+
+const errorId = `${config.idPrefix}-error`;
+
+/** Get the return URL from baseUrl (e.g., "/api/BOM" -> "/BOM") */
+const listUrl = config.baseUrl.replace(/^\/api/, "");
+
+const editTitle = config.formTitle.replace("新規", "") + "情報";
+const formTitle = isEdit ? editTitle : config.formTitle;
+const errorTarget = "#" + errorId;
+---
+
+<form
+  {...{ [httpMethod]: actionUrl }}
+  hx-swap="innerHTML"
+  hx-target={errorTarget}
+>
+  <div id={errorId} class={errorArea}></div>
+
+  {/* Header section */}
+  <div class={card}>
+    <h2 class={cardTitle}>{formTitle}</h2>
+    <div class={headGrid}>
+      {
+        config.headerColumns.map((col) => (
+          <label class={labelStyle}>
+            {col.label}
+            <input
+              type={
+                col.type === "number"
+                  ? "number"
+                  : col.type === "date"
+                    ? "date"
+                    : "text"
+              }
+              name={col.key}
+              class={inputStyleWide}
+              value={headerValues[col.key] ?? col.defaultValue ?? ""}
+              placeholder={col.placeholder ?? ""}
+              required={col.required}
+            />
+          </label>
+        ))
+      }
+    </div>
+  </div>
+
+  {/* Child sections */}
+  {
+    config.children.map((child, idx) => {
+      const sectionId = "section-" + idx + "-lines";
+      const data = childrenData[idx] ?? { records: [] };
+      const discName = child.discriminator?.column;
+      const discValue = child.discriminator
+        ? String(child.discriminator.value)
+        : undefined;
+      const lineRowUrl = config.baseUrl + "/line-row?section=" + idx;
+      const color = badgeColors[idx % badgeColors.length];
+      const badgeStyle = "background: " + color + ";";
+      const sectionTarget = "#" + sectionId;
+
+      // Extract short badge text from sectionLabel (text before parenthesis or full label)
+      const badgeText =
+        child.sectionLabel.match(/^(.+?)（/)?.[1] ?? child.sectionLabel;
+
+      return (
+        <div class={card}>
+          <div class={sectionTitle}>
+            <span class={sectionBadge} style={badgeStyle}>
+              {badgeText}
+            </span>
+            {child.sectionLabel}
+          </div>
+          <div class={tableWrapper}>
+            <table style="width: 100%; border-collapse: collapse;">
+              <thead>
+                <tr>
+                  {child.columns
+                    .filter((c) => c.type !== "deleteAction")
+                    .map((col) => {
+                      const wStyle = col.width
+                        ? "width:" + col.width
+                        : undefined;
+                      return (
+                        <th class={thCell} style={wStyle}>
+                          {col.label}
+                        </th>
+                      );
+                    })}
+                  <th class={thCell} style="width: 3rem;" />
+                </tr>
+              </thead>
+              <tbody id={sectionId}>
+                {data.records.map((rec, i) => {
+                  const rk = idx + "-" + i;
+                  return (
+                    <HeaderBodyLineRow
+                      columns={child.columns}
+                      sectionIndex={idx}
+                      rowKey={rk}
+                      discriminatorName={discName}
+                      discriminatorValue={discValue}
+                      values={rec}
+                    />
+                  );
+                })}
+              </tbody>
+            </table>
+          </div>
+          <div style="margin-top: 0.5rem;">
+            <button
+              type="button"
+              class={addBtn}
+              hx-get={lineRowUrl}
+              hx-target={sectionTarget}
+              hx-swap="beforeend"
+            >
+              + 行追加
+            </button>
+          </div>
+        </div>
+      );
+    })
+  }
+
+  {/* Footer */}
+  <div class={footerBar}>
+    <a href={listUrl} class={button({ intent: "secondary" })}>キャンセル</a>
+    <button type="submit" class={button({ intent: "primary" })}>
+      {isEdit ? "更新" : "登録"}
+    </button>
+  </div>
+</form>

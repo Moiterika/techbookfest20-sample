@@ -31,6 +31,7 @@ export const 取引区分カラム: Column[] = [
 ];
 
 export const 取引区分エンティティ: EntityConfig = {
+  tableName: "transaction_types",
   idPrefix: "txtype",
   baseUrl: "/api/取引区分",
   bodyTargetId: "txtypes-body",

@@ -1,0 +1,149 @@
+---
+import type { Column } from "../crud/types";
+import { tdCell, row, inputStyleSm } from "../../styles/common";
+import Typeahead品目 from "../品目/Typeahead品目.astro";
+
+interface Props {
+  columns: Column[];
+  sectionIndex: number;
+  rowKey: string;
+  discriminatorName?: string;
+  discriminatorValue?: string;
+  values?: Record<string, any>;
+}
+
+const {
+  columns,
+  sectionIndex,
+  rowKey,
+  discriminatorName,
+  discriminatorValue,
+  values = {},
+} = Astro.props;
+
+const lookupId = "lookup-" + rowKey + "-itemName";
+const trId = "line-" + sectionIndex + "-" + rowKey;
+
+/** key を lineXxx 形式のフォーム名に変換 */
+function lineName(key: string): string {
+  return "line" + key.charAt(0).toUpperCase() + key.slice(1);
+}
+
+/** discriminator の hidden input name */
+const discFieldName = discriminatorName ? lineName(discriminatorName) : "";
+
+/** 各カラムのフォーム名を事前計算 */
+const fieldNames = Object.fromEntries(
+  columns.map((c) => [c.key, lineName(c.key)]),
+);
+
+const cellSelect =
+  "rounded-lg text-sm text-on-surface outline-none bg-surface-container-low border-2 border-transparent transition-[border-color,background-color] duration-200 focus:border-b-primary focus:bg-white py-1.5 px-2.5 min-w-20";
+const removeBtn =
+  "inline-flex items-center justify-center w-7 h-7 rounded-full cursor-pointer text-error border-none bg-transparent text-sm hover:bg-error/10";
+const lookupText = "text-sm text-outline";
+
+function widthStyle(col: Column): string | undefined {
+  return col.width ? "width:" + col.width : undefined;
+}
+---
+
+<tr id={trId} class={row}>
+  {
+    discriminatorName && (
+      <input type="hidden" name={discFieldName} value={discriminatorValue} />
+    )
+  }
+  {
+    columns.map((col) => {
+      const type = col.type ?? "text";
+      const val = values[col.key] ?? col.defaultValue ?? "";
+      const name = fieldNames[col.key];
+
+      if (type === "deleteAction") {
+        return (
+          <td class={tdCell} style={widthStyle(col)}>
+            <button
+              type="button"
+              class={removeBtn}
+              onclick="this.closest('tr').remove()"
+            >
+              &times;
+            </button>
+          </td>
+        );
+      }
+
+      if (type === "itemCode") {
+        return (
+          <td class={tdCell}>
+            <Typeahead品目
+              name="lineItemId"
+              selectedId={values.itemId}
+              selectedCode={values.itemCode ?? ""}
+              selectedName={values.itemName ?? ""}
+              compact
+              hideNameLabel
+              lookupTargetId={lookupId}
+            />
+          </td>
+        );
+      }
+
+      if (type === "readonlyLookup") {
+        return (
+          <td class={tdCell}>
+            <span id={lookupId} class={lookupText}>
+              {values[col.key] ?? ""}
+            </span>
+          </td>
+        );
+      }
+
+      if (type === "number") {
+        const numCol = col as any;
+        return (
+          <td class={tdCell} style={widthStyle(col)}>
+            <input
+              type="number"
+              step="0.0001"
+              min={numCol.min ?? 0}
+              name={name}
+              value={val}
+              class={inputStyleSm}
+              placeholder={col.placeholder ?? "0"}
+            />
+          </td>
+        );
+      }
+
+      if (type === "select") {
+        const selCol = col as any;
+        return (
+          <td class={tdCell} style={widthStyle(col)}>
+            <select name={name} class={cellSelect}>
+              {selCol.options.map((opt) => (
+                <option value={opt.value} selected={opt.value === String(val)}>
+                  {opt.label}
+                </option>
+              ))}
+            </select>
+          </td>
+        );
+      }
+
+      // default: text input
+      return (
+        <td class={tdCell} style={widthStyle(col)}>
+          <input
+            type="text"
+            name={name}
+            value={val}
+            class={inputStyleSm}
+            placeholder={col.placeholder ?? ""}
+          />
+        </td>
+      );
+    })
+  }
+</tr>

@@ -83,7 +83,11 @@ function buildBeforeRequest(): string | undefined {
       if (type === "barcode") {
         const escaped = (val ?? "").toString().replace(/'/g, "\\'");
         return (
-          <td class={tdCell} style={cellStyle(col)} x-data={`{ barcodeVal: '${escaped}' }`}>
+          <td
+            class={tdCell}
+            style={cellStyle(col)}
+            x-data={`{ barcodeVal: '${escaped}' }`}
+          >
             <input
               name={col.key}
               x-model="barcodeVal"
@@ -132,10 +136,7 @@ function buildBeforeRequest(): string | undefined {
         const expr = (col as any).expression;
         return (
           <td class={tdCell} style={cellStyle(col)}>
-            <span
-              class="font-medium"
-              x-text={`(${expr}).toLocaleString()`}
-            />
+            <span class="font-medium" x-text={`(${expr}).toLocaleString()`} />
           </td>
         );
       }

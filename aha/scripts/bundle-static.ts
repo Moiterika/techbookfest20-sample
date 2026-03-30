@@ -20,53 +20,25 @@ const jsDir = path.join(gothStatic, "js");
 
 fs.mkdirSync(jsDir, { recursive: true });
 
-// ─── 1. htmx.org バンドル ──────────────────────
+// ─── 1. htmx.org — 公式 min ビルドをコピー ───────────
+// Bun.build でバンドルするとグローバル変数 htmx がリネームされるため、
+// 公式の htmx.min.js をそのままコピーする。
 
-console.log("Bundling htmx.org...");
+console.log("Copying htmx.org (official min build)...");
 
-const htmxEntry = path.resolve("scripts/.tmp-htmx-entry.ts");
-fs.writeFileSync(htmxEntry, `import "htmx.org";\n`);
-
-const htmxResult = await Bun.build({
-  entrypoints: [htmxEntry],
-  outdir: jsDir,
-  naming: "htmx.min.js",
-  minify: true,
-  target: "browser",
-});
-
-fs.unlinkSync(htmxEntry);
-
-if (!htmxResult.success) {
-  console.error("htmx bundle failed:", htmxResult.logs);
-  process.exit(1);
-}
+const htmxMin = path.resolve("node_modules/htmx.org/dist/htmx.min.js");
+fs.copyFileSync(htmxMin, path.join(jsDir, "htmx.min.js"));
 console.log(`  → ${path.relative(".", path.join(jsDir, "htmx.min.js"))}`);
 
-// ─── 2. Alpine.js バンドル ─────────────────────
+// ─── 2. Alpine.js — CDN ビルドをコピー ─────────────
+// Bun.build で ESM バンドルすると CDN ビルドと互換性のない出力になるため、
+// alpinejs の公式 CDN ビルド (cdn.min.js) をそのままコピーする。
+// CDN ビルドは defer 読み込みで自動的に Alpine.start() を呼ぶ。
 
-console.log("Bundling Alpine.js...");
+console.log("Copying Alpine.js (CDN build)...");
 
-const alpineEntry = path.resolve("scripts/.tmp-alpine-entry.ts");
-fs.writeFileSync(
-  alpineEntry,
-  `import Alpine from "alpinejs";\nAlpine.start();\n`,
-);
-
-const alpineResult = await Bun.build({
-  entrypoints: [alpineEntry],
-  outdir: jsDir,
-  naming: "alpine.min.js",
-  minify: true,
-  target: "browser",
-});
-
-fs.unlinkSync(alpineEntry);
-
-if (!alpineResult.success) {
-  console.error("Alpine bundle failed:", alpineResult.logs);
-  process.exit(1);
-}
+const alpineCdn = path.resolve("node_modules/alpinejs/dist/cdn.min.js");
+fs.copyFileSync(alpineCdn, path.join(jsDir, "alpine.min.js"));
 console.log(`  → ${path.relative(".", path.join(jsDir, "alpine.min.js"))}`);
 
 // ─── 3. react-barcode カスタムエレメント バンドル ──────

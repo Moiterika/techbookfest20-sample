@@ -22,7 +22,11 @@ const dummyRecord: Record<string, any> = {
 
 export const GET: APIRoute = async () => {
   const rowHtml = await container.renderToString(CrudRow, {
-    props: { record: dummyRecord, columns: 品目カラム, entity: 品目エンティティ },
+    props: {
+      record: dummyRecord,
+      columns: 品目カラム,
+      entity: 品目エンティティ,
+    },
   });
 
   return new Response(JSON.stringify({ row: rowHtml }, null, 2), {

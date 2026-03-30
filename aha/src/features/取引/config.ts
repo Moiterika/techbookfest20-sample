@@ -66,6 +66,7 @@ export function get取引カラム(
 }
 
 export const 取引エンティティ: EntityConfig = {
+  tableName: "transactions",
   idPrefix: "tx",
   baseUrl: "/api/取引",
   bodyTargetId: "tx-body",

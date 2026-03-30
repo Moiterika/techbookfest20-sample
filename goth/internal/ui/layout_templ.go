@@ -50,7 +50,7 @@ func Base(title string) templ.Component {
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 3, "</body></html>")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 3, "<script>\n\t\t\t// htmx で差し込まれた DOM に Alpine を初期化\n\t\t\tdocument.addEventListener('htmx:afterSettle', function(e) {\n\t\t\t\tif (window.Alpine && e.detail.elt) {\n\t\t\t\t\tAlpine.initTree(e.detail.elt);\n\t\t\t\t}\n\t\t\t});\n\t\t</script></body></html>")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}

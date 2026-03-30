@@ -63,7 +63,8 @@ export const labelStyle =
 export const card = "mb-6 p-6 rounded-xl bg-white";
 
 /** カード内タイトル */
-export const cardTitle = "text-lg font-bold text-on-surface mb-4 tracking-tight";
+export const cardTitle =
+  "text-lg font-bold text-on-surface mb-4 tracking-tight";
 
 // ─── テーブル ─────────────────────────────────────
 

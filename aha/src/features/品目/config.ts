@@ -27,6 +27,7 @@ export const 品目カラム: Column[] = [
 ];
 
 export const 品目エンティティ: EntityConfig = {
+  tableName: "items",
   idPrefix: "item",
   baseUrl: "/api/品目",
   bodyTargetId: "items-body",

@@ -6,15 +6,10 @@
     "node": ">=22.12.0"
   },
   "scripts": {
-    "prepare": "",
     "dev": "bunx --bun astro dev",
     "build": "bunx --bun astro build",
     "fmt": "bunx --bun astro sync && bunx --bun prettier --write 'src/**/*.{astro,ts}'",
     "gen:go": "bun run scripts/gen-go.ts --all",
-    "gen:go:取引区分": "bun run scripts/gen-go.ts --feature 取引区分",
-    "gen:go:品目": "bun run scripts/gen-go.ts --feature 品目",
-    "gen:go:取引": "bun run scripts/gen-go.ts --feature 取引",
-    "gen:go:bom": "bun run scripts/gen-go.ts --feature BOM",
     "gen:css": "bunx @tailwindcss/cli -i ./src/index.css -o ../goth/static/css/aha.css --minify",
     "gen:static": "bun run scripts/bundle-static.ts && bun run gen:css",
     "gen:init": "rm -f ../goth/internal/features/*_manual_service.go ../goth/internal/features/*_manual_sql.go",
@@ -47,6 +42,7 @@
     "@playwright/test": "^1.58.2",
     "@tailwindcss/cli": "^4.2.2",
     "@tailwindcss/vite": "^4.2.2",
+    "@types/bun": "^1.3.11",
     "drizzle-kit": "^0.31.10",
     "node-module-license-output": "^1.0.0",
     "prettier": "^3.8.1",

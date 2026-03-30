@@ -3,10 +3,12 @@ import { experimental_AstroContainer as AstroContainer } from "astro/container";
 import { BOM一覧Query } from "../../../features/BOM/一覧/BOM一覧Query";
 import { BOM登録Command } from "../../../features/BOM/登録/BOM登録Command";
 import { BOM一括削除Command } from "../../../features/BOM/削除/BOM一括削除Command";
-import BomListRows from "../../../components/BOM/BomListRows.astro";
+import HeaderBodyListRows from "../../../components/header-body/HeaderBodyListRows.astro";
+import { BOMヘッダーボディ } from "../../../features/BOM/gen-go.config";
 import { errorText } from "../../../styles/common";
 
 const container = await AstroContainer.create();
+const config = BOMヘッダーボディ;
 
 /** FormData から明細行を組み立てる */
 function parseLines(form: FormData) {
@@ -35,8 +37,9 @@ export const GET: APIRoute = async ({ url }) => {
     q: url.searchParams.get("q") || undefined,
   });
 
-  const html = await container.renderToString(BomListRows, {
+  const html = await container.renderToString(HeaderBodyListRows, {
     props: {
+      config,
       records: result.records,
       currentPage: result.currentPage,
       totalPages: result.totalPages,

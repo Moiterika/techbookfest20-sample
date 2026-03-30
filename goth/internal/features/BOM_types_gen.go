@@ -2,6 +2,7 @@
 package features
 
 import (
+	"database/sql"
 	"time"
 )
 
@@ -15,10 +16,41 @@ type RowBOM struct {
 	UpdatedAt time.Time `db:"updated_at"`
 }
 
+// BomLines は bom_lines テーブルの行
+type BomLines struct {
+	Id int `db:"id"`
+	BomId int `db:"bom_id"`
+	Type int `db:"type"`
+	ItemId int `db:"item_id"`
+	Quantity string `db:"quantity"`
+	Unit string `db:"unit"`
+	RefBomCode sql.NullString `db:"ref_bom_code"`
+	RefBomVersion sql.NullString `db:"ref_bom_version"`
+	CreatedAt time.Time `db:"created_at"`
+	UpdatedAt time.Time `db:"updated_at"`
+	// JOIN 結果
+	ItemCode string
+	ItemName string
+}
+
 type 作成InputBOM struct {
 	Code string
 	Version string
 	Name string
+}
+
+type 作成InputBomLines struct {
+	Type int
+	ItemId int
+	Quantity string
+	Unit string
+	RefBomCode *string
+	RefBomVersion *string
+}
+
+type 作成InputBOMWithLines struct {
+	作成InputBOM
+	LinesBomLines []作成InputBomLines
 }
 
 type 更新InputBOM struct {
@@ -28,11 +60,22 @@ type 更新InputBOM struct {
 	Name string
 }
 
+type 更新InputBOMWithLines struct {
+	更新InputBOM
+	LinesBomLines []作成InputBomLines
+}
+
 type 削除InputBOM struct { ID int }
 type 一括削除InputBOM struct { IDs []int }
 type 一覧InputBOM struct { Page int; Size int; Search string }
 
 type ResponseBOM struct { RowBOM }
+
+type ResponseBOM詳細 struct {
+	RowBOM
+	製造品目アウトプット []BomLines
+	投入品目インプット []BomLines
+}
 
 type ListResultBOM struct {
 	Records     []ResponseBOM

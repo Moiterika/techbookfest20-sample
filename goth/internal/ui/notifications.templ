@@ -3,16 +3,70 @@ package ui
 templ Notifications() {
 	<div
 		id="notifications"
-		x-data="{ messages: [] }"
-		hx-on--after-request="if(event.detail.xhr) { try { let t = JSON.parse(event.detail.xhr.getResponseHeader('HX-Trigger')); if(t['show-toast']) { $data.messages.push(t['show-toast']); setTimeout(() => $data.messages.shift(), 3000); } } catch(e){} }"
-		style="position:fixed;top:1rem;right:1rem;z-index:50;"
+		x-data="{ loading: false, error: null, toast: null, toastTimer: null, showError(msg) { this.error = msg; }, closeError() { this.error = null; }, showToast(msg) { this.toast = msg; clearTimeout(this.toastTimer); this.toastTimer = setTimeout(() => { this.toast = null; }, 3000); } }"
+		@notify-error.window="showError($event.detail)"
+		@show-toast.window="showToast($event.detail.value || '保存しました')"
+		@htmx:before-request.window="loading = true"
+		@htmx:after-request.window="loading = false"
 	>
-		<template x-for="(msg, i) in messages" :key="i">
-			<div
-				class="mb-2 p-4 rounded-lg bg-gradient-to-br from-primary to-primary-dark text-white text-sm font-semibold min-w-[200px]"
-				x-text="msg"
-				x-transition
-			></div>
-		</template>
+		<!-- ローディング -->
+		<div x-show="loading && !error" x-transition.opacity class="fixed bottom-4 right-4 z-[999] bg-gradient-to-br from-primary to-primary-dark text-white px-4 py-2 rounded-lg text-sm shadow-[0_10px_30px_-5px_rgba(18,28,42,0.08)]">
+			読み込み中…
+		</div>
+
+		<!-- 成功トースト -->
+		<div x-show="toast" x-transition.opacity class="fixed bottom-4 right-4 z-[1000] bg-[#065f46] text-white px-4 py-2.5 rounded-lg text-sm font-semibold shadow-[0_10px_30px_-5px_rgba(18,28,42,0.15)] flex items-center gap-2">
+			<span x-text="toast"></span>
+		</div>
+
+		<!-- エラーダイアログ -->
+		<div
+			x-show="error"
+			x-cloak
+			x-transition.opacity
+			class="fixed inset-0 bg-[rgba(18,28,42,0.4)] z-[1000] flex items-center justify-center"
+			@click.self="closeError()"
+			@keydown.escape.window="closeError()"
+		>
+			<div class="bg-white rounded-xl p-6 max-w-[28rem] w-[90%] shadow-[0_20px_60px_-10px_rgba(18,28,42,0.25)]" x-transition.scale.90>
+				<div class="text-base font-bold text-error mb-3 flex items-center gap-2">エラー</div>
+				<div class="text-sm text-on-surface-variant mb-5 leading-relaxed" x-html="error"></div>
+				<div class="flex justify-end">
+					<button class="text-sm font-semibold px-4 py-2 rounded-lg border-none cursor-pointer bg-gradient-to-br from-primary to-primary-dark text-white hover:opacity-90" @click="closeError()">閉じる</button>
+				</div>
+			</div>
+		</div>
 	</div>
+
+	<script>
+		// htmx エラーハンドリング
+		var pTagRegex = /<(?:p|div)[^>]*>(.*?)<\/(?:p|div)>/;
+
+		function notifyError(msg) {
+			window.dispatchEvent(new CustomEvent("notify-error", { detail: msg }));
+		}
+
+		// 4xx: バリデーションエラー等
+		document.addEventListener("htmx:beforeSwap", function(e) {
+			var xhr = e.detail.xhr;
+			if (xhr && xhr.status >= 400 && xhr.status < 500) {
+				var text = xhr.responseText || "";
+				var match = text.match(pTagRegex);
+				var msg = match ? match[1] : "リクエストエラー（" + xhr.status + "）";
+				notifyError(msg);
+				e.detail.shouldSwap = false;
+			}
+		});
+
+		// 5xx, ネットワークエラー
+		document.addEventListener("htmx:responseError", function(e) {
+			var xhr = e.detail.xhr;
+			var status = xhr ? xhr.status : 0;
+			if (status >= 500) {
+				notifyError("サーバーエラーが発生しました（" + status + "）");
+			} else if (status === 0) {
+				notifyError("サーバーに接続できませんでした");
+			}
+		});
+	</script>
 }

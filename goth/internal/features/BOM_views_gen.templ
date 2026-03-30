@@ -13,66 +13,42 @@ templ RenderPageBOM() {
 				<a href="/" class="text-primary no-underline hover:underline">← ホーム</a>
 			</nav>
 			<h1 class="text-2xl font-bold mb-8 text-on-surface tracking-tight">BOM管理</h1>
-			<div id="BOM-search" class="mb-6 p-6 rounded-xl bg-white">
-				<div class="flex gap-4 flex-wrap">
-					<div class="flex flex-col gap-2 text-[0.625rem] font-bold uppercase tracking-wider text-outline flex-1 min-w-[12.5rem]">
-						<span>検索</span>
-						<input type="search" name="q" placeholder="検索…" class="rounded-lg text-sm text-on-surface outline-none bg-surface-container-low border-2 border-transparent transition-[border-color,background-color] duration-200 focus:border-b-primary focus:bg-white px-3 py-2.5" hx-get="/api/BOM" hx-trigger="input changed delay:300ms, search" hx-target="#data-body" hx-swap="innerHTML" hx-include="#BOM-search" hx-vals='{"page": "1"}'/>
-					</div>
-				</div>
+			<div class="flex justify-end mb-4">
+				<a href="/BOM/new" class="text-sm py-2 px-4 rounded-lg cursor-pointer font-semibold transition-all duration-200 inline-flex items-center justify-center border-none bg-gradient-to-br from-primary to-primary-dark text-white hover:opacity-90 active:opacity-80">＋ 新規BOM登録</a>
 			</div>
-			<div x-data="{ open: false }">
-				<div class="flex justify-between items-center mb-6 flex-wrap gap-4" x-data="{ hasSelection: false, updateSelection() { const tbody = document.getElementById('data-body'); this.hasSelection = tbody ? tbody.querySelectorAll('input[name=\'rowSelect\']:checked').length > 0 : false; } }" @change.window="updateSelection()" hx-on--after-swap.window="$nextTick(() => this.updateSelection())">
-					<div class="flex items-center gap-3 flex-wrap">
-						<button class="inline-flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-semibold cursor-pointer transition-all duration-150 text-error bg-error-container/20 border-none hover:bg-error-container/40 disabled:opacity-40 disabled:cursor-not-allowed disabled:hover:bg-error-container/20" data-bulk-delete="/api/BOM" data-body-target="data-body" :disabled="!hasSelection">選択削除</button>
-					</div>
-					<div class="flex items-center gap-3 flex-wrap">
-						<button class="inline-flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-semibold cursor-pointer transition-all duration-150 text-primary bg-transparent border-none hover:bg-surface-container-high disabled:opacity-40 disabled:cursor-not-allowed disabled:hover:bg-transparent" hx-get="/api/BOM" hx-target="#data-body" hx-swap="innerHTML">更新</button>
-						<button @click="open = !open" x-text="open ? '閉じる' : '＋ 新規追加'" class="text-sm py-2 px-4 rounded-lg cursor-pointer font-semibold transition-all duration-200 inline-flex items-center justify-center border-none bg-gradient-to-br from-primary to-primary-dark text-white hover:opacity-90 active:opacity-80"></button>
-					</div>
-				</div>
-				<div x-show="open" x-transition class="mb-6 p-6 rounded-xl bg-white">
-					<h2 class="text-lg font-bold text-on-surface mb-4 tracking-tight">新規BOM登録</h2>
-					<form hx-post="/api/BOM" hx-target="#data-body" hx-swap="innerHTML" hx-on--after-request="if(event.detail.successful && event.detail.elt === this) { this.reset(); open = false }" class="flex flex-col gap-4">
-						<div class="mt-2"><button type="submit" class="text-sm py-2 px-4 rounded-lg cursor-pointer font-semibold transition-all duration-200 inline-flex items-center justify-center border-none bg-gradient-to-br from-primary to-primary-dark text-white hover:opacity-90 active:opacity-80">登録する</button></div>
-					</form>
-				</div>
-			</div>
-			<div class="overflow-x-auto rounded-xl bg-white [-webkit-overflow-scrolling:touch]">
-				<table class="w-full min-w-[50rem] border-collapse text-left">
-					<thead class="bg-surface-container">
+			<div class="overflow-x-auto rounded-xl bg-white">
+				<table style="width: 100%; border-collapse: collapse;">
+					<thead>
 						<tr>
-							<th class="py-4 px-6 w-10"><input type="checkbox" class="crud-select-all rounded-sm cursor-pointer accent-primary" data-body-id="data-body"/></th>
+							<th class="py-4 px-6 text-[0.625rem] font-bold text-on-surface-variant uppercase tracking-widest">BOMコード</th>
+							<th class="py-4 px-6 text-[0.625rem] font-bold text-on-surface-variant uppercase tracking-widest">版</th>
+							<th class="py-4 px-6 text-[0.625rem] font-bold text-on-surface-variant uppercase tracking-widest">名称</th>
+							<th class="py-4 px-6 text-[0.625rem] font-bold text-on-surface-variant uppercase tracking-widest" style="width: 10rem;">操作</th>
 						</tr>
 					</thead>
-					<tbody id="data-body" hx-get="/api/BOM" hx-trigger="load" hx-swap="innerHTML"></tbody>
+					<tbody id="boms-body" hx-get="/api/BOM" hx-trigger="load" hx-swap="innerHTML"></tbody>
 				</table>
 			</div>
-			<div id="data-pagination"></div>
+			<div id="boms-pagination"></div>
 		</main>
 		@ui.Notifications()
 	}
 }
 
 templ RenderRowBOM(item ResponseBOM) {
-	<tr id={ fmt.Sprintf("row-%d", item.Id) } class="transition-all duration-200 ease-in-out hover:bg-surface-container-low [&.htmx-swapping]:opacity-0">
-		<td class="py-4 px-6 w-10"><input type="checkbox" name="rowSelect" value={ fmt.Sprintf("%d", item.Id) } class="rounded-sm cursor-pointer accent-primary"/></td>
-		<td class="py-4 px-6 text-on-surface-variant text-sm">
-			<div class="flex gap-2">
-				<button class="text-sm py-2 px-4 rounded-lg cursor-pointer font-semibold transition-all duration-200 inline-flex items-center justify-center border-none bg-transparent text-primary hover:bg-surface-container-high active:bg-surface-container-highest" hx-get={ fmt.Sprintf("/api/BOM/%d/edit", item.Id) } hx-target={ fmt.Sprintf("#row-%d", item.Id) } hx-swap="outerHTML">編集</button>
-				<button class="inline-flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-semibold cursor-pointer transition-all duration-150 text-error bg-error-container/20 border-none hover:bg-error-container/40 disabled:opacity-40 disabled:cursor-not-allowed disabled:hover:bg-error-container/20" hx-delete={ fmt.Sprintf("/api/BOM/%d", item.Id) } hx-target={ fmt.Sprintf("#row-%d", item.Id) } hx-swap="outerHTML swap:0.3s" hx-confirm="削除しますか？">削除</button>
-			</div>
-		</td>
-	</tr>
-}
-
-templ RenderEditRowBOM(item ResponseBOM) {
-	<tr id={ fmt.Sprintf("row-%d", item.Id) } class="bg-surface-container-low">
-		<td class="py-4 px-6 w-10"></td>
-		<td class="py-4 px-6 text-on-surface-variant text-sm">
-			<div class="flex gap-2">
-				<button class="text-sm py-2 px-4 rounded-lg cursor-pointer font-semibold transition-all duration-200 inline-flex items-center justify-center border-none bg-gradient-to-br from-primary to-primary-dark text-white hover:opacity-90 active:opacity-80" hx-put={ fmt.Sprintf("/api/BOM/%d", item.Id) } hx-target={ fmt.Sprintf("#row-%d", item.Id) } hx-swap="outerHTML" hx-include={ fmt.Sprintf("#edit-form-%d", item.Id) }>保存</button>
-				<button class="text-sm py-2 px-4 rounded-lg cursor-pointer font-semibold transition-all duration-200 inline-flex items-center justify-center border-none bg-transparent text-primary hover:bg-surface-container-high active:bg-surface-container-highest" hx-get={ fmt.Sprintf("/api/BOM/%d/edit", item.Id) } hx-target={ fmt.Sprintf("#row-%d", item.Id) } hx-swap="outerHTML">キャンセル</button>
+	<tr id={ fmt.Sprintf("bom-%d", item.Id) } class="transition-all duration-200 ease-in-out hover:bg-surface-container-low [&.htmx-swapping]:opacity-0">
+		<td class="py-4 px-6 text-on-surface-variant text-sm">{ item.Code }</td>
+		<td class="py-4 px-6 text-on-surface-variant text-sm">{ item.Version }</td>
+		<td class="py-4 px-6 text-on-surface-variant text-sm">{ item.Name }</td>
+		<td class="py-4 px-6 text-right">
+			<div class="flex items-center justify-end gap-2">
+				<a href={ fmt.Sprintf("/BOM/%d", item.Id) } class="inline-flex items-center gap-1 text-primary text-xs font-bold px-2 py-1 rounded-md cursor-pointer border-none bg-transparent no-underline hover:bg-primary/10">編集</a>
+				<div class="relative" x-data="{ menuOpen: false }" @click.outside="menuOpen = false">
+					<button class="inline-flex items-center justify-center w-7 h-7 rounded-full cursor-pointer text-outline border-none bg-transparent hover:text-on-surface hover:bg-surface-container-low" @click="menuOpen = !menuOpen" type="button">&#8942;</button>
+					<div class="absolute right-0 top-full z-20 mt-1 bg-white rounded-lg shadow-[0_10px_30px_-5px_rgba(18,28,42,0.08)] py-1 min-w-[120px]" x-show="menuOpen" x-transition x-cloak>
+						<button class="flex items-center gap-2 w-full text-left px-3 py-2 text-sm cursor-pointer text-error border-none bg-transparent hover:bg-error-container/30" hx-delete={ fmt.Sprintf("/api/BOM/%d", item.Id) } hx-target={ fmt.Sprintf("#bom-%d", item.Id) } hx-swap="outerHTML swap:0.3s" hx-confirm="「{name}」を削除しますか？" @click="menuOpen = false">削除</button>
+					</div>
+				</div>
 			</div>
 		</td>
 	</tr>
@@ -83,16 +59,16 @@ templ RenderRowsBOM(result ListResultBOM) {
 		@RenderRowBOM(item)
 	}
 	if len(result.Records) == 0 {
-		<tr><td colspan="1" class="text-center py-8 text-outline">BOMがありません</td></tr>
+		<tr><td colspan="4" class="text-center py-8 text-outline">BOMがありません</td></tr>
 	}
 	@RenderPaginationBOM(result)
 }
 
 templ RenderPaginationBOM(result ListResultBOM) {
-	<div id="data-pagination" hx-swap-oob="true" class="flex justify-between items-center py-4 px-6 bg-surface-container-low rounded-b-xl flex-wrap gap-3">
+	<div id="boms-pagination" hx-swap-oob="true" class="flex justify-between items-center py-4 px-6 bg-surface-container-low rounded-b-xl flex-wrap gap-3">
 		<div class="flex items-center gap-2 text-sm text-on-surface-variant">
 			<span>表示件数:</span>
-			<select name="size" hx-get="/api/BOM" hx-target="#data-body" hx-swap="innerHTML" hx-include="this" hx-vals='{"page": "1"}' class="bg-white rounded-md text-sm py-1 px-2 text-on-surface-variant border-none cursor-pointer outline-none focus:shadow-[0_0_0_1px_var(--color-primary)]">
+			<select name="size" hx-get="/api/BOM" hx-target="#boms-body" hx-swap="innerHTML" hx-include="this" hx-vals='{"page": "1"}' class="bg-white rounded-md text-sm py-1 px-2 text-on-surface-variant border-none cursor-pointer outline-none focus:shadow-[0_0_0_1px_var(--color-primary)]">
 				<option value="20" if result.PageSize == 20 { selected }>20件</option>
 				<option value="50" if result.PageSize == 50 { selected }>50件</option>
 				<option value="100" if result.PageSize == 100 { selected }>100件</option>
@@ -101,7 +77,7 @@ templ RenderPaginationBOM(result ListResultBOM) {
 		if result.TotalPages > 1 {
 			<div class="flex items-center gap-1">
 				if result.CurrentPage > 1 {
-					<button class="w-8 h-8 flex items-center justify-center text-xs font-bold rounded-lg cursor-pointer text-on-surface hover:bg-surface-container-high border-none" hx-get={ fmt.Sprintf("/api/BOM?page=%d&size=%d", result.CurrentPage-1, result.PageSize) } hx-target="#data-body" hx-swap="innerHTML">&#8249;</button>
+					<button class="w-8 h-8 flex items-center justify-center text-xs font-bold rounded-lg cursor-pointer text-on-surface hover:bg-surface-container-high border-none" hx-get={ fmt.Sprintf("/api/BOM?page=%d&size=%d", result.CurrentPage-1, result.PageSize) } hx-target="#boms-body" hx-swap="innerHTML">&#8249;</button>
 				} else {
 					<span class="w-8 h-8 flex items-center justify-center text-xs rounded-lg text-outline-variant cursor-default border-none">&#8249;</span>
 				}
@@ -109,11 +85,11 @@ templ RenderPaginationBOM(result ListResultBOM) {
 					if i == result.CurrentPage {
 						<span class="w-8 h-8 flex items-center justify-center text-xs font-bold rounded-lg bg-gradient-to-br from-primary to-primary-dark text-white cursor-default border-none">{ fmt.Sprintf("%d", i) }</span>
 					} else {
-						<button class="w-8 h-8 flex items-center justify-center text-xs font-bold rounded-lg cursor-pointer text-on-surface hover:bg-surface-container-high border-none" hx-get={ fmt.Sprintf("/api/BOM?page=%d&size=%d", i, result.PageSize) } hx-target="#data-body" hx-swap="innerHTML">{ fmt.Sprintf("%d", i) }</button>
+						<button class="w-8 h-8 flex items-center justify-center text-xs font-bold rounded-lg cursor-pointer text-on-surface hover:bg-surface-container-high border-none" hx-get={ fmt.Sprintf("/api/BOM?page=%d&size=%d", i, result.PageSize) } hx-target="#boms-body" hx-swap="innerHTML">{ fmt.Sprintf("%d", i) }</button>
 					}
 				}
 				if result.CurrentPage < result.TotalPages {
-					<button class="w-8 h-8 flex items-center justify-center text-xs font-bold rounded-lg cursor-pointer text-on-surface hover:bg-surface-container-high border-none" hx-get={ fmt.Sprintf("/api/BOM?page=%d&size=%d", result.CurrentPage+1, result.PageSize) } hx-target="#data-body" hx-swap="innerHTML">&#8250;</button>
+					<button class="w-8 h-8 flex items-center justify-center text-xs font-bold rounded-lg cursor-pointer text-on-surface hover:bg-surface-container-high border-none" hx-get={ fmt.Sprintf("/api/BOM?page=%d&size=%d", result.CurrentPage+1, result.PageSize) } hx-target="#boms-body" hx-swap="innerHTML">&#8250;</button>
 				} else {
 					<span class="w-8 h-8 flex items-center justify-center text-xs rounded-lg text-outline-variant cursor-default border-none">&#8250;</span>
 				}
@@ -125,4 +101,208 @@ templ RenderPaginationBOM(result ListResultBOM) {
 			</div>
 		}
 	</div>
+}
+
+templ RenderNewPageBOM() {
+	@ui.Base("新規BOM登録") {
+		<main class="max-w-[87.5rem] mx-auto py-8 px-8">
+			<nav class="mb-4">
+				<a href="/BOM" class="text-primary no-underline hover:underline">← BOM一覧</a>
+			</nav>
+			<h1 class="text-2xl font-bold mb-8 text-on-surface tracking-tight">新規BOM登録</h1>
+			<form hx-post="/api/BOM" hx-swap="innerHTML" hx-target="#bom-error">
+				<div id="bom-error" class="min-h-6 mb-2"></div>
+				<div class="mb-6 p-6 rounded-xl bg-white">
+					<h2 class="text-lg font-bold text-on-surface mb-4 tracking-tight">新規BOM登録</h2>
+					<div class="grid grid-cols-3 gap-4 mb-2">
+						<label class="flex flex-col gap-2 text-[0.625rem] font-bold uppercase tracking-wider text-outline">BOMコード<input type="text" name="code" placeholder="例: BOM-001" required class="rounded-lg text-sm text-on-surface outline-none bg-surface-container-low border-2 border-transparent transition-[border-color,background-color] duration-200 focus:border-b-primary focus:bg-white px-3 py-2.5 w-full"/></label>
+						<label class="flex flex-col gap-2 text-[0.625rem] font-bold uppercase tracking-wider text-outline">版<input type="text" name="version" placeholder="例: 1" required class="rounded-lg text-sm text-on-surface outline-none bg-surface-container-low border-2 border-transparent transition-[border-color,background-color] duration-200 focus:border-b-primary focus:bg-white px-3 py-2.5 w-full"/></label>
+						<label class="flex flex-col gap-2 text-[0.625rem] font-bold uppercase tracking-wider text-outline">名称<input type="text" name="name" placeholder="例: 製品A 部品表" required class="rounded-lg text-sm text-on-surface outline-none bg-surface-container-low border-2 border-transparent transition-[border-color,background-color] duration-200 focus:border-b-primary focus:bg-white px-3 py-2.5 w-full"/></label>
+					</div>
+				</div>
+				<div class="mb-6 p-6 rounded-xl bg-white">
+					<div class="text-base font-bold text-on-surface mb-3 flex items-center gap-2"><span class="text-xs font-bold px-2 py-0.5 rounded-full text-white" style="background: #1e40af;">製造品目</span>製造品目（アウトプット）</div>
+					<table style="width: 100%; border-collapse: collapse;">
+						<thead><tr>
+							<th class="py-4 px-6 text-[0.625rem] font-bold text-on-surface-variant uppercase tracking-widest">品目コード</th>
+							<th class="py-4 px-6 text-[0.625rem] font-bold text-on-surface-variant uppercase tracking-widest">品目名</th>
+							<th class="py-4 px-6 text-[0.625rem] font-bold text-on-surface-variant uppercase tracking-widest">数量</th>
+							<th class="py-4 px-6 text-[0.625rem] font-bold text-on-surface-variant uppercase tracking-widest">単位</th>
+							<th class="py-4 px-6 text-[0.625rem] font-bold text-on-surface-variant uppercase tracking-widest" style="width: 3rem;"></th>
+						</tr></thead>
+						<tbody id="section-0-lines"></tbody>
+					</table>
+					<div style="margin-top: 0.5rem;"><button type="button" class="inline-flex items-center gap-1 text-sm text-primary font-semibold cursor-pointer border-none bg-transparent px-2 py-1.5 rounded-md hover:bg-surface-container-high" hx-get="/api/BOM/line-row?section=0" hx-target="#section-0-lines" hx-swap="beforeend">+ 行追加</button></div>
+				</div>
+				<div class="mb-6 p-6 rounded-xl bg-white">
+					<div class="text-base font-bold text-on-surface mb-3 flex items-center gap-2"><span class="text-xs font-bold px-2 py-0.5 rounded-full text-white" style="background: #b45309;">投入品目</span>投入品目（インプット）</div>
+					<table style="width: 100%; border-collapse: collapse;">
+						<thead><tr>
+							<th class="py-4 px-6 text-[0.625rem] font-bold text-on-surface-variant uppercase tracking-widest">品目コード</th>
+							<th class="py-4 px-6 text-[0.625rem] font-bold text-on-surface-variant uppercase tracking-widest">品目名</th>
+							<th class="py-4 px-6 text-[0.625rem] font-bold text-on-surface-variant uppercase tracking-widest">数量</th>
+							<th class="py-4 px-6 text-[0.625rem] font-bold text-on-surface-variant uppercase tracking-widest">単位</th>
+							<th class="py-4 px-6 text-[0.625rem] font-bold text-on-surface-variant uppercase tracking-widest">BOMコード</th>
+							<th class="py-4 px-6 text-[0.625rem] font-bold text-on-surface-variant uppercase tracking-widest">版</th>
+							<th class="py-4 px-6 text-[0.625rem] font-bold text-on-surface-variant uppercase tracking-widest" style="width: 3rem;"></th>
+						</tr></thead>
+						<tbody id="section-1-lines"></tbody>
+					</table>
+					<div style="margin-top: 0.5rem;"><button type="button" class="inline-flex items-center gap-1 text-sm text-primary font-semibold cursor-pointer border-none bg-transparent px-2 py-1.5 rounded-md hover:bg-surface-container-high" hx-get="/api/BOM/line-row?section=1" hx-target="#section-1-lines" hx-swap="beforeend">+ 行追加</button></div>
+				</div>
+				<div class="flex gap-3 justify-end mt-6">
+					<a href="/BOM" class="text-sm py-2 px-4 rounded-lg cursor-pointer font-semibold transition-all duration-200 inline-flex items-center justify-center border-none bg-transparent text-primary hover:bg-surface-container-high active:bg-surface-container-highest">キャンセル</a>
+					<button type="submit" class="text-sm py-2 px-4 rounded-lg cursor-pointer font-semibold transition-all duration-200 inline-flex items-center justify-center border-none bg-gradient-to-br from-primary to-primary-dark text-white hover:opacity-90 active:opacity-80">登録</button>
+				</div>
+			</form>
+		</main>
+		@ui.Notifications()
+	}
+}
+
+templ RenderEditPageBOM(detail ResponseBOM詳細) {
+	@ui.Base("BOM編集") {
+		<main class="max-w-[87.5rem] mx-auto py-8 px-8">
+			<nav class="mb-4">
+				<a href="/BOM" class="text-primary no-underline hover:underline">← BOM一覧</a>
+			</nav>
+			<h1 class="text-2xl font-bold mb-8 text-on-surface tracking-tight">BOM編集</h1>
+			<form hx-put={ fmt.Sprintf("/api/BOM/%d", detail.Id) } hx-swap="innerHTML" hx-target="#bom-error">
+				<div id="bom-error" class="min-h-6 mb-2"></div>
+				<div class="mb-6 p-6 rounded-xl bg-white">
+					<h2 class="text-lg font-bold text-on-surface mb-4 tracking-tight">BOM情報</h2>
+					<div class="grid grid-cols-3 gap-4 mb-2">
+						<label class="flex flex-col gap-2 text-[0.625rem] font-bold uppercase tracking-wider text-outline">BOMコード<input type="text" name="code" value={ detail.Code } placeholder="例: BOM-001" required class="rounded-lg text-sm text-on-surface outline-none bg-surface-container-low border-2 border-transparent transition-[border-color,background-color] duration-200 focus:border-b-primary focus:bg-white px-3 py-2.5 w-full"/></label>
+						<label class="flex flex-col gap-2 text-[0.625rem] font-bold uppercase tracking-wider text-outline">版<input type="text" name="version" value={ detail.Version } placeholder="例: 1" required class="rounded-lg text-sm text-on-surface outline-none bg-surface-container-low border-2 border-transparent transition-[border-color,background-color] duration-200 focus:border-b-primary focus:bg-white px-3 py-2.5 w-full"/></label>
+						<label class="flex flex-col gap-2 text-[0.625rem] font-bold uppercase tracking-wider text-outline">名称<input type="text" name="name" value={ detail.Name } placeholder="例: 製品A 部品表" required class="rounded-lg text-sm text-on-surface outline-none bg-surface-container-low border-2 border-transparent transition-[border-color,background-color] duration-200 focus:border-b-primary focus:bg-white px-3 py-2.5 w-full"/></label>
+					</div>
+				</div>
+				<div class="mb-6 p-6 rounded-xl bg-white">
+					<div class="text-base font-bold text-on-surface mb-3 flex items-center gap-2"><span class="text-xs font-bold px-2 py-0.5 rounded-full text-white" style="background: #1e40af;">製造品目</span>製造品目（アウトプット）</div>
+					<table style="width: 100%; border-collapse: collapse;">
+						<thead><tr>
+							<th class="py-4 px-6 text-[0.625rem] font-bold text-on-surface-variant uppercase tracking-widest">品目コード</th>
+							<th class="py-4 px-6 text-[0.625rem] font-bold text-on-surface-variant uppercase tracking-widest">品目名</th>
+							<th class="py-4 px-6 text-[0.625rem] font-bold text-on-surface-variant uppercase tracking-widest">数量</th>
+							<th class="py-4 px-6 text-[0.625rem] font-bold text-on-surface-variant uppercase tracking-widest">単位</th>
+							<th class="py-4 px-6 text-[0.625rem] font-bold text-on-surface-variant uppercase tracking-widest" style="width: 3rem;"></th>
+						</tr></thead>
+						<tbody id="section-0-lines">
+							for _, line := range detail.製造品目アウトプット {
+								@RenderExistingLineRowBOM0(line)
+							}
+						</tbody>
+					</table>
+					<div style="margin-top: 0.5rem;"><button type="button" class="inline-flex items-center gap-1 text-sm text-primary font-semibold cursor-pointer border-none bg-transparent px-2 py-1.5 rounded-md hover:bg-surface-container-high" hx-get="/api/BOM/line-row?section=0" hx-target="#section-0-lines" hx-swap="beforeend">+ 行追加</button></div>
+				</div>
+				<div class="mb-6 p-6 rounded-xl bg-white">
+					<div class="text-base font-bold text-on-surface mb-3 flex items-center gap-2"><span class="text-xs font-bold px-2 py-0.5 rounded-full text-white" style="background: #b45309;">投入品目</span>投入品目（インプット）</div>
+					<table style="width: 100%; border-collapse: collapse;">
+						<thead><tr>
+							<th class="py-4 px-6 text-[0.625rem] font-bold text-on-surface-variant uppercase tracking-widest">品目コード</th>
+							<th class="py-4 px-6 text-[0.625rem] font-bold text-on-surface-variant uppercase tracking-widest">品目名</th>
+							<th class="py-4 px-6 text-[0.625rem] font-bold text-on-surface-variant uppercase tracking-widest">数量</th>
+							<th class="py-4 px-6 text-[0.625rem] font-bold text-on-surface-variant uppercase tracking-widest">単位</th>
+							<th class="py-4 px-6 text-[0.625rem] font-bold text-on-surface-variant uppercase tracking-widest">BOMコード</th>
+							<th class="py-4 px-6 text-[0.625rem] font-bold text-on-surface-variant uppercase tracking-widest">版</th>
+							<th class="py-4 px-6 text-[0.625rem] font-bold text-on-surface-variant uppercase tracking-widest" style="width: 3rem;"></th>
+						</tr></thead>
+						<tbody id="section-1-lines">
+							for _, line := range detail.投入品目インプット {
+								@RenderExistingLineRowBOM1(line)
+							}
+						</tbody>
+					</table>
+					<div style="margin-top: 0.5rem;"><button type="button" class="inline-flex items-center gap-1 text-sm text-primary font-semibold cursor-pointer border-none bg-transparent px-2 py-1.5 rounded-md hover:bg-surface-container-high" hx-get="/api/BOM/line-row?section=1" hx-target="#section-1-lines" hx-swap="beforeend">+ 行追加</button></div>
+				</div>
+				<div class="flex gap-3 justify-end mt-6">
+					<a href="/BOM" class="text-sm py-2 px-4 rounded-lg cursor-pointer font-semibold transition-all duration-200 inline-flex items-center justify-center border-none bg-transparent text-primary hover:bg-surface-container-high active:bg-surface-container-highest">キャンセル</a>
+					<button type="submit" class="text-sm py-2 px-4 rounded-lg cursor-pointer font-semibold transition-all duration-200 inline-flex items-center justify-center border-none bg-gradient-to-br from-primary to-primary-dark text-white hover:opacity-90 active:opacity-80">更新</button>
+				</div>
+			</form>
+		</main>
+		@ui.Notifications()
+	}
+}
+
+templ RenderExistingLineRowBOM0(line BomLines) {
+	<tr class="transition-all duration-200 ease-in-out hover:bg-surface-container-low [&.htmx-swapping]:opacity-0">
+		<input type="hidden" name="lineType" value="2"/>
+		<td class="py-4 px-6 text-on-surface-variant text-sm">@RenderTypeahead品目("lineItemId", line.ItemId, line.ItemCode, line.ItemName, true, true, fmt.Sprintf("lookup-%d-itemName", line.Id))</td>
+		<td class="py-4 px-6 text-on-surface-variant text-sm"><span id={ fmt.Sprintf("lookup-%d-itemName", line.Id) } class="text-sm text-outline">{ line.ItemName }</span></td>
+		<td class="py-4 px-6 text-on-surface-variant text-sm"><input type="number" step="0.0001" name="lineQuantity" value={ line.Quantity } class="rounded-lg text-sm text-on-surface outline-none bg-surface-container-low border-2 border-transparent transition-[border-color,background-color] duration-200 focus:border-b-primary focus:bg-white py-1.5 px-2.5 w-full min-w-[7.5rem]"/></td>
+		<td class="py-4 px-6 text-on-surface-variant text-sm">@RenderSelectLineBOM0Unit(line.Unit)</td>
+	</tr>
+}
+
+templ RenderExistingLineRowBOM1(line BomLines) {
+	<tr class="transition-all duration-200 ease-in-out hover:bg-surface-container-low [&.htmx-swapping]:opacity-0">
+		<input type="hidden" name="lineType" value="1"/>
+		<td class="py-4 px-6 text-on-surface-variant text-sm">@RenderTypeahead品目("lineItemId", line.ItemId, line.ItemCode, line.ItemName, true, true, fmt.Sprintf("lookup-%d-itemName", line.Id))</td>
+		<td class="py-4 px-6 text-on-surface-variant text-sm"><span id={ fmt.Sprintf("lookup-%d-itemName", line.Id) } class="text-sm text-outline">{ line.ItemName }</span></td>
+		<td class="py-4 px-6 text-on-surface-variant text-sm"><input type="number" step="0.0001" name="lineQuantity" value={ line.Quantity } class="rounded-lg text-sm text-on-surface outline-none bg-surface-container-low border-2 border-transparent transition-[border-color,background-color] duration-200 focus:border-b-primary focus:bg-white py-1.5 px-2.5 w-full min-w-[7.5rem]"/></td>
+		<td class="py-4 px-6 text-on-surface-variant text-sm">@RenderSelectLineBOM1Unit(line.Unit)</td>
+		<td class="py-4 px-6 text-on-surface-variant text-sm"><input type="text" name="lineRefBomCode" value={ NullStrOr(line.RefBomCode, "") } class="rounded-lg text-sm text-on-surface outline-none bg-surface-container-low border-2 border-transparent transition-[border-color,background-color] duration-200 focus:border-b-primary focus:bg-white py-1.5 px-2.5 w-full min-w-[7.5rem]"/></td>
+		<td class="py-4 px-6 text-on-surface-variant text-sm"><input type="text" name="lineRefBomVersion" value={ NullStrOr(line.RefBomVersion, "") } class="rounded-lg text-sm text-on-surface outline-none bg-surface-container-low border-2 border-transparent transition-[border-color,background-color] duration-200 focus:border-b-primary focus:bg-white py-1.5 px-2.5 w-full min-w-[7.5rem]"/></td>
+	</tr>
+}
+
+templ RenderSelectLineBOM0Unit(selected string) {
+	<select name="lineUnit" class="rounded-lg text-sm text-on-surface outline-none bg-surface-container-low border-2 border-transparent transition-[border-color,background-color] duration-200 focus:border-b-primary focus:bg-white py-1.5 px-2.5 min-w-20">
+		<option value="pcs" if selected == "pcs" { selected }>個</option>
+		<option value="kg" if selected == "kg" { selected }>kg</option>
+		<option value="g" if selected == "g" { selected }>g</option>
+		<option value="L" if selected == "L" { selected }>L</option>
+		<option value="mL" if selected == "mL" { selected }>mL</option>
+		<option value="m" if selected == "m" { selected }>m</option>
+		<option value="cm" if selected == "cm" { selected }>cm</option>
+		<option value="box" if selected == "box" { selected }>箱</option>
+		<option value="set" if selected == "set" { selected }>セット</option>
+		<option value="hour" if selected == "hour" { selected }>時間</option>
+	</select>
+}
+
+templ RenderSelectLineBOM1Unit(selected string) {
+	<select name="lineUnit" class="rounded-lg text-sm text-on-surface outline-none bg-surface-container-low border-2 border-transparent transition-[border-color,background-color] duration-200 focus:border-b-primary focus:bg-white py-1.5 px-2.5 min-w-20">
+		<option value="pcs" if selected == "pcs" { selected }>個</option>
+		<option value="kg" if selected == "kg" { selected }>kg</option>
+		<option value="g" if selected == "g" { selected }>g</option>
+		<option value="L" if selected == "L" { selected }>L</option>
+		<option value="mL" if selected == "mL" { selected }>mL</option>
+		<option value="m" if selected == "m" { selected }>m</option>
+		<option value="cm" if selected == "cm" { selected }>cm</option>
+		<option value="box" if selected == "box" { selected }>箱</option>
+		<option value="set" if selected == "set" { selected }>セット</option>
+		<option value="hour" if selected == "hour" { selected }>時間</option>
+	</select>
+}
+
+templ RenderEmptyLineRowBOM0(rowKey string) {
+	<tr class="transition-all duration-200 ease-in-out hover:bg-surface-container-low [&.htmx-swapping]:opacity-0">
+		<input type="hidden" name="lineType" value="2"/>
+		<td class="py-4 px-6 text-on-surface-variant text-sm">@RenderTypeahead品目("lineItemId", 0, "", "", true, true, fmt.Sprintf("lookup-%s-itemName", rowKey))</td>
+		<td class="py-4 px-6 text-on-surface-variant text-sm"><span id={ fmt.Sprintf("lookup-%s-itemName", rowKey) } class="text-sm text-outline"></span></td>
+		<td class="py-4 px-6 text-on-surface-variant text-sm"><input type="number" step="0.0001" min="0" name="lineQuantity" placeholder="0" class="rounded-lg text-sm text-on-surface outline-none bg-surface-container-low border-2 border-transparent transition-[border-color,background-color] duration-200 focus:border-b-primary focus:bg-white py-1.5 px-2.5 w-full min-w-[7.5rem]"/></td>
+		<td class="py-4 px-6 text-on-surface-variant text-sm">@RenderSelectLineBOM0Unit("pcs")</td>
+	</tr>
+}
+
+templ RenderEmptyLineRowBOM1(rowKey string) {
+	<tr class="transition-all duration-200 ease-in-out hover:bg-surface-container-low [&.htmx-swapping]:opacity-0">
+		<input type="hidden" name="lineType" value="1"/>
+		<td class="py-4 px-6 text-on-surface-variant text-sm">@RenderTypeahead品目("lineItemId", 0, "", "", true, true, fmt.Sprintf("lookup-%s-itemName", rowKey))</td>
+		<td class="py-4 px-6 text-on-surface-variant text-sm"><span id={ fmt.Sprintf("lookup-%s-itemName", rowKey) } class="text-sm text-outline"></span></td>
+		<td class="py-4 px-6 text-on-surface-variant text-sm"><input type="number" step="0.0001" min="0" name="lineQuantity" placeholder="0" class="rounded-lg text-sm text-on-surface outline-none bg-surface-container-low border-2 border-transparent transition-[border-color,background-color] duration-200 focus:border-b-primary focus:bg-white py-1.5 px-2.5 w-full min-w-[7.5rem]"/></td>
+		<td class="py-4 px-6 text-on-surface-variant text-sm">@RenderSelectLineBOM1Unit("pcs")</td>
+		<td class="py-4 px-6 text-on-surface-variant text-sm"><input type="text" name="lineRefBomCode" placeholder="BOMコード" class="rounded-lg text-sm text-on-surface outline-none bg-surface-container-low border-2 border-transparent transition-[border-color,background-color] duration-200 focus:border-b-primary focus:bg-white py-1.5 px-2.5 w-full min-w-[7.5rem]"/></td>
+		<td class="py-4 px-6 text-on-surface-variant text-sm"><input type="text" name="lineRefBomVersion" placeholder="版" class="rounded-lg text-sm text-on-surface outline-none bg-surface-container-low border-2 border-transparent transition-[border-color,background-color] duration-200 focus:border-b-primary focus:bg-white py-1.5 px-2.5 w-full min-w-[7.5rem]"/></td>
+	</tr>
+}
+
+templ RenderLineRowBOM(section int, rowKey string) {
+	if section == 0 {
+		@RenderEmptyLineRowBOM0(rowKey)
+	} else if section == 1 {
+		@RenderEmptyLineRowBOM1(rowKey)
+	}
 }

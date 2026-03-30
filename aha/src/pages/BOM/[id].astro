@@ -1,12 +1,14 @@
 ---
 import Layout from "../../layouts/Layout.astro";
 import Nav from "../../components/Nav.astro";
-import BomForm from "../../components/BOM/BomForm.astro";
+import HeaderBodyForm from "../../components/header-body/HeaderBodyForm.astro";
+import { BOMヘッダーボディ } from "../../features/BOM/gen-go.config";
 import { pageContainer, pageTitle } from "../../styles/common";
 import { db } from "../../db";
 import { boms, bomLines, items } from "../../db/schema";
 import { eq } from "drizzle-orm";
 
+const config = BOMヘッダーボディ;
 const id = Number(Astro.params.id);
 if (!id) return Astro.redirect("/BOM");
 
@@ -31,41 +33,42 @@ const lines = await db
   .leftJoin(items, eq(bomLines.itemId, items.id))
   .where(eq(bomLines.bomId, id));
 
-const outputLines = lines
-  .filter((l) => l.type === 2)
-  .map((l) => ({
-    itemId: l.itemId,
-    itemCode: l.itemCode || "",
-    itemName: l.itemName || "",
-    quantity: l.quantity,
-    unit: l.unit,
-  }));
+// Build childrenData from config.children discriminator definitions
+const childrenData = config.children.map((child) => {
+  const disc = child.discriminator;
+  const filtered = disc
+    ? lines.filter((l) => (l as any)[disc.column] === disc.value)
+    : lines;
+  return {
+    records: filtered.map((l) => ({
+      itemId: l.itemId,
+      itemCode: l.itemCode || "",
+      itemName: l.itemName || "",
+      quantity: l.quantity,
+      unit: l.unit,
+      refBomCode: l.refBomCode || "",
+      refBomVersion: l.refBomVersion || "",
+    })),
+  };
+});
 
-const inputLines = lines
-  .filter((l) => l.type === 1)
-  .map((l) => ({
-    itemId: l.itemId,
-    itemCode: l.itemCode || "",
-    itemName: l.itemName || "",
-    quantity: l.quantity,
-    unit: l.unit,
-    refBomCode: l.refBomCode || "",
-    refBomVersion: l.refBomVersion || "",
-  }));
+const headerValues = {
+  code: bom.code,
+  version: bom.version,
+  name: bom.name,
+};
 ---
 
 <Layout>
   <main class={pageContainer}>
     <Nav current="boms" />
     <h1 class={pageTitle}>BOM編集</h1>
-    <BomForm
+    <HeaderBodyForm
+      config={config}
       mode="edit"
-      bomId={bom.id}
-      code={bom.code}
-      version={bom.version}
-      name={bom.name}
-      outputLines={outputLines}
-      inputLines={inputLines}
+      recordId={bom.id}
+      headerValues={headerValues}
+      childrenData={childrenData}
     />
   </main>
 </Layout>

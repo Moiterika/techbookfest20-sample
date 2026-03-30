@@ -74,6 +74,11 @@ interface ActionsColumn extends ColumnBase {
   type: "actions";
 }
 
+/** 削除ボタン列（header-body の子行用） */
+interface DeleteActionColumn extends ColumnBase {
+  type: "deleteAction";
+}
+
 export type Column =
   | TextColumn
   | NumberColumn
@@ -83,10 +88,37 @@ export type Column =
   | ReadonlyLookupColumn
   | ComputedColumn
   | SelectColumn
-  | ActionsColumn;
+  | ActionsColumn
+  | DeleteActionColumn;
+
+/** 子エンティティ（明細行）の設定 */
+export interface ChildEntityConfig {
+  /** 子テーブル名 (例: "bom_lines") */
+  tableName: string;
+  /** セクション見出し (例: "製造品目（アウトプット）") */
+  sectionLabel: string;
+  /** 子行のカラム定義 */
+  columns: Column[];
+  /** 同一テーブルで複数リストを分ける場合の判別カラム */
+  discriminator?: {
+    column: string;
+    value: number | string;
+  };
+}
+
+/** header-body パターンの設定 */
+export interface HeaderBodyConfig extends EntityConfig {
+  type: "header-body";
+  /** 親エンティティのカラム（ヘッダーフォーム用） */
+  headerColumns: Column[];
+  /** 子エンティティ定義（1つ or 複数） */
+  children: ChildEntityConfig[];
+}
 
 /** エンティティ固有の設定 */
 export interface EntityConfig {
+  /** DB テーブル名 (例: "items", "transactions") — コード生成で使用 */
+  tableName: string;
   /** ID プレフィックス (例: "item", "tx") */
   idPrefix: string;
   /** API ベース URL (例: "/api/items") */

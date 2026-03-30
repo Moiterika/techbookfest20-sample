@@ -60,25 +60,71 @@ func Execute一覧SQLBOM(ctx context.Context, db *sql.DB, input 一覧InputBOM) 
 	return ListResultBOM{Records: records, CurrentPage: page, TotalPages: totalPages, PageSize: size}, nil
 }
 
-func Execute登録SQLBOM(ctx context.Context, db *sql.DB, input 作成InputBOM) (ResponseBOM, error) {
+func Execute登録SQLBOM(ctx context.Context, db *sql.DB, input 作成InputBOMWithLines) (ResponseBOM, error) {
 	now := time.Now()
+	tx, err := db.BeginTx(ctx, nil)
+	if err != nil {
+		return ResponseBOM{}, err
+	}
+	defer tx.Rollback()
+
 	var r RowBOM
-	err := db.QueryRowContext(ctx,
+	err = tx.QueryRowContext(ctx,
 		`INSERT INTO boms (code, version, name, created_at, updated_at) VALUES ($1, $2, $3, $4, $5) RETURNING id, code, version, name, created_at, updated_at`,
 		input.Code, input.Version, input.Name, now, now,
 	).Scan(&r.Id, &r.Code, &r.Version, &r.Name, &r.CreatedAt, &r.UpdatedAt)
 	if err != nil {
 		return ResponseBOM{}, err
 	}
+
+	for _, l := range input.LinesBomLines {
+		_, err := tx.ExecContext(ctx,
+			`INSERT INTO bom_lines (bom_id, type, item_id, quantity, unit, ref_bom_code, ref_bom_version, created_at, updated_at) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9)`,
+			r.Id, l.Type, l.ItemId, l.Quantity, l.Unit, l.RefBomCode, l.RefBomVersion, now, now,
+		)
+		if err != nil {
+			return ResponseBOM{}, err
+		}
+	}
+
+	if err := tx.Commit(); err != nil {
+		return ResponseBOM{}, err
+	}
 	return ResponseBOM{RowBOM: r}, nil
 }
 
-func Execute更新SQLBOM(ctx context.Context, db *sql.DB, input 更新InputBOM) (ResponseBOM, error) {
+func Execute更新SQLBOM(ctx context.Context, db *sql.DB, input 更新InputBOMWithLines) (ResponseBOM, error) {
 	now := time.Now()
-	_, err := db.ExecContext(ctx,
+	tx, err := db.BeginTx(ctx, nil)
+	if err != nil {
+		return ResponseBOM{}, err
+	}
+	defer tx.Rollback()
+
+	_, err = tx.ExecContext(ctx,
 		`UPDATE boms SET code=$1, version=$2, name=$3, updated_at=$4 WHERE id=$5`,
 		input.Code, input.Version, input.Name, now, input.ID)
 	if err != nil {
+		return ResponseBOM{}, err
+	}
+
+	// Delete old lines and re-insert
+	_, err = tx.ExecContext(ctx, `DELETE FROM bom_lines WHERE bom_id=$1`, input.ID)
+	if err != nil {
+		return ResponseBOM{}, err
+	}
+
+	for _, l := range input.LinesBomLines {
+		_, err := tx.ExecContext(ctx,
+			`INSERT INTO bom_lines (bom_id, type, item_id, quantity, unit, ref_bom_code, ref_bom_version, created_at, updated_at) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9)`,
+			input.ID, l.Type, l.ItemId, l.Quantity, l.Unit, l.RefBomCode, l.RefBomVersion, now, now,
+		)
+		if err != nil {
+			return ResponseBOM{}, err
+		}
+	}
+
+	if err := tx.Commit(); err != nil {
 		return ResponseBOM{}, err
 	}
 	return GetByIDSQLBOM(ctx, db, input.ID)
@@ -101,6 +147,39 @@ func Execute一括削除SQLBOM(ctx context.Context, db *sql.DB, input 一括削�
 	}
 	_, err := db.ExecContext(ctx, fmt.Sprintf(`DELETE FROM boms WHERE id IN (%s)`, strings.Join(ph, ",")), args...)
 	return err
+}
+
+func GetByIDBOM詳細SQL(ctx context.Context, db *sql.DB, id int) (ResponseBOM詳細, error) {
+	bom, err := GetByIDSQLBOM(ctx, db, id)
+	if err != nil {
+		return ResponseBOM詳細{}, err
+	}
+
+	rows, err := db.QueryContext(ctx,
+		`SELECT bl.id, bl.bom_id, bl.type, bl.item_id, bl.quantity, bl.unit, bl.ref_bom_code, bl.ref_bom_version, bl.created_at, bl.updated_at, COALESCE(i.code,''), COALESCE(i.name,'') FROM bom_lines bl LEFT JOIN items i ON bl.item_id = i.id WHERE bl.bom_id=$1 ORDER BY bl.id`, id)
+	if err != nil {
+		return ResponseBOM詳細{}, err
+	}
+	defer rows.Close()
+
+	var outputLines, inputLines []BomLines
+	for rows.Next() {
+		var l BomLines
+		if err := rows.Scan(&l.Id, &l.BomId, &l.Type, &l.ItemId, &l.Quantity, &l.Unit, &l.RefBomCode, &l.RefBomVersion, &l.CreatedAt, &l.UpdatedAt, &l.ItemCode, &l.ItemName); err != nil {
+			return ResponseBOM詳細{}, err
+		}
+		if l.Type == 2 {
+			outputLines = append(outputLines, l)
+		} else {
+			inputLines = append(inputLines, l)
+		}
+	}
+
+	return ResponseBOM詳細{
+		RowBOM:           bom.RowBOM,
+		製造品目アウトプット: outputLines,
+		投入品目インプット:   inputLines,
+	}, nil
 }
 
 func GetByIDSQLBOM(ctx context.Context, db *sql.DB, id int) (ResponseBOM, error) {

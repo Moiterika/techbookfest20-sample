@@ -20,6 +20,10 @@
   --color-on-error-container: #93000a;
 }
 
+[x-cloak] {
+  display: none !important;
+}
+
 /* Base styles */
 html,
 body {

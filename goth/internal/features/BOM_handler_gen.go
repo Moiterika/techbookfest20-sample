@@ -2,23 +2,47 @@
 package features
 
 import (
+	"fmt"
 	"net/http"
 	"strconv"
+	"time"
 )
 
 func (h *HandlerBOM) RegisterRoutesBOM(mux *http.ServeMux) {
 	mux.HandleFunc("GET /BOM", h.HandlePageBOM)
+	mux.HandleFunc("GET /BOM/new", h.HandleNewBOM)
+	mux.HandleFunc("GET /BOM/{id}", h.HandleEditBOM)
 	mux.HandleFunc("GET /api/BOM", h.Handle一覧BOM)
 	mux.HandleFunc("POST /api/BOM", h.Handle登録BOM)
 	mux.HandleFunc("DELETE /api/BOM", h.Handle一括削除BOM)
 	mux.HandleFunc("PUT /api/BOM/{id}", h.Handle更新BOM)
 	mux.HandleFunc("DELETE /api/BOM/{id}", h.Handle削除BOM)
-	mux.HandleFunc("GET /api/BOM/{id}/edit", h.HandleEditBOM)
+	mux.HandleFunc("GET /api/BOM/line-row", h.HandleLineRowBOM)
 }
 
 func (h *HandlerBOM) HandlePageBOM(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "text/html; charset=utf-8")
 	RenderPageBOM().Render(r.Context(), w)
+}
+
+func (h *HandlerBOM) HandleNewBOM(w http.ResponseWriter, r *http.Request) {
+	w.Header().Set("Content-Type", "text/html; charset=utf-8")
+	RenderNewPageBOM().Render(r.Context(), w)
+}
+
+func (h *HandlerBOM) HandleEditBOM(w http.ResponseWriter, r *http.Request) {
+	id, err := strconv.Atoi(r.PathValue("id"))
+	if err != nil {
+		http.Error(w, "Invalid ID", http.StatusBadRequest)
+		return
+	}
+	detail, err := h.GetByIDBOM詳細(r.Context(), id)
+	if err != nil {
+		http.Error(w, "Not found", http.StatusNotFound)
+		return
+	}
+	w.Header().Set("Content-Type", "text/html; charset=utf-8")
+	RenderEditPageBOM(detail).Render(r.Context(), w)
 }
 
 func (h *HandlerBOM) Handle一覧BOM(w http.ResponseWriter, r *http.Request) {
@@ -42,21 +66,15 @@ func (h *HandlerBOM) Handle登録BOM(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	input := Parse作成FormBOM(r)
-	_, err := h.Execute登録BOM(r.Context(), input)
+	result, err := h.Execute登録BOM(r.Context(), input)
 	if err != nil {
 		w.Header().Set("Content-Type", "text/html; charset=utf-8")
 		w.WriteHeader(http.StatusUnprocessableEntity)
 		RenderErrorMessage(err.Error()).Render(r.Context(), w)
 		return
 	}
-	listResult, err := h.Get一覧BOM(r.Context(), 一覧InputBOM{Page: 1, Size: 20})
-	if err != nil {
-		http.Error(w, err.Error(), http.StatusInternalServerError)
-		return
-	}
-	w.Header().Set("Content-Type", "text/html; charset=utf-8")
-	w.Header().Set("HX-Trigger", `{"show-toast": "登録しました"}`)
-	RenderRowsBOM(listResult).Render(r.Context(), w)
+	w.Header().Set("HX-Redirect", fmt.Sprintf("/BOM/%d?saved=1", result.Id))
+	w.WriteHeader(http.StatusNoContent)
 }
 
 func (h *HandlerBOM) Handle更新BOM(w http.ResponseWriter, r *http.Request) {
@@ -70,16 +88,15 @@ func (h *HandlerBOM) Handle更新BOM(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	input := Parse更新FormBOM(r, id)
-	result, err := h.Execute更新BOM(r.Context(), input)
+	_, err = h.Execute更新BOM(r.Context(), input)
 	if err != nil {
 		w.Header().Set("Content-Type", "text/html; charset=utf-8")
 		w.WriteHeader(http.StatusUnprocessableEntity)
 		RenderErrorMessage(err.Error()).Render(r.Context(), w)
 		return
 	}
-	w.Header().Set("Content-Type", "text/html; charset=utf-8")
-	w.Header().Set("HX-Trigger", `{"show-toast": "更新しました"}`)
-	RenderRowBOM(result).Render(r.Context(), w)
+	w.Header().Set("HX-Redirect", fmt.Sprintf("/BOM/%d?saved=1", id))
+	w.WriteHeader(http.StatusNoContent)
 }
 
 func (h *HandlerBOM) Handle削除BOM(w http.ResponseWriter, r *http.Request) {
@@ -92,7 +109,8 @@ func (h *HandlerBOM) Handle削除BOM(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
-	w.Header().Set("Content-Type", "text/html; charset=utf-8")
+	w.Header().Set("HX-Redirect", "/BOM")
+	w.WriteHeader(http.StatusNoContent)
 }
 
 func (h *HandlerBOM) Handle一括削除BOM(w http.ResponseWriter, r *http.Request) {
@@ -108,17 +126,9 @@ func (h *HandlerBOM) Handle一括削除BOM(w http.ResponseWriter, r *http.Reques
 	w.WriteHeader(http.StatusOK)
 }
 
-func (h *HandlerBOM) HandleEditBOM(w http.ResponseWriter, r *http.Request) {
-	id, err := strconv.Atoi(r.PathValue("id"))
-	if err != nil {
-		http.Error(w, "Invalid ID", http.StatusBadRequest)
-		return
-	}
-	item, err := h.GetByIDBOM(r.Context(), id)
-	if err != nil {
-		http.Error(w, err.Error(), http.StatusNotFound)
-		return
-	}
+func (h *HandlerBOM) HandleLineRowBOM(w http.ResponseWriter, r *http.Request) {
+	section, _ := strconv.Atoi(r.URL.Query().Get("section"))
+	rowKey := fmt.Sprintf("new-%d-%s", time.Now().UnixMilli(), r.URL.Query().Get("section"))
 	w.Header().Set("Content-Type", "text/html; charset=utf-8")
-	RenderEditRowBOM(item).Render(r.Context(), w)
+	RenderLineRowBOM(section, rowKey).Render(r.Context(), w)
 }

@@ -33,10 +33,7 @@ function thStyle(col: Column): string | undefined {
 ---
 
 <div class={tableWrapper}>
-  <table
-    id={tableId}
-    class="w-full min-w-[50rem] border-collapse text-left"
-  >
+  <table id={tableId} class="w-full min-w-[50rem] border-collapse text-left">
     <thead class={theadStyle}>
       <tr>
         <th class={checkboxTh}>
@@ -46,7 +43,13 @@ function thStyle(col: Column): string | undefined {
             data-body-id={bodyId}
           />
         </th>
-        {columns.map((col) => <th class={thCell} style={thStyle(col)}>{col.label}</th>)}
+        {
+          columns.map((col) => (
+            <th class={thCell} style={thStyle(col)}>
+              {col.label}
+            </th>
+          ))
+        }
       </tr>
     </thead>
     <tbody id={bodyId} hx-get={baseUrl} hx-trigger="load" hx-swap="innerHTML">

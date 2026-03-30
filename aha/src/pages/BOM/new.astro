@@ -1,7 +1,8 @@
 ---
 import Layout from "../../layouts/Layout.astro";
 import Nav from "../../components/Nav.astro";
-import BomForm from "../../components/BOM/BomForm.astro";
+import HeaderBodyForm from "../../components/header-body/HeaderBodyForm.astro";
+import { BOMヘッダーボディ } from "../../features/BOM/gen-go.config";
 import { pageContainer, pageTitle } from "../../styles/common";
 ---
 
@@ -9,6 +10,6 @@ import { pageContainer, pageTitle } from "../../styles/common";
   <main class={pageContainer}>
     <Nav current="boms" />
     <h1 class={pageTitle}>BOM登録</h1>
-    <BomForm mode="create" />
+    <HeaderBodyForm config={BOMヘッダーボディ} mode="create" />
   </main>
 </Layout>

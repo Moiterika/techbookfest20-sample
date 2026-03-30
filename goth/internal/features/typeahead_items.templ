@@ -1,0 +1,71 @@
+package features
+
+import "fmt"
+
+// TypeaheadSearch は品目検索入力コンポーネント
+templ RenderTypeaheadSearch(name string, compact bool) {
+	<div x-data="{ open: false }" class="relative">
+		<input
+			type="text"
+			placeholder="品目コード or 名前で検索…"
+			if compact {
+				class="rounded-lg text-sm text-on-surface outline-none bg-surface-container-low border-2 border-transparent transition-[border-color,background-color] duration-200 focus:border-b-primary focus:bg-white py-1.5 px-2.5 w-full min-w-[7.5rem]"
+			} else {
+				class="rounded-lg text-sm text-on-surface outline-none bg-surface-container-low border-2 border-transparent transition-[border-color,background-color] duration-200 focus:border-b-primary focus:bg-white px-3 py-2.5"
+			}
+			autocomplete="off"
+			hx-get="/api/品目/search"
+			hx-trigger="input changed delay:300ms"
+			hx-target="next ul"
+			hx-swap="innerHTML"
+			hx-include="this"
+			name="q"
+			@focus="open = true"
+			@input="open = true"
+			@click.outside="open = false"
+			@keydown.escape="open = false"
+		/>
+		<ul class="absolute z-10 w-full mt-1 bg-white rounded-lg shadow-[0_10px_30px_-5px_rgba(18,28,42,0.08)] max-h-[200px] overflow-y-auto" x-show="open" x-transition></ul>
+	</div>
+	<input type="hidden" name={ name } value=""/>
+}
+
+// TypeaheadBadge は品目選択済みバッジコンポーネント
+templ RenderTypeaheadBadge(name string, item TypeaheadItem, hideNameLabel bool) {
+	<div class="flex items-center gap-2" data-selected-name={ item.Name } data-selected-price={ fmt.Sprintf("%d", item.Price) }>
+		<span class="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-sm font-semibold text-primary bg-surface-container-high whitespace-nowrap shrink-0">
+			{ item.Code }
+			<button
+				type="button"
+				class="inline-flex items-center justify-center w-4 h-4 rounded-full text-xs leading-none text-primary cursor-pointer border-none bg-transparent hover:bg-primary/[0.15]"
+				hx-get="/api/品目/typeahead?action=clear"
+				hx-target="closest [data-typeahead]"
+				hx-swap="innerHTML"
+			>&times;</button>
+		</span>
+		if !hideNameLabel {
+			<span class="text-sm text-on-surface-variant whitespace-nowrap">{ item.Name }</span>
+		}
+	</div>
+	<input type="hidden" name={ name } value={ fmt.Sprintf("%d", item.ID) }/>
+}
+
+// TypeaheadWrapper はtypeaheadのラッパー（初期状態 or 選択済み）
+templ RenderTypeahead品目(name string, selectedId int, selectedCode string, selectedName string, compact bool, hideNameLabel bool, lookupTargetId string) {
+	<div
+		data-typeahead
+		class="relative"
+		hx-vals={ fmt.Sprintf(`{"taName":"%s","taCompact":"%v","taHideNameLabel":"%v","taLookupId":"%s"}`, name, compact, hideNameLabel, lookupTargetId) }
+		hx-target="this"
+		hx-get="/api/品目/typeahead?action=clear"
+		hx-trigger="typeahead-reset from:body"
+		hx-swap="innerHTML"
+		hx-disinherit="hx-target"
+	>
+		if selectedId > 0 {
+			@RenderTypeaheadBadge(name, TypeaheadItem{ID: selectedId, Code: selectedCode, Name: selectedName}, hideNameLabel)
+		} else {
+			@RenderTypeaheadSearch(name, compact)
+		}
+	</div>
+}

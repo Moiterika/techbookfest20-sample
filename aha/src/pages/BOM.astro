@@ -1,18 +1,11 @@
 ---
 import Layout from "../layouts/Layout.astro";
 import Nav from "../components/Nav.astro";
-import {
-  pageContainer,
-  pageTitle,
-  button,
-  thCell,
-} from "../styles/common";
+import { BOMヘッダーボディ } from "../features/BOM/gen-go.config";
+import { pageContainer, pageTitle, button, thCell } from "../styles/common";
 
-const editBtn =
-  "inline-flex items-center gap-1 text-primary text-xs font-bold px-2 py-1 rounded-md cursor-pointer border-none bg-transparent no-underline hover:bg-primary/10";
-const deleteBtn =
-  "inline-flex items-center gap-1 text-error text-xs font-bold px-2 py-1 rounded-md cursor-pointer border-none bg-transparent hover:bg-error/10";
-const actionsCell = "py-4 px-6 text-right flex gap-2 justify-end";
+const config = BOMヘッダーボディ;
+const listUrl = config.baseUrl.replace(/^\/api/, "");
 const toolbar = "flex justify-end mb-4";
 const emptyRow = "text-center py-8 text-outline text-sm";
 const tableWrap = "overflow-x-auto rounded-xl bg-white";
@@ -24,32 +17,38 @@ const tableWrap = "overflow-x-auto rounded-xl bg-white";
     <h1 class={pageTitle}>BOM管理</h1>
 
     <div class={toolbar}>
-      <a href="/BOM/new" class={button({ intent: "primary" })}>+ 新規BOM</a>
+      <a href={`${listUrl}/new`} class={button({ intent: "primary" })}
+        >+ {config.formTitle}</a
+      >
     </div>
 
     <div class={tableWrap}>
       <table style="width: 100%; border-collapse: collapse;">
         <thead>
           <tr>
-            <th class={thCell}>BOMコード</th>
-            <th class={thCell}>版</th>
-            <th class={thCell}>名称</th>
+            {
+              config.headerColumns
+                .filter((c) => c.type !== "actions")
+                .map((col) => <th class={thCell}>{col.label}</th>)
+            }
             <th class={thCell} style="width: 10rem;">操作</th>
           </tr>
         </thead>
         <tbody
-          id="boms-body"
-          hx-get="/api/BOM"
+          id={config.bodyTargetId}
+          hx-get={config.baseUrl}
           hx-trigger="load"
           hx-swap="innerHTML"
         >
           <tr>
-            <td colspan="4" class={emptyRow}>読み込み中…</td>
+            <td colspan={config.headerColumns.length + 1} class={emptyRow}
+              >読み込み中…</td
+            >
           </tr>
         </tbody>
       </table>
     </div>
 
-    <div id="boms-pagination"></div>
+    <div id={config.paginationId}></div>
   </main>
 </Layout>

@@ -24,6 +24,14 @@ templ Base(title string) {
 	</head>
 	<body>
 		{ children... }
+		<script>
+			// htmx で差し込まれた DOM に Alpine を初期化
+			document.addEventListener('htmx:afterSettle', function(e) {
+				if (window.Alpine && e.detail.elt) {
+					Alpine.initTree(e.detail.elt);
+				}
+			});
+		</script>
 	</body>
 	</html>
 }

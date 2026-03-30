@@ -15,6 +15,9 @@ func RegisterRoutes(mux *http.ServeMux, db *sql.DB) {
 	// ── API + ページ（feature ごとに RegisterRoutes で登録） ──
 	品目 := features.NewHandler品目(db)
 	品目.RegisterRoutes品目(mux)
+	// 品目タイプアヘッド（複数featureから共有）
+	mux.HandleFunc("GET /api/品目/search", 品目.HandleTypeaheadSearch)
+	mux.HandleFunc("GET /api/品目/typeahead", 品目.HandleTypeahead)
 
 	取引区分 := features.NewHandler取引区分(db)
 	取引区分.RegisterRoutes取引区分(mux)

@@ -1,0 +1,128 @@
+---
+import type { HeaderBodyConfig } from "../crud/types";
+import { tdCell, row } from "../../styles/common";
+import { Icon } from "astro-icon/components";
+import CrudPagination from "../crud/CrudPagination.astro";
+
+interface Props {
+  config: HeaderBodyConfig;
+  records: Record<string, any>[];
+  currentPage?: number;
+  totalPages?: number;
+  pageSize?: number;
+  extraParams?: Record<string, string>;
+}
+
+const {
+  config,
+  records,
+  currentPage = 1,
+  totalPages = 1,
+  pageSize = 20,
+  extraParams = {},
+} = Astro.props;
+
+const listUrl = config.baseUrl.replace(/^\/api/, "");
+
+const actionsCell = "py-4 px-6 text-right";
+const actionsRow = "flex items-center justify-end gap-2";
+const editBtn =
+  "inline-flex items-center gap-1 text-primary text-xs font-bold px-2 py-1 rounded-md cursor-pointer border-none bg-transparent no-underline hover:bg-primary/10";
+const kebabBtn =
+  "inline-flex items-center justify-center w-7 h-7 rounded-full cursor-pointer text-outline border-none bg-transparent hover:text-on-surface hover:bg-surface-container-low";
+const kebabMenu =
+  "absolute right-0 top-full z-20 mt-1 bg-white rounded-lg shadow-[0_10px_30px_-5px_rgba(18,28,42,0.08)] py-1 min-w-[120px]";
+const kebabItem =
+  "flex items-center gap-2 w-full text-left px-3 py-2 text-sm cursor-pointer text-error border-none bg-transparent hover:bg-error-container/30";
+
+const emptyCell = "text-center py-8 text-outline";
+
+/** Build display name from config.displayNameKey */
+function displayName(rec: Record<string, any>): string {
+  const key = config.displayNameKey ?? "name";
+  return rec[key] ?? "";
+}
+
+/** Build confirm message */
+function confirmMsg(rec: Record<string, any>): string {
+  const tmpl = config.deleteConfirmTemplate ?? "削除しますか？";
+  return tmpl.replace("{name}", displayName(rec));
+}
+
+const colCount =
+  config.headerColumns.filter((c) => c.type !== "actions").length + 1;
+---
+
+{
+  records.length === 0 ? (
+    <tr>
+      <td colspan={colCount} class={emptyCell}>
+        {config.emptyMessage}
+      </td>
+    </tr>
+  ) : (
+    records.map((r) => {
+      const rowId = config.idPrefix + "-" + r.id;
+      const editUrl = listUrl + "/" + r.id;
+      const deleteUrl = config.baseUrl + "/" + r.id;
+      const targetId = "#" + rowId;
+      return (
+        <tr id={rowId} class={row}>
+          {config.headerColumns
+            .filter((c) => c.type !== "actions")
+            .map((col) => (
+              <td class={tdCell}>{r[col.key] ?? ""}</td>
+            ))}
+          <td class={actionsCell}>
+            <div class={actionsRow}>
+              <a href={editUrl} class={editBtn}>
+                <Icon name="heroicons:pencil-square" class="w-3.5 h-3.5" />
+                編集
+              </a>
+              <div
+                class="relative"
+                x-data="{ menuOpen: false }"
+                @click.outside="menuOpen = false"
+              >
+                <button
+                  class={kebabBtn}
+                  @click="menuOpen = !menuOpen"
+                  type="button"
+                >
+                  <Icon
+                    name="heroicons:ellipsis-vertical-solid"
+                    class="w-5 h-5"
+                  />
+                </button>
+                <div class={kebabMenu} x-show="menuOpen" x-transition x-cloak>
+                  <button
+                    class={kebabItem}
+                    hx-delete={deleteUrl}
+                    hx-target={targetId}
+                    hx-swap="outerHTML swap:0.3s"
+                    hx-confirm={confirmMsg(r)}
+                    @click="menuOpen = false"
+                  >
+                    <Icon name="heroicons:trash" class="w-4 h-4" />
+                    削除
+                  </button>
+                </div>
+              </div>
+            </div>
+          </td>
+        </tr>
+      );
+    })
+  )
+}
+
+<CrudPagination
+  currentPage={currentPage}
+  totalPages={totalPages}
+  pageSize={pageSize}
+  baseUrl={config.baseUrl}
+  bodyTargetId={config.bodyTargetId}
+  paginationId={config.paginationId}
+  extraParams={extraParams}
+  oob
+/>

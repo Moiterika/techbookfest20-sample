@@ -5,7 +5,7 @@ import { pageContainer, pageTitle } from "../styles/common";
 import CrudToolbar from "../components/crud/CrudToolbar.astro";
 import CrudTable from "../components/crud/CrudTable.astro";
 import CrudForm from "../components/crud/CrudForm.astro";
-import Search取引 from "../components/取引/Search取引.astro";
+import SearchPanel from "../components/crud/SearchPanel.astro";
 import {
   get取引カラム,
   fetch取引区分オプション,
@@ -21,7 +21,7 @@ const 取引カラム = get取引カラム(txTypeOptions);
     <Nav current="transactions" />
     <h1 class={pageTitle}>取引管理</h1>
 
-    <Search取引 />
+    <SearchPanel entity={取引エンティティ} />
 
     <div x-data="{ open: false }">
       <CrudToolbar

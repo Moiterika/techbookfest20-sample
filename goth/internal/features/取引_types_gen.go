@@ -39,7 +39,12 @@ type 更新Input取引 struct {
 
 type 削除Input取引 struct { ID int }
 type 一括削除Input取引 struct { IDs []int }
-type 一覧Input取引 struct { Page int; Size int; Search string }
+type 一覧Input取引 struct {
+	Page int
+	Size int
+	DateFrom string
+	DateTo string
+}
 
 type Response取引 struct { Row取引 }
 

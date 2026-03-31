@@ -1,23 +1,26 @@
 ---
+import type { TypeaheadConfig } from "./types";
 import { inputStyle, inputStyleSm } from "../../styles/common";
 import { dropdown } from "./typeaheadStyles";
 
 interface Props {
+  config: TypeaheadConfig;
   name?: string;
   formId?: string;
   compact?: boolean;
 }
 
-const { name = "itemId", formId, compact = false } = Astro.props;
+const { config, name = "itemId", formId, compact = false } = Astro.props;
+const searchUrl = `/api/${config.entityName}/search`;
 ---
 
 <div x-data="{ open: false }" class="relative">
   <input
     type="text"
-    placeholder="品目コード or 名前で検索…"
+    placeholder={config.placeholder ?? "検索…"}
     class={compact ? inputStyleSm : inputStyle}
     autocomplete="off"
-    hx-get="/api/品目/search"
+    hx-get={searchUrl}
     hx-trigger="input changed delay:300ms"
     hx-target="next ul"
     hx-swap="innerHTML"

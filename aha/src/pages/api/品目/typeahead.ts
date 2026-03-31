@@ -3,8 +3,9 @@ import { experimental_AstroContainer as AstroContainer } from "astro/container";
 import { db } from "../../../db";
 import { items } from "../../../db/schema";
 import { eq } from "drizzle-orm";
-import Typeahead品目Search from "../../../components/品目/Typeahead品目Search.astro";
-import Typeahead品目Badge from "../../../components/品目/Typeahead品目Badge.astro";
+import TypeaheadSearch from "../../../components/crud/TypeaheadSearch.astro";
+import TypeaheadBadge from "../../../components/crud/TypeaheadBadge.astro";
+import { 品目Typeahead } from "../../../features/shared/typeahead-configs";
 
 const container = await AstroContainer.create();
 
@@ -38,13 +39,14 @@ export const GET: APIRoute = async ({ url }) => {
       return new Response("item not found", { status: 404 });
     }
 
-    let html = await container.renderToString(Typeahead品目Badge, {
+    let html = await container.renderToString(TypeaheadBadge, {
       props: {
+        config: 品目Typeahead,
         name: taName,
         selectedId: item.id,
         selectedCode: item.code,
         selectedName: item.name,
-        selectedPrice: item.price,
+        selectedExtra: { price: String(item.price) },
         formId: taFormId || undefined,
         hideNameLabel: taHideNameLabel,
       },
@@ -60,8 +62,9 @@ export const GET: APIRoute = async ({ url }) => {
   }
 
   // action === "clear"
-  let html = await container.renderToString(Typeahead品目Search, {
+  let html = await container.renderToString(TypeaheadSearch, {
     props: {
+      config: 品目Typeahead,
       name: taName,
       formId: taFormId || undefined,
       compact: taCompact,

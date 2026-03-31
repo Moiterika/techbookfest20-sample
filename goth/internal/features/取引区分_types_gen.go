@@ -30,7 +30,11 @@ type 更新Input取引区分 struct {
 
 type 削除Input取引区分 struct { ID int }
 type 一括削除Input取引区分 struct { IDs []int }
-type 一覧Input取引区分 struct { Page int; Size int; Search string }
+type 一覧Input取引区分 struct {
+	Page int
+	Size int
+	Q string
+}
 
 type Response取引区分 struct { Row取引区分 }
 

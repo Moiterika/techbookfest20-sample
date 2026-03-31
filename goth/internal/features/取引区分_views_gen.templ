@@ -13,11 +13,11 @@ templ RenderPage取引区分() {
 				<a href="/" class="text-primary no-underline hover:underline">← ホーム</a>
 			</nav>
 			<h1 class="text-2xl font-bold mb-8 text-on-surface tracking-tight">取引区分管理</h1>
-			<div id="取引区分-search" class="mb-6 p-6 rounded-xl bg-white">
+			<div id="txtype-search" class="mb-6 p-6 rounded-xl bg-white">
 				<div class="flex gap-4 flex-wrap">
 					<div class="flex flex-col gap-2 text-[0.625rem] font-bold uppercase tracking-wider text-outline flex-1 min-w-[12.5rem]">
 						<span>検索</span>
-						<input type="search" name="q" placeholder="取引区分コード・取引区分名称で検索…" class="rounded-lg text-sm text-on-surface outline-none bg-surface-container-low border-2 border-transparent transition-[border-color,background-color] duration-200 focus:border-b-primary focus:bg-white px-3 py-2.5" hx-get="/api/取引区分" hx-trigger="input changed delay:300ms, search" hx-target="#txtypes-body" hx-swap="innerHTML" hx-include="#取引区分-search" hx-vals='{"page": "1"}'/>
+						<input type="search" name="q" placeholder="コード・名称で検索…" class="rounded-lg text-sm text-on-surface outline-none bg-surface-container-low border-2 border-transparent transition-[border-color,background-color] duration-200 focus:border-b-primary focus:bg-white px-3 py-2.5" hx-get="/api/取引区分" hx-trigger="input changed delay:300ms, search" hx-target="#txtypes-body" hx-swap="innerHTML" hx-include="#txtype-search" hx-vals='{"page": "1"}'/>
 					</div>
 				</div>
 			</div>

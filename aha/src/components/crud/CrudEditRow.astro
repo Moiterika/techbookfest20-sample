@@ -7,7 +7,8 @@ import {
   row,
   flexRow,
 } from "../../styles/common";
-import Typeahead品目 from "../品目/Typeahead品目.astro";
+import Typeahead from "./Typeahead.astro";
+import { 品目Typeahead } from "../../features/shared/typeahead-configs";
 
 interface Props {
   record: Record<string, any>;
@@ -29,9 +30,9 @@ function cellStyle(col: Column): string | undefined {
   return col.minWidth ? `min-width:${col.minWidth}` : undefined;
 }
 
-// itemCode 列のバリデーション式
+// itemCode/typeahead 列のバリデーション式
 function buildBeforeRequest(): string | undefined {
-  const hasItemCode = columns.some((c) => c.type === "itemCode");
+  const hasItemCode = columns.some((c) => c.type === "itemCode" || c.type === "typeahead");
   if (!hasItemCode) return undefined;
   return `
     const itemId = document.querySelector('[form=${formId}][name=itemId]');
@@ -99,7 +100,7 @@ function buildBeforeRequest(): string | undefined {
         );
       }
 
-      if (type === "itemCode") {
+      if (type === "itemCode" || type === "typeahead") {
         const valueName = (col as any).valueName ?? "itemId";
         const lookupCol = columns.find((c) => c.type === "readonlyLookup");
         const lookupId = lookupCol
@@ -107,7 +108,8 @@ function buildBeforeRequest(): string | undefined {
           : undefined;
         return (
           <td class={tdCell} style={cellStyle(col)}>
-            <Typeahead品目
+            <Typeahead
+              config={品目Typeahead}
               name={valueName}
               selectedId={record[valueName]}
               selectedCode={val ?? ""}

@@ -1,7 +1,8 @@
 ---
 import type { Column } from "../crud/types";
 import { tdCell, row, inputStyleSm } from "../../styles/common";
-import Typeahead品目 from "../品目/Typeahead品目.astro";
+import Typeahead from "../crud/Typeahead.astro";
+import { 品目Typeahead } from "../../features/shared/typeahead-configs";
 
 interface Props {
   columns: Column[];
@@ -74,10 +75,11 @@ function widthStyle(col: Column): string | undefined {
         );
       }
 
-      if (type === "itemCode") {
+      if (type === "itemCode" || type === "typeahead") {
         return (
           <td class={tdCell}>
-            <Typeahead品目
+            <Typeahead
+              config={品目Typeahead}
               name="lineItemId"
               selectedId={values.itemId}
               selectedCode={values.itemCode ?? ""}
@@ -122,7 +124,7 @@ function widthStyle(col: Column): string | undefined {
         return (
           <td class={tdCell} style={widthStyle(col)}>
             <select name={name} class={cellSelect}>
-              {selCol.options.map((opt) => (
+              {selCol.options.map((opt: any) => (
                 <option value={opt.value} selected={opt.value === String(val)}>
                   {opt.label}
                 </option>

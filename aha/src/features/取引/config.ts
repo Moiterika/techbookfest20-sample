@@ -66,6 +66,10 @@ export function get取引カラム(
 }
 
 export const 取引エンティティ: EntityConfig = {
+  searchFields: [
+    { searchType: "date", param: "dateFrom", label: "開始日" },
+    { searchType: "date", param: "dateTo", label: "終了日" },
+  ],
   tableName: "transactions",
   idPrefix: "tx",
   baseUrl: "/api/取引",

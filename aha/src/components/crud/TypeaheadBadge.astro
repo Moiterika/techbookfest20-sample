@@ -1,40 +1,47 @@
 ---
+import type { TypeaheadConfig } from "./types";
 import { selectedRow, badge, badgeClear, nameLabel } from "./typeaheadStyles";
 
 interface Props {
+  config: TypeaheadConfig;
   name?: string;
   selectedId: number;
   selectedCode: string;
   selectedName: string;
-  selectedPrice?: number;
+  selectedExtra?: Record<string, string>;
   formId?: string;
   hideNameLabel?: boolean;
 }
 
 const {
+  config,
   name = "itemId",
   selectedId,
   selectedCode,
   selectedName,
-  selectedPrice,
+  selectedExtra = {},
   formId,
   hideNameLabel = false,
 } = Astro.props;
+
+const typeaheadUrl = `/api/${config.entityName}/typeahead?action=clear`;
+
+// data-selected-* 属性を構築
+const dataAttrs: Record<string, string> = {
+  "data-selected-name": selectedName,
+};
+for (const [key, val] of Object.entries(selectedExtra)) {
+  dataAttrs[`data-selected-${key}`] = val;
+}
 ---
 
-<div
-  class={selectedRow}
-  data-selected-name={selectedName}
-  {...selectedPrice != null
-    ? { "data-selected-price": String(selectedPrice) }
-    : {}}
->
+<div class={selectedRow} {...dataAttrs}>
   <span class={badge}>
     {selectedCode}
     <button
       type="button"
       class={badgeClear}
-      hx-get="/api/品目/typeahead?action=clear"
+      hx-get={typeaheadUrl}
       hx-target="closest [data-typeahead]"
       hx-swap="innerHTML">&times;</button
     >

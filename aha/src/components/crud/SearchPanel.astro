@@ -1,0 +1,81 @@
+---
+import type { EntityConfig, SearchField } from "./types";
+import { inputStyle, labelStyle } from "../../styles/common";
+
+interface Props {
+  entity: EntityConfig;
+}
+
+const { entity } = Astro.props;
+
+const fields = entity.searchFields ?? [];
+const containerId = entity.searchContainerId ?? `${entity.idPrefix}-search`;
+
+const searchRow = "flex gap-4 flex-wrap";
+
+function htmxTrigger(field: SearchField): string {
+  return field.searchType === "text"
+    ? "input changed delay:300ms, search"
+    : "change";
+}
+
+function inputType(field: SearchField): astroHTML.JSX.HTMLInputTypeAttribute {
+  if (field.searchType === "date") return "date";
+  if (field.searchType === "text") return "search";
+  return "text";
+}
+---
+
+{
+  fields.length > 0 && (
+    <div id={containerId} class="mb-6 bg-white rounded-xl p-6">
+      <div class={searchRow}>
+        {fields.map((field) => {
+          const wrapClass = `${labelStyle} ${field.flexClass ?? ""}`.trim();
+          const trigger = htmxTrigger(field);
+
+          if (field.searchType === "select") {
+            return (
+              <div class={wrapClass}>
+                <span>{field.label}</span>
+                <select
+                  name={field.param}
+                  class={inputStyle}
+                  hx-get={entity.baseUrl}
+                  hx-trigger="change"
+                  hx-target={`#${entity.bodyTargetId}`}
+                  hx-swap="innerHTML"
+                  hx-include={`#${containerId}`}
+                  hx-vals='{"page": "1"}'
+                >
+                  <option value="">すべて</option>
+                  {field.options.map((opt) => (
+                    <option value={opt.value}>{opt.label}</option>
+                  ))}
+                </select>
+              </div>
+            );
+          }
+
+          return (
+            <div class={wrapClass}>
+              <span>{field.label}</span>
+              <input
+                type={inputType(field)}
+                name={field.param}
+                placeholder={field.placeholder ?? ""}
+                class={inputStyle}
+                hx-get={entity.baseUrl}
+                hx-trigger={trigger}
+                hx-target={`#${entity.bodyTargetId}`}
+                hx-swap="innerHTML"
+                hx-include={`#${containerId}`}
+                hx-vals='{"page": "1"}'
+              />
+            </div>
+          );
+        })}
+      </div>
+    </div>
+  )
+}

@@ -7,7 +7,8 @@ import {
   card,
   cardTitle,
 } from "../../styles/common";
-import Typeahead品目 from "../品目/Typeahead品目.astro";
+import Typeahead from "./Typeahead.astro";
+import { 品目Typeahead } from "../../features/shared/typeahead-configs";
 
 interface Props {
   columns: Column[];
@@ -80,14 +81,14 @@ const formLayout = "flex flex-col gap-4";
           );
         }
 
-        if (type === "itemCode") {
+        if (type === "itemCode" || type === "typeahead") {
           return (
             <label class={labelStyle}>
               <span>
                 {col.label}{" "}
                 {col.required && <span class={requiredStar}>*</span>}
               </span>
-              <Typeahead品目 />
+              <Typeahead config={品目Typeahead} />
             </label>
           );
         }

@@ -17,9 +17,13 @@ func Execute一覧SQL取引(ctx context.Context, db *sql.DB, input 一覧Input�
 
 	where := "WHERE 1=1"
 	args := []any{}
-	if input.Search != "" {
-		where += " AND (date ILIKE $1)"
-		args = append(args, "%"+input.Search+"%")
+	if input.DateFrom != "" {
+		args = append(args, input.DateFrom)
+		where += fmt.Sprintf(" AND date >= $%d", len(args))
+	}
+	if input.DateTo != "" {
+		args = append(args, input.DateTo)
+		where += fmt.Sprintf(" AND date <= $%d", len(args))
 	}
 
 	var total int

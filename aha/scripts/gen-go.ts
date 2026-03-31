@@ -17,7 +17,7 @@
  *
  * ルール:
  *   *_gen.*     → 毎回上書き
- *   *_manual_*  → 初回のみ生成 (既存保護)
+ *   *_cus_*  → 初回のみ生成 (既存保護)
  *   router.go, main.go, ui/layout/, ui/components/ → 生成しない
  */
 
@@ -133,6 +133,16 @@ interface ColumnDef {
   placeholder?: string;
 }
 
+interface SearchFieldDef {
+  searchType: "text" | "date" | "select";
+  param: string;
+  label: string;
+  placeholder: string;
+  flexClass: string;
+  dbColumns: string[];
+  options: { value: string; label: string }[];
+}
+
 interface EntityConfigDef {
   idPrefix: string;
   baseUrl: string; // /api/品目 等 — 日本語
@@ -141,6 +151,8 @@ interface EntityConfigDef {
   formTitle: string;
   emptyMessage: string;
   deleteConfirmTemplate: string;
+  searchFields: SearchFieldDef[];
+  searchContainerId: string;
 }
 
 // ─── schema.ts パーサー ────────────────────
@@ -277,15 +289,106 @@ function extractNumber(obj: string, key: string): string | null {
 }
 
 function parseEntityConfig(content: string): EntityConfigDef {
+  const idPrefix = extractFromConfig(content, "idPrefix") || "row";
   return {
-    idPrefix: extractFromConfig(content, "idPrefix") || "row",
+    idPrefix,
     baseUrl: extractFromConfig(content, "baseUrl") || "/api/unknown",
     bodyTargetId: extractFromConfig(content, "bodyTargetId") || "data-body",
     paginationId: extractFromConfig(content, "paginationId") || "data-pagination",
     formTitle: extractFromConfig(content, "formTitle") || "新規登録",
     emptyMessage: extractFromConfig(content, "emptyMessage") || "データがありません",
     deleteConfirmTemplate: extractFromConfig(content, "deleteConfirmTemplate") || "削除しますか？",
+    searchFields: parseSearchFields(content),
+    searchContainerId: extractFromConfig(content, "searchContainerId") || `${idPrefix}-search`,
   };
+}
+
+/** 文字列リテラルを考慮した bracket depth matching */
+function extractBracketContentStringSafe(s: string, offset: number, open = "[", close = "]"): string | null {
+  let start = s.indexOf(open, offset);
+  if (start < 0) return null;
+  start++;
+  let depth = 1;
+  let inString = false;
+  let strChar = "";
+  for (let i = start; i < s.length; i++) {
+    const ch = s[i];
+    if (inString) {
+      if (ch === "\\" ) { i++; continue; } // skip escaped
+      if (ch === strChar) inString = false;
+      continue;
+    }
+    if (ch === '"' || ch === "'" || ch === "`") { inString = true; strChar = ch; continue; }
+    if (ch === open) depth++;
+    else if (ch === close) {
+      depth--;
+      if (depth === 0) return s.slice(start, i);
+    }
+  }
+  return null;
+}
+
+/** searchFields 配列をパースする */
+function parseSearchFields(content: string): SearchFieldDef[] {
+  const fields: SearchFieldDef[] = [];
+  const startIdx = content.indexOf("searchFields:");
+  if (startIdx < 0) return fields;
+  const body = extractBracketContentStringSafe(content, startIdx, "[", "]") || "";
+  if (!body) return fields;
+
+  // 各オブジェクトを balanced braces (string-safe) でパース
+  let pos = 0;
+  while (pos < body.length) {
+    const objBody = extractBracketContentStringSafe(body, pos, "{", "}");
+    if (objBody === null) break;
+    // pos を進める
+    const braceStart = body.indexOf("{", pos);
+    pos = braceStart + objBody.length + 2; // skip { + body + }
+
+    const searchType = extractString(objBody, "searchType") as "text" | "date" | "select" | null;
+    const param = extractString(objBody, "param");
+    const label = extractString(objBody, "label");
+    if (!searchType || !param || !label) continue;
+
+    // dbColumns をパース
+    const dbColumns: string[] = [];
+    const dbColIdx = objBody.indexOf("dbColumns:");
+    if (dbColIdx >= 0) {
+      const dbColBody = extractBracketContentStringSafe(objBody, dbColIdx, "[", "]");
+      if (dbColBody) {
+        const colStrRegex = /"([^"]*)"/g;
+        let cm;
+        while ((cm = colStrRegex.exec(dbColBody)) !== null) {
+          dbColumns.push(cm[1]);
+        }
+      }
+    }
+
+    // options をパース (select 用)
+    const options: { value: string; label: string }[] = [];
+    const optIdx = objBody.indexOf("options:");
+    if (optIdx >= 0) {
+      const optBody = extractBracketContentStringSafe(objBody, optIdx, "[", "]");
+      if (optBody) {
+        const optRegex = /\{\s*value:\s*"([^"]*)",\s*label:\s*"([^"]*)"\s*\}/g;
+        let om;
+        while ((om = optRegex.exec(optBody)) !== null) {
+          options.push({ value: om[1], label: om[2] });
+        }
+      }
+    }
+
+    fields.push({
+      searchType,
+      param,
+      label,
+      placeholder: extractString(objBody, "placeholder") || "",
+      flexClass: extractString(objBody, "flexClass") || "",
+      dbColumns,
+      options,
+    });
+  }
+  return fields;
 }
 
 function extractFromConfig(content: string, key: string): string | null {
@@ -315,9 +418,44 @@ function simpleGoType(goType: string): string {
   return goType;
 }
 
+/** searchFields から一覧Input struct を生成 */
+function gen一覧InputStruct(JP: string, searchFields?: SearchFieldDef[]): string {
+  if (!searchFields || searchFields.length === 0) {
+    return `type 一覧Input${JP} struct { Page int; Size int; Search string }`;
+  }
+  const fieldLines = searchFields.map((sf) => {
+    const goFieldName = toPascalCase(sf.param);
+    return `\t${goFieldName} string`;
+  });
+  return [
+    `type 一覧Input${JP} struct {`,
+    "\tPage int",
+    "\tSize int",
+    ...fieldLines,
+    "}",
+  ].join("\n");
+}
+
+/** param name から Go のフィールド初期化式を生成 */
+function genSearchParamsParse(JP: string, searchFields?: SearchFieldDef[]): string[] {
+  const lines: string[] = [];
+  if (!searchFields || searchFields.length === 0) {
+    lines.push(`\tsearch := r.URL.Query().Get("q")`);
+    lines.push(`\tresult, err := h.Get一覧${JP}(r.Context(), 一覧Input${JP}{Page: page, Size: size, Search: search})`);
+  } else {
+    for (const sf of searchFields) {
+      const goField = toPascalCase(sf.param);
+      lines.push(`\t${sf.param}Param := r.URL.Query().Get("${sf.param}")`);
+    }
+    const fieldInits = searchFields.map((sf) => `${toPascalCase(sf.param)}: ${sf.param}Param`).join(", ");
+    lines.push(`\tresult, err := h.Get一覧${JP}(r.Context(), 一覧Input${JP}{Page: page, Size: size, ${fieldInits}})`);
+  }
+  return lines;
+}
+
 // ─── Go コード生成: types_gen.go ───────────
 
-function genTypes(entity: EntityDef, fm: FeatureMapping): string {
+function genTypes(entity: EntityDef, fm: FeatureMapping, searchFields?: SearchFieldDef[]): string {
   const JP = fm.jpName;
   const lines: string[] = [];
 
@@ -365,7 +503,7 @@ function genTypes(entity: EntityDef, fm: FeatureMapping): string {
 
   lines.push(`type 削除Input${JP} struct { ID int }`);
   lines.push(`type 一括削除Input${JP} struct { IDs []int }`);
-  lines.push(`type 一覧Input${JP} struct { Page int; Size int; Search string }`);
+  lines.push(gen一覧InputStruct(JP, searchFields));
   lines.push("");
 
   // Response / ListResult
@@ -467,8 +605,9 @@ function genHandler(fm: FeatureMapping, config: EntityConfigDef | null): string 
   lines.push("\tif page < 1 { page = 1 }");
   lines.push(`\tsize, _ := strconv.Atoi(r.URL.Query().Get("size"))`);
   lines.push("\tif size < 1 { size = 20 }");
-  lines.push(`\tsearch := r.URL.Query().Get("q")`);
-  lines.push(`\tresult, err := h.Get一覧${JP}(r.Context(), 一覧Input${JP}{Page: page, Size: size, Search: search})`);
+  for (const l of genSearchParamsParse(JP, config?.searchFields)) {
+    lines.push(l);
+  }
   lines.push("\tif err != nil {");
   lines.push("\t\thttp.Error(w, err.Error(), http.StatusInternalServerError)");
   lines.push("\t\treturn");
@@ -612,10 +751,16 @@ function genViewsTempl(entity: EntityDef, fm: FeatureMapping, columns: ColumnDef
     disabledPageBtn: "w-8 h-8 flex items-center justify-center text-xs rounded-lg text-outline-variant cursor-default border-none",
   };
 
-  // 検索プレースホルダ — テキスト列ラベルから生成
-  const textLabels = dataCols.filter((c) => c.type === "text" || c.type === undefined).map((c) => c.label).slice(0, 2);
-  const searchPlaceholder = textLabels.length > 0 ? `${textLabels.join("・")}で検索…` : "検索…";
-  const searchContainerId = `${JP}-search`;
+  // 検索フィールド — config.searchFields があればそれを使い、なければテキスト列から自動生成
+  const searchFields = config.searchFields;
+  const searchContainerId = config.searchContainerId || `${JP}-search`;
+
+  // フォールバック用: searchFields が空の場合に旧方式の単一検索フィールドを生成
+  let fallbackSearchPlaceholder = "";
+  if (searchFields.length === 0) {
+    const textLabels = dataCols.filter((c) => c.type === "text" || c.type === undefined).map((c) => c.label).slice(0, 2);
+    fallbackSearchPlaceholder = textLabels.length > 0 ? `${textLabels.join("・")}で検索…` : "検索…";
+  }
 
   const lines: string[] = [];
   lines.push("// Code generated by gen-go.ts. DO NOT EDIT.");
@@ -638,10 +783,34 @@ function genViewsTempl(entity: EntityDef, fm: FeatureMapping, columns: ColumnDef
   // 検索パネル
   lines.push(`\t\t\t<div id="${searchContainerId}" class="${TW.card}">`);
   lines.push(`\t\t\t\t<div class="flex gap-4 flex-wrap">`);
-  lines.push(`\t\t\t\t\t<div class="${TW.labelStyle} flex-1 min-w-[12.5rem]">`);
-  lines.push(`\t\t\t\t\t\t<span>検索</span>`);
-  lines.push(`\t\t\t\t\t\t<input type="search" name="q" placeholder="${searchPlaceholder}" class="${TW.inputStyle}" hx-get="${apiPath}" hx-trigger="input changed delay:300ms, search" hx-target="#${config.bodyTargetId}" hx-swap="innerHTML" hx-include="#${searchContainerId}" hx-vals='{"page": "1"}'/>`);
-  lines.push(`\t\t\t\t\t</div>`);
+  if (searchFields.length > 0) {
+    for (const sf of searchFields) {
+      const flexCls = sf.flexClass ? ` ${sf.flexClass}` : "";
+      const trigger = sf.searchType === "text" ? "input changed delay:300ms, search" : "change";
+      const inputType = sf.searchType === "date" ? "date" : "search";
+      if (sf.searchType === "select") {
+        lines.push(`\t\t\t\t\t<div class="${TW.labelStyle}${flexCls}">`);
+        lines.push(`\t\t\t\t\t\t<span>${sf.label}</span>`);
+        lines.push(`\t\t\t\t\t\t<select name="${sf.param}" class="${TW.inputStyle}" hx-get="${apiPath}" hx-trigger="change" hx-target="#${config.bodyTargetId}" hx-swap="innerHTML" hx-include="#${searchContainerId}" hx-vals='{"page": "1"}'>`);
+        lines.push(`\t\t\t\t\t\t\t<option value="">すべて</option>`);
+        for (const opt of sf.options) {
+          lines.push(`\t\t\t\t\t\t\t<option value="${opt.value}">${opt.label}</option>`);
+        }
+        lines.push(`\t\t\t\t\t\t</select>`);
+        lines.push(`\t\t\t\t\t</div>`);
+      } else {
+        lines.push(`\t\t\t\t\t<div class="${TW.labelStyle}${flexCls}">`);
+        lines.push(`\t\t\t\t\t\t<span>${sf.label}</span>`);
+        lines.push(`\t\t\t\t\t\t<input type="${inputType}" name="${sf.param}" placeholder="${sf.placeholder}" class="${TW.inputStyle}" hx-get="${apiPath}" hx-trigger="${trigger}" hx-target="#${config.bodyTargetId}" hx-swap="innerHTML" hx-include="#${searchContainerId}" hx-vals='{"page": "1"}'/>`);
+        lines.push(`\t\t\t\t\t</div>`);
+      }
+    }
+  } else {
+    lines.push(`\t\t\t\t\t<div class="${TW.labelStyle} flex-1 min-w-[12.5rem]">`);
+    lines.push(`\t\t\t\t\t\t<span>検索</span>`);
+    lines.push(`\t\t\t\t\t\t<input type="search" name="q" placeholder="${fallbackSearchPlaceholder}" class="${TW.inputStyle}" hx-get="${apiPath}" hx-trigger="input changed delay:300ms, search" hx-target="#${config.bodyTargetId}" hx-swap="innerHTML" hx-include="#${searchContainerId}" hx-vals='{"page": "1"}'/>`);
+    lines.push(`\t\t\t\t\t</div>`);
+  }
   lines.push(`\t\t\t\t</div>`);
   lines.push(`\t\t\t</div>`);
   // ツールバー + フォーム
@@ -1054,14 +1223,17 @@ function parseHeaderBodyConfig(featureName: string): HeaderBodyDef | null {
   if (!content.includes('"header-body"')) return null;
 
   // EntityConfig 部分を抽出
+  const idPrefix = extractFromConfig(content, "idPrefix") || "row";
   const entityConfig: EntityConfigDef = {
-    idPrefix: extractFromConfig(content, "idPrefix") || "row",
+    idPrefix,
     baseUrl: extractFromConfig(content, "baseUrl") || `/api/${featureName}`,
     bodyTargetId: extractFromConfig(content, "bodyTargetId") || "data-body",
     paginationId: extractFromConfig(content, "paginationId") || "data-pagination",
     formTitle: extractFromConfig(content, "formTitle") || `新規${featureName}登録`,
     emptyMessage: extractFromConfig(content, "emptyMessage") || `${featureName}がありません`,
     deleteConfirmTemplate: extractFromConfig(content, "deleteConfirmTemplate") || "削除しますか？",
+    searchFields: parseSearchFields(content),
+    searchContainerId: extractFromConfig(content, "searchContainerId") || `${idPrefix}-search`,
   };
 
   // headerColumns を抽出
@@ -1292,7 +1464,7 @@ function genHeaderBodyTypes(parentEntity: EntityDef, childEntities: Map<string, 
 
   lines.push(`type 削除Input${JP} struct { ID int }`);
   lines.push(`type 一括削除Input${JP} struct { IDs []int }`);
-  lines.push(`type 一覧Input${JP} struct { Page int; Size int; Search string }`);
+  lines.push(gen一覧InputStruct(JP, hbDef.entityConfig.searchFields));
   lines.push("");
 
   // Response types
@@ -1447,8 +1619,9 @@ function genHeaderBodyHandler(fm: FeatureMapping, config: EntityConfigDef): stri
   lines.push("\tif page < 1 { page = 1 }");
   lines.push(`\tsize, _ := strconv.Atoi(r.URL.Query().Get("size"))`);
   lines.push("\tif size < 1 { size = 20 }");
-  lines.push(`\tsearch := r.URL.Query().Get("q")`);
-  lines.push(`\tresult, err := h.Get一覧${JP}(r.Context(), 一覧Input${JP}{Page: page, Size: size, Search: search})`);
+  for (const l of genSearchParamsParse(JP, config.searchFields)) {
+    lines.push(l);
+  }
   lines.push("\tif err != nil {");
   lines.push("\t\thttp.Error(w, err.Error(), http.StatusInternalServerError)");
   lines.push("\t\treturn");
@@ -2018,10 +2191,11 @@ function generateFeature(featureName: string): void {
   // flat CRUD パターン
   const configResult = parseConfigFile(featureName);
   const columns = configResult?.columns ?? [];
-  const entityConfig = configResult?.entity ?? {
+  const entityConfig: EntityConfigDef = configResult?.entity ?? {
     idPrefix: "row", baseUrl: `/api/${featureName}`, bodyTargetId: "data-body",
     paginationId: "data-pagination", formTitle: `新規${featureName}登録`,
     emptyMessage: `${featureName}がありません`, deleteConfirmTemplate: "削除しますか？",
+    searchFields: [], searchContainerId: "row-search",
   };
 
   fs.mkdirSync(featuresDir, { recursive: true });
@@ -2030,14 +2204,14 @@ function generateFeature(featureName: string): void {
   const files: string[] = [];
 
   // _gen.* — 毎回上書き
-  write(path.join(featuresDir, `${prefix}_types_gen.go`), genTypes(entity, fm), files);
+  write(path.join(featuresDir, `${prefix}_types_gen.go`), genTypes(entity, fm, entityConfig.searchFields), files);
   write(path.join(featuresDir, `${prefix}_service_gen.go`), genService(fm), files);
   write(path.join(featuresDir, `${prefix}_handler_gen.go`), genHandler(fm, entityConfig), files);
   write(path.join(featuresDir, `${prefix}_views_gen.templ`), genViewsTempl(entity, fm, columns, entityConfig), files);
 
-  // _manual_* — 初回のみ
-  writeOnce(path.join(featuresDir, `${prefix}_manual_service.go`), genManualService(fm), files);
-  writeOnce(path.join(featuresDir, `${prefix}_manual_sql.go`), genManualSQL(fm), files);
+  // _cus_* — 初回のみ
+  writeOnce(path.join(featuresDir, `${prefix}_cus_service.go`), genManualService(fm), files);
+  writeOnce(path.join(featuresDir, `${prefix}_cus_sql.go`), genManualSQL(fm), files);
 
   console.log("  files:");
   for (const f of files) console.log(`    ${path.relative(gothRoot, f)}`);
@@ -2068,9 +2242,9 @@ function generateHeaderBodyFeature(featureName: string, fm: FeatureMapping, pare
   write(path.join(featuresDir, `${prefix}_handler_gen.go`), genHeaderBodyHandler(fm, hbDef.entityConfig), files);
   write(path.join(featuresDir, `${prefix}_views_gen.templ`), genHeaderBodyViewsTempl(parentEntity, fm, hbDef), files);
 
-  // _manual_* — 初回のみ
-  writeOnce(path.join(featuresDir, `${prefix}_manual_service.go`), genHeaderBodyManualService(fm), files);
-  writeOnce(path.join(featuresDir, `${prefix}_manual_sql.go`), genHeaderBodyManualSQL(fm), files);
+  // _cus_* — 初回のみ
+  writeOnce(path.join(featuresDir, `${prefix}_cus_service.go`), genHeaderBodyManualService(fm), files);
+  writeOnce(path.join(featuresDir, `${prefix}_cus_sql.go`), genHeaderBodyManualSQL(fm), files);
 
   console.log("  files (header-body):");
   for (const f of files) console.log(`    ${path.relative(gothRoot, f)}`);

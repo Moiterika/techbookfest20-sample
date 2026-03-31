@@ -1,5 +1,58 @@
 /** CRUD 共通コンポーネントで使うカラム定義 */
 
+// ─── 検索フィールド定義 ───
+
+interface SearchFieldBase {
+  /** クエリパラメータ名 (例: "q", "category") */
+  param: string;
+  /** 表示ラベル */
+  label: string;
+  /** プレースホルダ */
+  placeholder?: string;
+  /** Flex レイアウト用クラス (例: "flex-1 min-w-[12.5rem]") */
+  flexClass?: string;
+}
+
+interface TextSearchField extends SearchFieldBase {
+  searchType: "text";
+  /** gen-go 用: ILIKE 検索対象カラム (例: ["code", "name"]) */
+  dbColumns?: string[];
+}
+
+interface DateSearchField extends SearchFieldBase {
+  searchType: "date";
+}
+
+interface SelectSearchField extends SearchFieldBase {
+  searchType: "select";
+  options: { value: string; label: string }[];
+}
+
+export type SearchField = TextSearchField | DateSearchField | SelectSearchField;
+
+// ─── Typeahead 設定 ───
+
+export interface TypeaheadConfig {
+  /** エンティティ名 (例: "品目", "取引区分") — API パス導出に使用 */
+  entityName: string;
+  /** DB テーブル名 (例: "items") — コード生成で使用 */
+  tableName: string;
+  /** ILIKE 検索対象カラム (例: ["code", "name"]) */
+  searchColumns: string[];
+  /** ドロップダウンの表示カラム */
+  displayColumns: { key: string; bold?: boolean }[];
+  /** バッジに表示するキー (例: "code") */
+  badgeDisplayKey: string;
+  /** バッジ横の名称ラベルキー (例: "name") */
+  nameLabelKey?: string;
+  /** 選択時に追加で渡すデータキー (例: ["price"]) */
+  extraDataKeys?: string[];
+  /** 検索入力のプレースホルダ */
+  placeholder?: string;
+}
+
+// ─── カラム定義 ───
+
 /** 基本カラムプロパティ */
 interface ColumnBase {
   key: string;
@@ -41,7 +94,16 @@ interface BarcodeColumn extends ColumnBase {
   type: "barcode";
 }
 
-/** 品目タイプアヘッド選択 */
+/** タイプアヘッド選択（汎用） */
+interface TypeaheadColumn extends ColumnBase {
+  type: "typeahead";
+  /** 参照先エンティティ名 (例: "品目", "取引区分") */
+  typeaheadEntity: string;
+  /** hidden input の name (例: "itemId") */
+  valueName?: string;
+}
+
+/** @deprecated TypeaheadColumn を使用してください */
 interface ItemCodeColumn extends ColumnBase {
   type: "itemCode";
   /** hidden input の name（デフォルト: "itemId"） */
@@ -84,6 +146,7 @@ export type Column =
   | NumberColumn
   | DateColumn
   | BarcodeColumn
+  | TypeaheadColumn
   | ItemCodeColumn
   | ReadonlyLookupColumn
   | ComputedColumn
@@ -117,6 +180,10 @@ export interface HeaderBodyConfig extends EntityConfig {
 
 /** エンティティ固有の設定 */
 export interface EntityConfig {
+  /** 検索パネルのフィールド定義。未定義なら検索パネル非表示 */
+  searchFields?: SearchField[];
+  /** 検索パネルの container ID（デフォルト: `${idPrefix}-search`） */
+  searchContainerId?: string;
   /** DB テーブル名 (例: "items", "transactions") — コード生成で使用 */
   tableName: string;
   /** ID プレフィックス (例: "item", "tx") */

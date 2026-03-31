@@ -37,7 +37,12 @@ type 更新Input品目 struct {
 
 type 削除Input品目 struct { ID int }
 type 一括削除Input品目 struct { IDs []int }
-type 一覧Input品目 struct { Page int; Size int; Search string }
+type 一覧Input品目 struct {
+	Page int
+	Size int
+	Q string
+	Category string
+}
 
 type Response品目 struct { Row品目 }
 

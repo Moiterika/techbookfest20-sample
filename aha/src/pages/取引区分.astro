@@ -5,6 +5,7 @@ import { pageContainer, pageTitle } from "../styles/common";
 import CrudToolbar from "../components/crud/CrudToolbar.astro";
 import CrudTable from "../components/crud/CrudTable.astro";
 import CrudForm from "../components/crud/CrudForm.astro";
+import SearchPanel from "../components/crud/SearchPanel.astro";
 import { 取引区分カラム, 取引区分エンティティ } from "../features/取引区分";
 ---
 
@@ -12,6 +13,8 @@ import { 取引区分カラム, 取引区分エンティティ } from "../featur
   <main class={pageContainer}>
     <Nav current="transaction-types" />
     <h1 class={pageTitle}>取引区分管理</h1>
+
+    <SearchPanel entity={取引区分エンティティ} />
 
     <div x-data="{ open: false }">
       <CrudToolbar

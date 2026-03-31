@@ -27,6 +27,24 @@ export const 品目カラム: Column[] = [
 ];
 
 export const 品目エンティティ: EntityConfig = {
+  searchFields: [
+    {
+      searchType: "text",
+      param: "q",
+      label: "検索",
+      placeholder: "品目コード・品目名で検索…",
+      flexClass: "flex-1 min-w-[12.5rem]",
+      dbColumns: ["code", "name"],
+    },
+    {
+      searchType: "text",
+      param: "category",
+      label: "カテゴリ",
+      placeholder: "カテゴリ",
+      flexClass: "min-w-[10rem]",
+      dbColumns: ["category"],
+    },
+  ],
   tableName: "items",
   idPrefix: "item",
   baseUrl: "/api/品目",

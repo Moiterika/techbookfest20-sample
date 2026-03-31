@@ -33,7 +33,9 @@
       "Bash(bun fmt:*)",
       "Bash(find /workspace/aha -name playwright* -o -name *test* -o -name *spec*)",
       "Bash(bunx --bun astro build)",
-      "Bash(bun scripts/gen-go.ts --all)"
+      "Bash(bun scripts/gen-go.ts --all)",
+      "Bash(grep)",
+      "Bash(ls)"
     ]
   },
   "enabledMcpjsonServers": [

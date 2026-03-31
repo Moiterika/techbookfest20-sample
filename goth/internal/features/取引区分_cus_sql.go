@@ -17,9 +17,9 @@ func Execute一覧SQL取引区分(ctx context.Context, db *sql.DB, input 一覧I
 
 	where := "WHERE 1=1"
 	args := []any{}
-	if input.Search != "" {
-		where += " AND (code ILIKE $1 OR name ILIKE $1)"
-		args = append(args, "%"+input.Search+"%")
+	if input.Q != "" {
+		args = append(args, "%"+input.Q+"%")
+		where += fmt.Sprintf(" AND (code ILIKE $%d OR name ILIKE $%d)", len(args), len(args))
 	}
 
 	var total int

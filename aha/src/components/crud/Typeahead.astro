@@ -1,13 +1,15 @@
 ---
-import Typeahead品目Search from "./Typeahead品目Search.astro";
-import Typeahead品目Badge from "./Typeahead品目Badge.astro";
+import type { TypeaheadConfig } from "./types";
+import TypeaheadSearch from "./TypeaheadSearch.astro";
+import TypeaheadBadge from "./TypeaheadBadge.astro";
 
 interface Props {
+  config: TypeaheadConfig;
   name?: string;
   selectedId?: number;
   selectedCode?: string;
   selectedName?: string;
-  selectedPrice?: number;
+  selectedExtra?: Record<string, string>;
   formId?: string;
   compact?: boolean;
   hideNameLabel?: boolean;
@@ -15,16 +17,19 @@ interface Props {
 }
 
 const {
+  config,
   name = "itemId",
   selectedId,
   selectedCode = "",
   selectedName = "",
-  selectedPrice,
+  selectedExtra = {},
   formId,
   compact = false,
   hideNameLabel = false,
   lookupTargetId,
 } = Astro.props;
+
+const typeaheadUrl = `/api/${config.entityName}/typeahead?action=clear`;
 
 const hxVals = JSON.stringify({
   taName: name,
@@ -32,12 +37,21 @@ const hxVals = JSON.stringify({
   taCompact: String(compact),
   taHideNameLabel: String(hideNameLabel),
   taLookupId: lookupTargetId ?? "",
+  taEntity: config.entityName,
 });
+
+// extraDataKeys からイベント detail を構築する after-swap ハンドラ
+const extraParts = (config.extraDataKeys ?? [])
+  .map((k) => `${k}: Number(el.dataset.selected${k.charAt(0).toUpperCase() + k.slice(1)} || 0)`)
+  .join(", ");
+const detailObj = extraParts
+  ? `{ name: el.dataset.selectedName, ${extraParts} }`
+  : "{ name: el.dataset.selectedName }";
 
 const afterSwapHandler = [
   "const el = this.querySelector('[data-selected-name]');",
   "if (el) {",
-  "  const d = { name: el.dataset.selectedName, price: Number(el.dataset.selectedPrice || 0) };",
+  `  const d = ${detailObj};`,
   "  this.dispatchEvent(new CustomEvent('item-selected', { detail: d, bubbles: true }));",
   "}",
 ].join(" ");
@@ -48,7 +62,7 @@ const afterSwapHandler = [
   class="relative"
   hx-vals={hxVals}
   hx-target="this"
-  hx-get="/api/品目/typeahead?action=clear"
+  hx-get={typeaheadUrl}
   hx-trigger="typeahead-reset from:body"
   hx-swap="innerHTML"
   hx-disinherit="hx-target"
@@ -56,17 +70,18 @@ const afterSwapHandler = [
 >
   {
     selectedId ? (
-      <Typeahead品目Badge
+      <TypeaheadBadge
+        config={config}
         name={name}
         selectedId={selectedId}
         selectedCode={selectedCode}
         selectedName={selectedName}
-        selectedPrice={selectedPrice}
+        selectedExtra={selectedExtra}
         formId={formId}
         hideNameLabel={hideNameLabel}
       />
     ) : (
-      <Typeahead品目Search name={name} formId={formId} compact={compact} />
+      <TypeaheadSearch config={config} name={name} formId={formId} compact={compact} />
     )
   }
 </div>

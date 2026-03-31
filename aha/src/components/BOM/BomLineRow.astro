@@ -1,7 +1,8 @@
 ---
 import { tdCell, row, inputStyleSm } from "../../styles/common";
 import { unitLabels, type Unit } from "../../features/shared/types/unit";
-import Typeahead品目 from "../品目/Typeahead品目.astro";
+import Typeahead from "../crud/Typeahead.astro";
+import { 品目Typeahead } from "../../features/shared/typeahead-configs";
 
 interface Props {
   section: "output" | "input";
@@ -41,7 +42,8 @@ const lookupText = "text-sm text-outline";
 <tr id={`bom-line-${rowKey}`} class={row}>
   <input type="hidden" name="lineType" value={lineType} />
   <td class={tdCell}>
-    <Typeahead品目
+    <Typeahead
+      config={品目Typeahead}
       name="lineItemId"
       selectedId={itemId}
       selectedCode={itemCode ?? ""}

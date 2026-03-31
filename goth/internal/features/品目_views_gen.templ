@@ -13,11 +13,15 @@ templ RenderPage品目() {
 				<a href="/" class="text-primary no-underline hover:underline">← ホーム</a>
 			</nav>
 			<h1 class="text-2xl font-bold mb-8 text-on-surface tracking-tight">品目管理</h1>
-			<div id="品目-search" class="mb-6 p-6 rounded-xl bg-white">
+			<div id="item-search" class="mb-6 p-6 rounded-xl bg-white">
 				<div class="flex gap-4 flex-wrap">
 					<div class="flex flex-col gap-2 text-[0.625rem] font-bold uppercase tracking-wider text-outline flex-1 min-w-[12.5rem]">
 						<span>検索</span>
-						<input type="search" name="q" placeholder="品目コード・品目名で検索…" class="rounded-lg text-sm text-on-surface outline-none bg-surface-container-low border-2 border-transparent transition-[border-color,background-color] duration-200 focus:border-b-primary focus:bg-white px-3 py-2.5" hx-get="/api/品目" hx-trigger="input changed delay:300ms, search" hx-target="#items-body" hx-swap="innerHTML" hx-include="#品目-search" hx-vals='{"page": "1"}'/>
+						<input type="search" name="q" placeholder="品目コード・品目名で検索…" class="rounded-lg text-sm text-on-surface outline-none bg-surface-container-low border-2 border-transparent transition-[border-color,background-color] duration-200 focus:border-b-primary focus:bg-white px-3 py-2.5" hx-get="/api/品目" hx-trigger="input changed delay:300ms, search" hx-target="#items-body" hx-swap="innerHTML" hx-include="#item-search" hx-vals='{"page": "1"}'/>
+					</div>
+					<div class="flex flex-col gap-2 text-[0.625rem] font-bold uppercase tracking-wider text-outline min-w-[10rem]">
+						<span>カテゴリ</span>
+						<input type="search" name="category" placeholder="カテゴリ" class="rounded-lg text-sm text-on-surface outline-none bg-surface-container-low border-2 border-transparent transition-[border-color,background-color] duration-200 focus:border-b-primary focus:bg-white px-3 py-2.5" hx-get="/api/品目" hx-trigger="input changed delay:300ms, search" hx-target="#items-body" hx-swap="innerHTML" hx-include="#item-search" hx-vals='{"page": "1"}'/>
 					</div>
 				</div>
 			</div>

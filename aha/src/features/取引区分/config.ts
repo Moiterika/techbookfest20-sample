@@ -31,6 +31,16 @@ export const 取引区分カラム: Column[] = [
 ];
 
 export const 取引区分エンティティ: EntityConfig = {
+  searchFields: [
+    {
+      searchType: "text",
+      param: "q",
+      label: "検索",
+      placeholder: "コード・名称で検索…",
+      flexClass: "flex-1 min-w-[12.5rem]",
+      dbColumns: ["code", "name"],
+    },
+  ],
   tableName: "transaction_types",
   idPrefix: "txtype",
   baseUrl: "/api/取引区分",

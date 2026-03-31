@@ -45,10 +45,10 @@ export const GET: APIRoute = async ({ url }) => {
 
   const suffix = new Date().toISOString().slice(0, 10).replace(/-/g, "");
   if (format === "xlsx")
-    return xlsxResponse(data, `transactions_${suffix}.xlsx`);
+    return xlsxResponse(data, `取引_${suffix}.xlsx`);
   if (format === "tsv")
-    return textResponse(data, "\t", `transactions_${suffix}.tsv`);
-  return textResponse(data, ",", `transactions_${suffix}.csv`);
+    return textResponse(data, "\t", `取引_${suffix}.tsv`);
+  return textResponse(data, ",", `取引_${suffix}.csv`);
 };
 
 function textResponse(
@@ -76,7 +76,7 @@ function textResponse(
   return new Response("\uFEFF" + text, {
     headers: {
       "Content-Type": mime,
-      "Content-Disposition": `attachment; filename="${filename}"`,
+      "Content-Disposition": `attachment; filename*=UTF-8''${encodeURIComponent(filename)}`,
     },
   });
 }
@@ -90,7 +90,7 @@ function xlsxResponse(data: (string | number)[][], filename: string) {
     headers: {
       "Content-Type":
         "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
-      "Content-Disposition": `attachment; filename="${filename}"`,
+      "Content-Disposition": `attachment; filename*=UTF-8''${encodeURIComponent(filename)}`,
     },
   });
 }

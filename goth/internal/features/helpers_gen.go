@@ -68,6 +68,6 @@ func WriteXLSX(w http.ResponseWriter, filename string, headers []string, rows []
 		}
 	}
 	w.Header().Set("Content-Type", "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet")
-	w.Header().Set("Content-Disposition", fmt.Sprintf("attachment; filename=\"%s\"", filename))
+	w.Header().Set("Content-Disposition", "attachment; filename*=UTF-8''"+url.PathEscape(filename))
 	return f.Write(w)
 }

@@ -1,52 +1,44 @@
 import type { APIRoute } from "astro";
 import { db } from "../../../db";
-import { 品目テーブル } from "../../../db/schema";
+import { 取引区分テーブル } from "../../../db/schema";
 import { and, desc, ilike, or } from "drizzle-orm";
 import * as XLSX from "xlsx";
 
-const HEADERS = ["品目コード", "品目名", "カテゴリ", "単価", "バーコード"];
+const HEADERS = ["取引区分コード", "取引区分名称", "受払係数"];
 
-/** GET /api/品目/export?format=csv|tsv|xlsx&q=... */
+/** GET /api/取引区分/export?format=csv|tsv|xlsx&q=... */
 export const GET: APIRoute = async ({ url }) => {
   const format = url.searchParams.get("format") || "csv";
   const query = (url.searchParams.get("q") || "").trim();
-  const カテゴリ = (url.searchParams.get("カテゴリ") || "").trim();
 
   const conditions = [];
   if (query) {
     conditions.push(
       or(
-        ilike(品目テーブル.コード, `%${query}%`),
-        ilike(品目テーブル.名称, `%${query}%`),
+        ilike(取引区分テーブル.コード, `%${query}%`),
+        ilike(取引区分テーブル.名称, `%${query}%`),
       ),
     );
-  }
-  if (カテゴリ) {
-    conditions.push(ilike(品目テーブル.カテゴリ, `%${カテゴリ}%`));
   }
   const searchFilter = conditions.length > 0 ? and(...conditions) : undefined;
 
   const rows = await db
     .select()
-    .from(品目テーブル)
+    .from(取引区分テーブル)
     .where(searchFilter)
-    .orderBy(desc(品目テーブル.id));
+    .orderBy(desc(取引区分テーブル.id));
 
   const data: (string | number)[][] = [
     HEADERS,
-    ...rows.map((r) => [
-      r.コード,
-      r.名称,
-      r.カテゴリ ?? "",
-      r.単価,
-      r.バーコード ?? "",
-    ]),
+    ...rows.map((r) => [r.コード, r.名称, r.係数]),
   ];
 
   const suffix = new Date().toISOString().slice(0, 10).replace(/-/g, "");
-  if (format === "xlsx") return xlsxResponse(data, `品目_${suffix}.xlsx`);
-  if (format === "tsv") return textResponse(data, "\t", `品目_${suffix}.tsv`);
-  return textResponse(data, ",", `品目_${suffix}.csv`);
+  if (format === "xlsx")
+    return xlsxResponse(data, `取引区分_${suffix}.xlsx`);
+  if (format === "tsv")
+    return textResponse(data, "\t", `取引区分_${suffix}.tsv`);
+  return textResponse(data, ",", `取引区分_${suffix}.csv`);
 };
 
 function textResponse(

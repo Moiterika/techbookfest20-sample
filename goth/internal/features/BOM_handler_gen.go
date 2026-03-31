@@ -5,6 +5,7 @@ import (
 	"encoding/csv"
 	"fmt"
 	"net/http"
+	"net/url"
 	"strconv"
 	"time"
 )
@@ -170,7 +171,7 @@ func (h *HandlerBOM) HandleExportBOM(w http.ResponseWriter, r *http.Request) {
 		filename += ".csv"
 	}
 	w.Header().Set("Content-Type", mime)
-	w.Header().Set("Content-Disposition", "attachment; filename=\""+filename+"\"")
+	w.Header().Set("Content-Disposition", "attachment; filename*=UTF-8''"+url.PathEscape(filename))
 	w.Write([]byte{0xEF, 0xBB, 0xBF})
 	cw := csv.NewWriter(w)
 	if format == "tsv" {

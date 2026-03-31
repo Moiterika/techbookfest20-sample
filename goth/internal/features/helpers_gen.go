@@ -24,3 +24,11 @@ func NullStrOr(ns sql.NullString, fallback string) string {
 	}
 	return fallback
 }
+
+// toNullString は *string を sql.NullString に変換する
+func toNullString(s *string) sql.NullString {
+	if s == nil || *s == "" {
+		return sql.NullString{}
+	}
+	return sql.NullString{String: *s, Valid: true}
+}

@@ -10,6 +10,7 @@ import (
 	"os"
 
 	goth "aha-goth"
+	"aha-goth/internal/features"
 	"aha-goth/internal/web"
 
 	_ "github.com/lib/pq"
@@ -43,6 +44,8 @@ func main() {
 		log.Fatal(err)
 	}
 
+	dbmap := features.InitDbMap(db)
+
 	mux := http.NewServeMux()
 
 	// Static files (embed.FS から配信 — 作業ディレクトリに依存しない)
@@ -50,7 +53,7 @@ func main() {
 	mux.Handle("GET /static/", http.StripPrefix("/static/", http.FileServer(http.FS(staticSub))))
 
 	// ルーティング登録 (router.go に集約)
-	web.RegisterRoutes(mux, db)
+	web.RegisterRoutes(mux, dbmap)
 
 	addr := ":" + envOrDefault("APP_PORT", "3000")
 	log.Printf("Server starting on %s", addr)

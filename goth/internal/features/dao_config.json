@@ -1,0 +1,399 @@
+{
+  "entities": [
+    {
+      "name": "BOM",
+      "table": "BOM",
+      "rowStruct": "RowBOM",
+      "responseStruct": "ResponseBOM",
+      "listResultStruct": "ListResultBOM",
+      "createInput": "作成InputBOM",
+      "updateInput": "更新InputBOM",
+      "deleteInput": "削除InputBOM",
+      "batchDeleteInput": "一括削除InputBOM",
+      "listInput": "一覧InputBOM",
+      "fields": [
+        {
+          "go": "Id",
+          "db": "id",
+          "type": "int",
+          "pk": true,
+          "auto": true
+        },
+        {
+          "go": "コード",
+          "db": "コード",
+          "type": "string"
+        },
+        {
+          "go": "版",
+          "db": "版",
+          "type": "string"
+        },
+        {
+          "go": "名称",
+          "db": "名称",
+          "type": "string"
+        },
+        {
+          "go": "CreatedAt",
+          "db": "created_at",
+          "type": "time.Time",
+          "timestamp": true
+        },
+        {
+          "go": "UpdatedAt",
+          "db": "updated_at",
+          "type": "time.Time",
+          "timestamp": true
+        }
+      ],
+      "search": {
+        "inputField": "Search",
+        "columns": [
+          "コード",
+          "名称"
+        ]
+      },
+      "filters": [],
+      "createWithLinesInput": "作成InputBOMWithLines",
+      "updateWithLinesInput": "更新InputBOMWithLines",
+      "child": {
+        "struct": "BOM明細",
+        "table": "BOM明細",
+        "parentFK": "BOM_ID",
+        "parentFKGo": "BOMID",
+        "linesField": "LinesBOM明細",
+        "inputStruct": "作成InputBOM明細",
+        "fields": [
+          {
+            "go": "Id",
+            "db": "id",
+            "type": "int",
+            "pk": true,
+            "auto": true
+          },
+          {
+            "go": "BOMID",
+            "db": "BOM_ID",
+            "type": "int"
+          },
+          {
+            "go": "区分",
+            "db": "区分",
+            "type": "int"
+          },
+          {
+            "go": "品目ID",
+            "db": "品目ID",
+            "type": "int"
+          },
+          {
+            "go": "数量",
+            "db": "数量",
+            "type": "string"
+          },
+          {
+            "go": "単位",
+            "db": "単位",
+            "type": "string"
+          },
+          {
+            "go": "参照BOMコード",
+            "db": "参照BOMコード",
+            "type": "sql.NullString",
+            "nullable": true,
+            "inputType": "*string"
+          },
+          {
+            "go": "参照BOM版",
+            "db": "参照BOM版",
+            "type": "sql.NullString",
+            "nullable": true,
+            "inputType": "*string"
+          },
+          {
+            "go": "CreatedAt",
+            "db": "created_at",
+            "type": "time.Time",
+            "timestamp": true
+          },
+          {
+            "go": "UpdatedAt",
+            "db": "updated_at",
+            "type": "time.Time",
+            "timestamp": true
+          }
+        ],
+        "inputFields": [
+          {
+            "go": "区分",
+            "type": "int"
+          },
+          {
+            "go": "品目ID",
+            "type": "int"
+          },
+          {
+            "go": "数量",
+            "type": "string"
+          },
+          {
+            "go": "単位",
+            "type": "string"
+          },
+          {
+            "go": "参照BOMコード",
+            "type": "*string",
+            "nullable": true
+          },
+          {
+            "go": "参照BOM版",
+            "type": "*string",
+            "nullable": true
+          }
+        ]
+      },
+      "detail": {
+        "responseStruct": "ResponseBOM詳細",
+        "joins": [
+          {
+            "table": "品目",
+            "alias": "i",
+            "childCol": "品目ID",
+            "parentCol": "id",
+            "fields": [
+              {
+                "column": "コード",
+                "as": "品目コード"
+              },
+              {
+                "column": "名称",
+                "as": "品目名"
+              }
+            ]
+          }
+        ],
+        "discriminator": {
+          "field": "区分",
+          "groups": [
+            {
+              "value": 2,
+              "responseField": "製造品目アウトプット"
+            },
+            {
+              "value": 1,
+              "responseField": "投入品目インプット"
+            }
+          ]
+        }
+      }
+    },
+    {
+      "name": "取引",
+      "table": "取引",
+      "rowStruct": "Row取引",
+      "responseStruct": "Response取引",
+      "listResultStruct": "ListResult取引",
+      "createInput": "作成Input取引",
+      "updateInput": "更新Input取引",
+      "deleteInput": "削除Input取引",
+      "batchDeleteInput": "一括削除Input取引",
+      "listInput": "一覧Input取引",
+      "fields": [
+        {
+          "go": "Id",
+          "db": "id",
+          "type": "int",
+          "pk": true,
+          "auto": true
+        },
+        {
+          "go": "日付",
+          "db": "日付",
+          "type": "string"
+        },
+        {
+          "go": "取引区分ID",
+          "db": "取引区分ID",
+          "type": "int"
+        },
+        {
+          "go": "品目ID",
+          "db": "品目ID",
+          "type": "int"
+        },
+        {
+          "go": "単価",
+          "db": "単価",
+          "type": "int"
+        },
+        {
+          "go": "数量",
+          "db": "数量",
+          "type": "int"
+        },
+        {
+          "go": "金額",
+          "db": "金額",
+          "type": "int"
+        },
+        {
+          "go": "CreatedAt",
+          "db": "created_at",
+          "type": "time.Time",
+          "timestamp": true
+        },
+        {
+          "go": "UpdatedAt",
+          "db": "updated_at",
+          "type": "time.Time",
+          "timestamp": true
+        }
+      ],
+      "filters": [
+        {
+          "inputField": "開始日",
+          "column": "日付",
+          "op": "gte"
+        },
+        {
+          "inputField": "終了日",
+          "column": "日付",
+          "op": "lte"
+        }
+      ]
+    },
+    {
+      "name": "取引区分",
+      "table": "取引区分",
+      "rowStruct": "Row取引区分",
+      "responseStruct": "Response取引区分",
+      "listResultStruct": "ListResult取引区分",
+      "createInput": "作成Input取引区分",
+      "updateInput": "更新Input取引区分",
+      "deleteInput": "削除Input取引区分",
+      "batchDeleteInput": "一括削除Input取引区分",
+      "listInput": "一覧Input取引区分",
+      "fields": [
+        {
+          "go": "Id",
+          "db": "id",
+          "type": "int",
+          "pk": true,
+          "auto": true
+        },
+        {
+          "go": "コード",
+          "db": "コード",
+          "type": "string"
+        },
+        {
+          "go": "名称",
+          "db": "名称",
+          "type": "string"
+        },
+        {
+          "go": "係数",
+          "db": "係数",
+          "type": "int"
+        },
+        {
+          "go": "CreatedAt",
+          "db": "created_at",
+          "type": "time.Time",
+          "timestamp": true
+        },
+        {
+          "go": "UpdatedAt",
+          "db": "updated_at",
+          "type": "time.Time",
+          "timestamp": true
+        }
+      ],
+      "search": {
+        "inputField": "Q",
+        "columns": [
+          "コード",
+          "名称"
+        ]
+      },
+      "filters": []
+    },
+    {
+      "name": "品目",
+      "table": "品目",
+      "rowStruct": "Row品目",
+      "responseStruct": "Response品目",
+      "listResultStruct": "ListResult品目",
+      "createInput": "作成Input品目",
+      "updateInput": "更新Input品目",
+      "deleteInput": "削除Input品目",
+      "batchDeleteInput": "一括削除Input品目",
+      "listInput": "一覧Input品目",
+      "fields": [
+        {
+          "go": "Id",
+          "db": "id",
+          "type": "int",
+          "pk": true,
+          "auto": true
+        },
+        {
+          "go": "コード",
+          "db": "コード",
+          "type": "string"
+        },
+        {
+          "go": "名称",
+          "db": "名称",
+          "type": "string"
+        },
+        {
+          "go": "カテゴリ",
+          "db": "カテゴリ",
+          "type": "sql.NullString",
+          "nullable": true,
+          "inputType": "*string"
+        },
+        {
+          "go": "単価",
+          "db": "単価",
+          "type": "int"
+        },
+        {
+          "go": "バーコード",
+          "db": "バーコード",
+          "type": "sql.NullString",
+          "nullable": true,
+          "inputType": "*string"
+        },
+        {
+          "go": "CreatedAt",
+          "db": "created_at",
+          "type": "time.Time",
+          "timestamp": true
+        },
+        {
+          "go": "UpdatedAt",
+          "db": "updated_at",
+          "type": "time.Time",
+          "timestamp": true
+        }
+      ],
+      "search": {
+        "inputField": "Q",
+        "columns": [
+          "コード",
+          "名称"
+        ]
+      },
+      "filters": [
+        {
+          "inputField": "カテゴリ",
+          "column": "カテゴリ",
+          "op": "ilike"
+        }
+      ]
+    }
+  ]
+}

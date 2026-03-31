@@ -2,12 +2,13 @@ package features
 
 import (
 	"context"
-	"database/sql"
 	"fmt"
 	"html"
 	"net/http"
 	"strconv"
 	"strings"
+
+	"github.com/go-gorp/gorp/v3"
 )
 
 // TypeaheadItem は品目検索候補
@@ -19,11 +20,11 @@ type TypeaheadItem struct {
 }
 
 // SearchItems は品目をコード・名前で検索する
-func SearchItems(ctx context.Context, db *sql.DB, q string, limit int) ([]TypeaheadItem, error) {
+func SearchItems(ctx context.Context, dbmap *gorp.DbMap, q string, limit int) ([]TypeaheadItem, error) {
 	if limit <= 0 {
 		limit = 10
 	}
-	rows, err := db.QueryContext(ctx,
+	rows, err := dbmap.Db.QueryContext(ctx,
 		`SELECT id, "コード", "名称", "単価" FROM "品目" WHERE "コード" ILIKE $1 OR "名称" ILIKE $1 ORDER BY "コード" LIMIT $2`,
 		"%"+q+"%", limit)
 	if err != nil {
@@ -43,9 +44,9 @@ func SearchItems(ctx context.Context, db *sql.DB, q string, limit int) ([]Typeah
 }
 
 // GetItemByID は品目をIDで取得する
-func GetItemByID(ctx context.Context, db *sql.DB, id int) (TypeaheadItem, error) {
+func GetItemByID(ctx context.Context, dbmap *gorp.DbMap, id int) (TypeaheadItem, error) {
 	var it TypeaheadItem
-	err := db.QueryRowContext(ctx,
+	err := dbmap.Db.QueryRowContext(ctx,
 		`SELECT id, "コード", "名称", "単価" FROM "品目" WHERE id=$1`, id,
 	).Scan(&it.ID, &it.Code, &it.Name, &it.Price)
 	return it, err

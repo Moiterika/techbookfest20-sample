@@ -2,11 +2,12 @@ package features
 
 import (
 	"context"
-	"database/sql"
 	"errors"
 	"net/http"
 	"strconv"
 	"strings"
+
+	"github.com/go-gorp/gorp/v3"
 )
 
 func validateBomLines(lines []作成InputBOM明細) error {
@@ -49,11 +50,11 @@ func validateBomLines(lines []作成InputBOM明細) error {
 	return nil
 }
 
-func Validate登録BOM(_ context.Context, _ *sql.DB, input 作成InputBOMWithLines) error {
+func Validate登録BOM(_ context.Context, _ *gorp.DbMap, input 作成InputBOMWithLines) error {
 	return validateBomLines(input.LinesBOM明細)
 }
 
-func Validate更新BOM(_ context.Context, _ *sql.DB, input 更新InputBOMWithLines) error {
+func Validate更新BOM(_ context.Context, _ *gorp.DbMap, input 更新InputBOMWithLines) error {
 	return validateBomLines(input.LinesBOM明細)
 }
 

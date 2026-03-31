@@ -2,16 +2,17 @@ package features
 
 import (
 	"context"
-	"database/sql"
 	"net/http"
 	"strconv"
+
+	"github.com/go-gorp/gorp/v3"
 )
 
-func Validate登録品目(_ context.Context, _ *sql.DB, _ 作成Input品目) error {
+func Validate登録品目(_ context.Context, _ *gorp.DbMap, _ 作成Input品目) error {
 	return nil
 }
 
-func Validate更新品目(_ context.Context, _ *sql.DB, _ 更新Input品目) error {
+func Validate更新品目(_ context.Context, _ *gorp.DbMap, _ 更新Input品目) error {
 	return nil
 }
 

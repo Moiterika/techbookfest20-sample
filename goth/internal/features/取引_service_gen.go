@@ -3,12 +3,13 @@ package features
 
 import (
 	"context"
-	"database/sql"
+
+	"github.com/go-gorp/gorp/v3"
 )
 
-type Handler取引 struct { DB *sql.DB }
+type Handler取引 struct { DB *gorp.DbMap }
 
-func NewHandler取引(db *sql.DB) *Handler取引 {
+func NewHandler取引(db *gorp.DbMap) *Handler取引 {
 	return &Handler取引{DB: db}
 }
 

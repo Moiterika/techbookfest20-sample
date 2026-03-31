@@ -3,12 +3,13 @@ package features
 
 import (
 	"context"
-	"database/sql"
+
+	"github.com/go-gorp/gorp/v3"
 )
 
-type HandlerBOM struct { DB *sql.DB }
+type HandlerBOM struct { DB *gorp.DbMap }
 
-func NewHandlerBOM(db *sql.DB) *HandlerBOM {
+func NewHandlerBOM(db *gorp.DbMap) *HandlerBOM {
 	return &HandlerBOM{DB: db}
 }
 

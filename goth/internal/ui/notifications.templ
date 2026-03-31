@@ -5,7 +5,7 @@ templ Notifications() {
 		id="notifications"
 		x-data="{ loading: false, error: null, toast: null, toastTimer: null, showError(msg) { this.error = msg; }, closeError() { this.error = null; }, showToast(msg) { this.toast = msg; clearTimeout(this.toastTimer); this.toastTimer = setTimeout(() => { this.toast = null; }, 3000); } }"
 		@notify-error.window="showError($event.detail)"
-		@show-toast.window="showToast($event.detail.value || '保存しました')"
+		@show-toast.window="showToast($event.detail || '保存しました')"
 		@htmx:before-request.window="loading = true"
 		@htmx:after-request.window="loading = false"
 	>

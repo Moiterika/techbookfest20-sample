@@ -43,7 +43,19 @@ func HomePage() templ.Component {
 				}()
 			}
 			ctx = templ.InitializeContext(ctx)
-			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 1, "<main style=\"max-width: 87.5rem; margin: 0 auto; padding: 2rem;\"><h1 style=\"font-size: 1.5rem; font-weight: bold; margin-bottom: 2rem;\">aha - GoTH</h1><nav style=\"display: flex; gap: 1rem; flex-wrap: wrap;\"><a href=\"/品目\" style=\"padding: 1rem 2rem; background: white; border-radius: 0.75rem; text-decoration: none; color: #00288e; font-weight: bold;\">品目管理</a> <a href=\"/取引区分\" style=\"padding: 1rem 2rem; background: white; border-radius: 0.75rem; text-decoration: none; color: #00288e; font-weight: bold;\">取引区分管理</a> <a href=\"/取引\" style=\"padding: 1rem 2rem; background: white; border-radius: 0.75rem; text-decoration: none; color: #00288e; font-weight: bold;\">取引管理</a> <a href=\"/BOM\" style=\"padding: 1rem 2rem; background: white; border-radius: 0.75rem; text-decoration: none; color: #00288e; font-weight: bold;\">BOM管理</a></nav></main>")
+			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 1, "<main class=\"max-w-[87.5rem] mx-auto py-8 px-8\">")
+			if templ_7745c5c3_Err != nil {
+				return templ_7745c5c3_Err
+			}
+			templ_7745c5c3_Err = ui.Nav("home").Render(ctx, templ_7745c5c3_Buffer)
+			if templ_7745c5c3_Err != nil {
+				return templ_7745c5c3_Err
+			}
+			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 2, "<h1 class=\"text-2xl font-bold mb-8 text-on-surface tracking-tight\">aha</h1><div class=\"grid grid-cols-[repeat(auto-fill,minmax(280px,1fr))] gap-6\"><a href=\"/品目\" class=\"block p-6 rounded-xl bg-white no-underline transition-all duration-200 hover:bg-surface-container-high hover:-translate-y-0.5\"><h2 class=\"text-lg font-bold text-primary mb-2\">品目管理</h2><p class=\"text-sm text-on-surface-variant leading-relaxed\">品目の登録・編集・削除を行います。</p></a> <a href=\"/取引\" class=\"block p-6 rounded-xl bg-white no-underline transition-all duration-200 hover:bg-surface-container-high hover:-translate-y-0.5\"><h2 class=\"text-lg font-bold text-primary mb-2\">取引管理</h2><p class=\"text-sm text-on-surface-variant leading-relaxed\">取引の登録・編集・削除を行います。</p></a> <a href=\"/取引区分\" class=\"block p-6 rounded-xl bg-white no-underline transition-all duration-200 hover:bg-surface-container-high hover:-translate-y-0.5\"><h2 class=\"text-lg font-bold text-primary mb-2\">取引区分管理</h2><p class=\"text-sm text-on-surface-variant leading-relaxed\">取引区分の登録・編集・削除を行います。</p></a> <a href=\"/BOM\" class=\"block p-6 rounded-xl bg-white no-underline transition-all duration-200 hover:bg-surface-container-high hover:-translate-y-0.5\"><h2 class=\"text-lg font-bold text-primary mb-2\">BOM管理</h2><p class=\"text-sm text-on-surface-variant leading-relaxed\">BOMの登録・編集・削除を行います。</p></a></div></main>")
+			if templ_7745c5c3_Err != nil {
+				return templ_7745c5c3_Err
+			}
+			templ_7745c5c3_Err = ui.Notifications().Render(ctx, templ_7745c5c3_Buffer)
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
@@ -90,46 +102,46 @@ func CrudPage(title string, apiPath string, bodyId string) templ.Component {
 				}()
 			}
 			ctx = templ.InitializeContext(ctx)
-			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 2, "<main style=\"max-width: 87.5rem; margin: 0 auto; padding: 2rem;\"><nav style=\"margin-bottom: 1rem;\"><a href=\"/\" style=\"color: #00288e; text-decoration: none;\">← ホーム</a></nav><h1 style=\"font-size: 1.5rem; font-weight: bold; margin-bottom: 2rem;\">")
+			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 3, "<main style=\"max-width: 87.5rem; margin: 0 auto; padding: 2rem;\"><nav style=\"margin-bottom: 1rem;\"><a href=\"/\" style=\"color: #00288e; text-decoration: none;\">← ホーム</a></nav><h1 style=\"font-size: 1.5rem; font-weight: bold; margin-bottom: 2rem;\">")
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
 			var templ_7745c5c3_Var5 string
 			templ_7745c5c3_Var5, templ_7745c5c3_Err = templ.JoinStringErrs(title)
 			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/web/pages.templ`, Line: 25, Col: 81}
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/web/pages.templ`, Line: 39, Col: 81}
 			}
 			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var5))
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
-			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 3, "</h1><div><table style=\"width: 100%; border-collapse: collapse; background: white; border-radius: 0.75rem;\"><tbody id=\"")
+			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 4, "</h1><div><table style=\"width: 100%; border-collapse: collapse; background: white; border-radius: 0.75rem;\"><tbody id=\"")
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
 			var templ_7745c5c3_Var6 string
 			templ_7745c5c3_Var6, templ_7745c5c3_Err = templ.JoinStringErrs(bodyId)
 			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/web/pages.templ`, Line: 29, Col: 17}
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/web/pages.templ`, Line: 43, Col: 17}
 			}
 			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var6))
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
-			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 4, "\" hx-get=\"")
+			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 5, "\" hx-get=\"")
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
 			var templ_7745c5c3_Var7 string
 			templ_7745c5c3_Var7, templ_7745c5c3_Err = templ.JoinStringErrs(apiPath)
 			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/web/pages.templ`, Line: 30, Col: 22}
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/web/pages.templ`, Line: 44, Col: 22}
 			}
 			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var7))
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
-			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 5, "\" hx-trigger=\"load\" hx-swap=\"innerHTML\"><tr><td style=\"text-align: center; padding: 2rem; color: #757684;\">読み込み中…</td></tr></tbody></table></div></main>")
+			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 6, "\" hx-trigger=\"load\" hx-swap=\"innerHTML\"><tr><td style=\"text-align: center; padding: 2rem; color: #757684;\">読み込み中…</td></tr></tbody></table></div></main>")
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}

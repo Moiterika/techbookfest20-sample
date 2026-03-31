@@ -12,7 +12,7 @@
     "gen:go": "bun run scripts/gen-go.ts --all",
     "gen:css": "bunx @tailwindcss/cli -i ./src/index.css -o ../goth/static/css/aha.css --minify",
     "gen:static": "bun run scripts/bundle-static.ts && bun run gen:css",
-    "gen:init": "rm -f ../goth/internal/features/*_gen.go ../goth/internal/features/*_gen.templ ../goth/internal/features/*_gen_templ.go ../goth/internal/features/*_cus_service.go ../goth/internal/features/dao_config.json",
+    "gen:init": "rm -f ../goth/internal/features/*_gen.go ../goth/internal/features/*_gen.templ ../goth/internal/features/*_gen_templ.go ../goth/internal/features/*_cus_service.go ../goth/internal/features/dao_config.json ../goth/internal/ui/*_gen.templ ../goth/internal/ui/*_gen_templ.go ../goth/icon_manifest.json",
     "gen:all": "bun run gen:go && bun run gen:static && cd ../goth && templ generate && go generate ./... && go fmt ./...",
     "gen:tpl": "bun third-party-license & bun run scripts/gen-licenses.ts",
     "test:e2e": "bunx playwright test",

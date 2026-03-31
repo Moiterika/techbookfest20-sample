@@ -48,7 +48,47 @@ func RenderPage取引区分() templ.Component {
 				}()
 			}
 			ctx = templ.InitializeContext(ctx)
-			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 1, "<main class=\"max-w-[87.5rem] mx-auto py-8 px-8\"><nav class=\"mb-4\"><a href=\"/\" class=\"text-primary no-underline hover:underline\">← ホーム</a></nav><h1 class=\"text-2xl font-bold mb-8 text-on-surface tracking-tight\">取引区分管理</h1><div id=\"txtype-search\" class=\"mb-6 p-6 rounded-xl bg-white\"><div class=\"flex gap-4 flex-wrap\"><div class=\"flex flex-col gap-2 text-[0.625rem] font-bold uppercase tracking-wider text-outline flex-1 min-w-[12.5rem]\"><span>検索</span> <input type=\"search\" name=\"q\" placeholder=\"コード・名称で検索…\" class=\"rounded-lg text-sm text-on-surface outline-none bg-surface-container-low border-2 border-transparent transition-[border-color,background-color] duration-200 focus:border-b-primary focus:bg-white px-3 py-2.5\" hx-get=\"/api/取引区分\" hx-trigger=\"input changed delay:300ms, search\" hx-target=\"#txtypes-body\" hx-swap=\"innerHTML\" hx-include=\"#txtype-search\" hx-vals='{\"page\": \"1\"}'></div></div></div><div x-data=\"{ open: false }\"><div class=\"flex justify-between items-center mb-6 flex-wrap gap-4\" x-data=\"{ hasSelection: false, updateSelection() { const tbody = document.getElementById('txtypes-body'); this.hasSelection = tbody ? tbody.querySelectorAll('input[name=\\'rowSelect\\']:checked').length > 0 : false; } }\" @change.window=\"updateSelection()\" @htmx:after-swap.window=\"setTimeout(() => updateSelection(), 0)\"><div class=\"flex items-center gap-3 flex-wrap\"><button class=\"inline-flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-semibold cursor-pointer transition-all duration-150 text-error bg-error-container/20 border-none hover:bg-error-container/40 disabled:opacity-40 disabled:cursor-not-allowed disabled:hover:bg-error-container/20\" data-bulk-delete=\"/api/取引区分\" data-body-target=\"txtypes-body\" :disabled=\"!hasSelection\">選択削除</button></div><div class=\"flex items-center gap-3 flex-wrap\"><button class=\"inline-flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-semibold cursor-pointer transition-all duration-150 text-primary bg-transparent border-none hover:bg-surface-container-high disabled:opacity-40 disabled:cursor-not-allowed disabled:hover:bg-transparent\" hx-get=\"/api/取引区分\" hx-target=\"#txtypes-body\" hx-swap=\"innerHTML\">更新</button> <button @click=\"open = !open\" x-text=\"open ? '閉じる' : '＋ 新規追加'\" class=\"text-sm py-2 px-4 rounded-lg cursor-pointer font-semibold transition-all duration-200 inline-flex items-center justify-center border-none bg-gradient-to-br from-primary to-primary-dark text-white hover:opacity-90 active:opacity-80\"></button></div></div><div x-show=\"open\" x-transition class=\"mb-6 p-6 rounded-xl bg-white\"><h2 class=\"text-lg font-bold text-on-surface mb-4 tracking-tight\">新規取引区分登録</h2><form hx-post=\"/api/取引区分\" hx-target=\"#txtypes-body\" hx-swap=\"innerHTML\" hx-on--after-request=\"if(event.detail.successful && event.detail.elt === this) { this.reset(); open = false }\" class=\"flex flex-col gap-4\"><label class=\"flex flex-col gap-2 text-[0.625rem] font-bold uppercase tracking-wider text-outline\">取引区分コード<input type=\"text\" name=\"コード\" required placeholder=\"例: IN-001\" class=\"rounded-lg text-sm text-on-surface outline-none bg-surface-container-low border-2 border-transparent transition-[border-color,background-color] duration-200 focus:border-b-primary focus:bg-white px-3 py-2.5\"></label> <label class=\"flex flex-col gap-2 text-[0.625rem] font-bold uppercase tracking-wider text-outline\">取引区分名称<input type=\"text\" name=\"名称\" required placeholder=\"例: 仕入\" class=\"rounded-lg text-sm text-on-surface outline-none bg-surface-container-low border-2 border-transparent transition-[border-color,background-color] duration-200 focus:border-b-primary focus:bg-white px-3 py-2.5\"></label> <label class=\"flex flex-col gap-2 text-[0.625rem] font-bold uppercase tracking-wider text-outline\">受払係数<select name=\"係数\" required class=\"rounded-lg text-sm text-on-surface outline-none bg-surface-container-low border-2 border-transparent transition-[border-color,background-color] duration-200 focus:border-b-primary focus:bg-white px-3 py-2.5\"></select></label><div class=\"mt-2\"><button type=\"submit\" class=\"text-sm py-2 px-4 rounded-lg cursor-pointer font-semibold transition-all duration-200 inline-flex items-center justify-center border-none bg-gradient-to-br from-primary to-primary-dark text-white hover:opacity-90 active:opacity-80\">登録する</button></div></form></div></div><div class=\"overflow-x-auto rounded-xl bg-white [-webkit-overflow-scrolling:touch]\"><table class=\"w-full min-w-[50rem] border-collapse text-left\"><thead class=\"bg-surface-container\"><tr><th class=\"py-4 px-6 w-10\"><input type=\"checkbox\" class=\"crud-select-all rounded-sm cursor-pointer accent-primary\" data-body-id=\"txtypes-body\"></th><th class=\"py-4 px-6 text-[0.625rem] font-bold text-on-surface-variant uppercase tracking-widest\">取引区分コード</th><th class=\"py-4 px-6 text-[0.625rem] font-bold text-on-surface-variant uppercase tracking-widest\">取引区分名称</th><th class=\"py-4 px-6 text-[0.625rem] font-bold text-on-surface-variant uppercase tracking-widest\">受払係数</th><th class=\"py-4 px-6 text-[0.625rem] font-bold text-on-surface-variant uppercase tracking-widest\">操作</th></tr></thead> <tbody id=\"txtypes-body\" hx-get=\"/api/取引区分\" hx-trigger=\"load\" hx-swap=\"innerHTML\"></tbody></table></div><div id=\"txtypes-pagination\"></div></main>")
+			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 1, "<main class=\"max-w-[87.5rem] mx-auto py-8 px-8\">")
+			if templ_7745c5c3_Err != nil {
+				return templ_7745c5c3_Err
+			}
+			templ_7745c5c3_Err = ui.Nav("transaction-types").Render(ctx, templ_7745c5c3_Buffer)
+			if templ_7745c5c3_Err != nil {
+				return templ_7745c5c3_Err
+			}
+			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 2, "<h1 class=\"text-2xl font-bold mb-8 text-on-surface tracking-tight\">取引区分管理</h1><div id=\"txtype-search\" class=\"mb-6 p-6 rounded-xl bg-white\"><div class=\"flex gap-4 flex-wrap\"><div class=\"flex flex-col gap-2 text-[0.625rem] font-bold uppercase tracking-wider text-outline flex-1 min-w-[12.5rem]\"><span>検索</span> <input type=\"search\" name=\"q\" placeholder=\"コード・名称で検索…\" class=\"rounded-lg text-sm text-on-surface outline-none bg-surface-container-low border-2 border-transparent transition-[border-color,background-color] duration-200 focus:border-b-primary focus:bg-white px-3 py-2.5\" hx-get=\"/api/取引区分\" hx-trigger=\"input changed delay:300ms, search\" hx-target=\"#txtypes-body\" hx-swap=\"innerHTML\" hx-include=\"#txtype-search\" hx-vals='{\"page\": \"1\"}'></div></div></div><div x-data=\"{ open: false }\"><div class=\"flex justify-between items-center mb-6 flex-wrap gap-4\" x-data=\"{ hasSelection: false, updateSelection() { const tbody = document.getElementById('txtypes-body'); this.hasSelection = tbody ? tbody.querySelectorAll('input[name=\\'rowSelect\\']:checked').length > 0 : false; } }\" @change.window=\"updateSelection()\" @htmx--after-swap.window=\"$nextTick(() => updateSelection())\"><div class=\"flex items-center gap-3 flex-wrap\"><button class=\"inline-flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-semibold cursor-pointer transition-all duration-150 text-primary bg-transparent border-none hover:bg-surface-container-high disabled:opacity-40 disabled:cursor-not-allowed disabled:hover:bg-transparent\" data-bulk-copy data-body-target=\"txtypes-body\" :disabled=\"!hasSelection\">")
+			if templ_7745c5c3_Err != nil {
+				return templ_7745c5c3_Err
+			}
+			templ_7745c5c3_Err = ui.Icon("clipboard-document", "w-4.5 h-4.5").Render(ctx, templ_7745c5c3_Buffer)
+			if templ_7745c5c3_Err != nil {
+				return templ_7745c5c3_Err
+			}
+			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 3, "選択コピー</button> <button class=\"inline-flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-semibold cursor-pointer transition-all duration-150 text-error bg-error-container/20 border-none hover:bg-error-container/40 disabled:opacity-40 disabled:cursor-not-allowed disabled:hover:bg-error-container/20\" data-bulk-delete=\"/api/取引区分\" data-body-target=\"txtypes-body\" :disabled=\"!hasSelection\">")
+			if templ_7745c5c3_Err != nil {
+				return templ_7745c5c3_Err
+			}
+			templ_7745c5c3_Err = ui.Icon("trash", "w-4.5 h-4.5").Render(ctx, templ_7745c5c3_Buffer)
+			if templ_7745c5c3_Err != nil {
+				return templ_7745c5c3_Err
+			}
+			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 4, "選択削除</button></div><div class=\"flex items-center gap-3 flex-wrap\"><div class=\"relative\" x-data=\"{ dlOpen: false }\" @click.outside=\"dlOpen = false\"><button class=\"inline-flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-semibold cursor-pointer transition-all duration-150 text-primary bg-transparent border-none hover:bg-surface-container-high disabled:opacity-40 disabled:cursor-not-allowed disabled:hover:bg-transparent\" @click=\"dlOpen = !dlOpen\">")
+			if templ_7745c5c3_Err != nil {
+				return templ_7745c5c3_Err
+			}
+			templ_7745c5c3_Err = ui.Icon("arrow-down-tray", "w-4.5 h-4.5").Render(ctx, templ_7745c5c3_Buffer)
+			if templ_7745c5c3_Err != nil {
+				return templ_7745c5c3_Err
+			}
+			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 5, "ダウンロード</button><div class=\"absolute z-10 mt-1 bg-white rounded-lg shadow-[0_10px_30px_-5px_rgba(18,28,42,0.08)] py-1 min-w-[120px]\" x-show=\"dlOpen\" x-transition x-cloak><button class=\"block w-full text-left px-3 py-1.5 text-sm cursor-pointer border-none bg-transparent hover:bg-surface-container-low\" @click=\"window.__crudExport('/api/取引区分', 'csv', 'txtype-search'); dlOpen = false\">CSV</button> <button class=\"block w-full text-left px-3 py-1.5 text-sm cursor-pointer border-none bg-transparent hover:bg-surface-container-low\" @click=\"window.__crudExport('/api/取引区分', 'tsv', 'txtype-search'); dlOpen = false\">TSV</button> <button class=\"block w-full text-left px-3 py-1.5 text-sm cursor-pointer border-none bg-transparent hover:bg-surface-container-low\" @click=\"window.__crudExport('/api/取引区分', 'xlsx', 'txtype-search'); dlOpen = false\">Excel (xlsx)</button></div></div><button class=\"inline-flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-semibold cursor-pointer transition-all duration-150 text-primary bg-transparent border-none hover:bg-surface-container-high disabled:opacity-40 disabled:cursor-not-allowed disabled:hover:bg-transparent\" hx-get=\"/api/取引区分\" hx-target=\"#txtypes-body\" hx-swap=\"innerHTML\">")
+			if templ_7745c5c3_Err != nil {
+				return templ_7745c5c3_Err
+			}
+			templ_7745c5c3_Err = ui.Icon("arrow-path", "w-4.5 h-4.5").Render(ctx, templ_7745c5c3_Buffer)
+			if templ_7745c5c3_Err != nil {
+				return templ_7745c5c3_Err
+			}
+			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 6, "更新</button> <button @click=\"open = !open\" x-text=\"open ? '閉じる' : '＋ 新規追加'\" class=\"text-sm py-2 px-4 rounded-lg cursor-pointer font-semibold transition-all duration-200 inline-flex items-center justify-center border-none bg-gradient-to-br from-primary to-primary-dark text-white hover:opacity-90 active:opacity-80\"></button></div></div><div x-show=\"open\" x-transition class=\"mb-6 p-6 rounded-xl bg-white\"><h2 class=\"text-lg font-bold text-on-surface mb-4 tracking-tight\">新規取引区分登録</h2><form hx-post=\"/api/取引区分\" hx-target=\"#txtypes-body\" hx-swap=\"innerHTML\" hx-on--after-request=\"if(event.detail.successful && event.detail.elt === this) { this.reset(); open = false }\" class=\"flex flex-col gap-4\"><label class=\"flex flex-col gap-2 text-[0.625rem] font-bold uppercase tracking-wider text-outline\">取引区分コード<input type=\"text\" name=\"コード\" required placeholder=\"例: IN-001\" class=\"rounded-lg text-sm text-on-surface outline-none bg-surface-container-low border-2 border-transparent transition-[border-color,background-color] duration-200 focus:border-b-primary focus:bg-white px-3 py-2.5\"></label> <label class=\"flex flex-col gap-2 text-[0.625rem] font-bold uppercase tracking-wider text-outline\">取引区分名称<input type=\"text\" name=\"名称\" required placeholder=\"例: 仕入\" class=\"rounded-lg text-sm text-on-surface outline-none bg-surface-container-low border-2 border-transparent transition-[border-color,background-color] duration-200 focus:border-b-primary focus:bg-white px-3 py-2.5\"></label> <label class=\"flex flex-col gap-2 text-[0.625rem] font-bold uppercase tracking-wider text-outline\">受払係数<select name=\"係数\" required class=\"rounded-lg text-sm text-on-surface outline-none bg-surface-container-low border-2 border-transparent transition-[border-color,background-color] duration-200 focus:border-b-primary focus:bg-white px-3 py-2.5\"></select></label><div class=\"mt-2\"><button type=\"submit\" class=\"text-sm py-2 px-4 rounded-lg cursor-pointer font-semibold transition-all duration-200 inline-flex items-center justify-center border-none bg-gradient-to-br from-primary to-primary-dark text-white hover:opacity-90 active:opacity-80\">登録する</button></div></form></div></div><div class=\"overflow-x-auto rounded-xl bg-white [-webkit-overflow-scrolling:touch]\"><table class=\"w-full min-w-[50rem] border-collapse text-left\"><thead class=\"bg-surface-container\"><tr><th class=\"py-4 px-6 w-10\"><input type=\"checkbox\" class=\"crud-select-all rounded-sm cursor-pointer accent-primary\" data-body-id=\"txtypes-body\"></th><th class=\"py-4 px-6 text-[0.625rem] font-bold text-on-surface-variant uppercase tracking-widest\">取引区分コード</th><th class=\"py-4 px-6 text-[0.625rem] font-bold text-on-surface-variant uppercase tracking-widest\">取引区分名称</th><th class=\"py-4 px-6 text-[0.625rem] font-bold text-on-surface-variant uppercase tracking-widest\">受払係数</th><th class=\"py-4 px-6 text-[0.625rem] font-bold text-on-surface-variant uppercase tracking-widest\">操作</th></tr></thead> <tbody id=\"txtypes-body\" hx-get=\"/api/取引区分\" hx-trigger=\"load\" hx-swap=\"innerHTML\"></tbody></table></div><div id=\"txtypes-pagination\"></div></main>")
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
@@ -87,124 +127,148 @@ func RenderRow取引区分(item Response取引区分) templ.Component {
 			templ_7745c5c3_Var3 = templ.NopComponent
 		}
 		ctx = templ.ClearChildren(ctx)
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 2, "<tr id=\"")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 7, "<tr id=\"")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
 		var templ_7745c5c3_Var4 string
 		templ_7745c5c3_Var4, templ_7745c5c3_Err = templ.JoinStringErrs(fmt.Sprintf("txtype-%d", item.Id))
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/features/取引区分_views_gen.templ`, Line: 65, Col: 43}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/features/取引区分_views_gen.templ`, Line: 84, Col: 43}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var4))
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 3, "\" class=\"transition-all duration-200 ease-in-out hover:bg-surface-container-low [&.htmx-swapping]:opacity-0\"><td class=\"py-4 px-6 w-10\"><input type=\"checkbox\" name=\"rowSelect\" value=\"")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 8, "\" class=\"transition-all duration-200 ease-in-out hover:bg-surface-container-low [&.htmx-swapping]:opacity-0\"><td class=\"py-4 px-6 w-10\"><input type=\"checkbox\" name=\"rowSelect\" value=\"")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
 		var templ_7745c5c3_Var5 string
 		templ_7745c5c3_Var5, templ_7745c5c3_Err = templ.JoinStringErrs(fmt.Sprintf("%d", item.Id))
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/features/取引区分_views_gen.templ`, Line: 66, Col: 103}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/features/取引区分_views_gen.templ`, Line: 85, Col: 103}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var5))
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 4, "\" class=\"rounded-sm cursor-pointer accent-primary\"></td><td class=\"py-4 px-6 text-on-surface-variant text-sm\">")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 9, "\" class=\"rounded-sm cursor-pointer accent-primary\"></td><td class=\"py-4 px-6 text-on-surface-variant text-sm\">")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
 		var templ_7745c5c3_Var6 string
 		templ_7745c5c3_Var6, templ_7745c5c3_Err = templ.JoinStringErrs(item.コード)
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/features/取引区分_views_gen.templ`, Line: 67, Col: 72}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/features/取引区分_views_gen.templ`, Line: 86, Col: 72}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var6))
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 5, "</td><td class=\"py-4 px-6 text-on-surface-variant text-sm\">")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 10, "</td><td class=\"py-4 px-6 text-on-surface-variant text-sm\">")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
 		var templ_7745c5c3_Var7 string
 		templ_7745c5c3_Var7, templ_7745c5c3_Err = templ.JoinStringErrs(item.名称)
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/features/取引区分_views_gen.templ`, Line: 68, Col: 69}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/features/取引区分_views_gen.templ`, Line: 87, Col: 69}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var7))
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 6, "</td><td class=\"py-4 px-6 text-on-surface-variant text-sm\">")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 11, "</td><td class=\"py-4 px-6 text-on-surface-variant text-sm\">")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
 		var templ_7745c5c3_Var8 string
 		templ_7745c5c3_Var8, templ_7745c5c3_Err = templ.JoinStringErrs(fmt.Sprintf("%v", item.係数))
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/features/取引区分_views_gen.templ`, Line: 69, Col: 88}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/features/取引区分_views_gen.templ`, Line: 88, Col: 88}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var8))
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 7, "</td><td class=\"py-4 px-6 text-on-surface-variant text-sm\"><div class=\"flex gap-2\"><button class=\"text-sm py-2 px-4 rounded-lg cursor-pointer font-semibold transition-all duration-200 inline-flex items-center justify-center border-none bg-transparent text-primary hover:bg-surface-container-high active:bg-surface-container-highest\" hx-get=\"")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 12, "</td><td class=\"py-4 px-6 text-right\"><div class=\"flex items-center justify-end gap-2\"><button class=\"inline-flex items-center gap-1 text-primary text-xs font-bold px-2 py-1 rounded-md cursor-pointer border-none bg-transparent no-underline hover:bg-primary/10\" hx-get=\"")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
 		var templ_7745c5c3_Var9 string
 		templ_7745c5c3_Var9, templ_7745c5c3_Err = templ.JoinStringErrs(fmt.Sprintf("/api/取引区分/%d/edit", item.Id))
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/features/取引区分_views_gen.templ`, Line: 72, Col: 312}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/features/取引区分_views_gen.templ`, Line: 91, Col: 236}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var9))
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 8, "\" hx-target=\"")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 13, "\" hx-target=\"")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
 		var templ_7745c5c3_Var10 string
 		templ_7745c5c3_Var10, templ_7745c5c3_Err = templ.JoinStringErrs(fmt.Sprintf("#txtype-%d", item.Id))
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/features/取引区分_views_gen.templ`, Line: 72, Col: 361}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/features/取引区分_views_gen.templ`, Line: 91, Col: 285}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var10))
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 9, "\" hx-swap=\"outerHTML\">編集</button> <button class=\"inline-flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-semibold cursor-pointer transition-all duration-150 text-error bg-error-container/20 border-none hover:bg-error-container/40 disabled:opacity-40 disabled:cursor-not-allowed disabled:hover:bg-error-container/20\" hx-delete=\"")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 14, "\" hx-swap=\"outerHTML\">")
+		if templ_7745c5c3_Err != nil {
+			return templ_7745c5c3_Err
+		}
+		templ_7745c5c3_Err = ui.Icon("pencil-square", "w-3.5 h-3.5").Render(ctx, templ_7745c5c3_Buffer)
+		if templ_7745c5c3_Err != nil {
+			return templ_7745c5c3_Err
+		}
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 15, "編集</button><div class=\"relative\" x-data=\"{ menuOpen: false }\" @click.outside=\"menuOpen = false\"><button class=\"inline-flex items-center justify-center w-7 h-7 rounded-full cursor-pointer text-outline border-none bg-transparent hover:text-on-surface hover:bg-surface-container-low\" @click=\"menuOpen = !menuOpen\" type=\"button\">")
+		if templ_7745c5c3_Err != nil {
+			return templ_7745c5c3_Err
+		}
+		templ_7745c5c3_Err = ui.Icon("ellipsis-vertical-solid", "w-5 h-5").Render(ctx, templ_7745c5c3_Buffer)
+		if templ_7745c5c3_Err != nil {
+			return templ_7745c5c3_Err
+		}
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 16, "</button><div class=\"absolute right-0 top-full z-20 mt-1 bg-white rounded-lg shadow-[0_10px_30px_-5px_rgba(18,28,42,0.08)] py-1 min-w-[120px]\" x-show=\"menuOpen\" x-transition x-cloak><button class=\"flex items-center gap-2 w-full text-left px-3 py-2 text-sm cursor-pointer text-error border-none bg-transparent hover:bg-error-container/30\" hx-delete=\"")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
 		var templ_7745c5c3_Var11 string
 		templ_7745c5c3_Var11, templ_7745c5c3_Err = templ.JoinStringErrs(fmt.Sprintf("/api/取引区分/%d", item.Id))
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/features/取引区分_views_gen.templ`, Line: 73, Col: 351}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/features/取引区分_views_gen.templ`, Line: 100, Col: 218}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var11))
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 10, "\" hx-target=\"")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 17, "\" hx-target=\"")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
 		var templ_7745c5c3_Var12 string
 		templ_7745c5c3_Var12, templ_7745c5c3_Err = templ.JoinStringErrs(fmt.Sprintf("#txtype-%d", item.Id))
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/features/取引区分_views_gen.templ`, Line: 73, Col: 400}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/features/取引区分_views_gen.templ`, Line: 100, Col: 267}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var12))
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 11, "\" hx-swap=\"outerHTML swap:0.3s\" hx-confirm=\"「{名称}」を削除しますか？\">削除</button></div></td></tr>")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 18, "\" hx-swap=\"outerHTML swap:0.3s\" hx-confirm=\"「{名称}」を削除しますか？\" @click=\"menuOpen = false\">")
+		if templ_7745c5c3_Err != nil {
+			return templ_7745c5c3_Err
+		}
+		templ_7745c5c3_Err = ui.Icon("trash", "w-4 h-4").Render(ctx, templ_7745c5c3_Buffer)
+		if templ_7745c5c3_Err != nil {
+			return templ_7745c5c3_Err
+		}
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 19, "削除</button></div></div></div></td></tr>")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
@@ -233,137 +297,137 @@ func RenderEditRow取引区分(item Response取引区分) templ.Component {
 			templ_7745c5c3_Var13 = templ.NopComponent
 		}
 		ctx = templ.ClearChildren(ctx)
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 12, "<tr id=\"")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 20, "<tr id=\"")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
 		var templ_7745c5c3_Var14 string
 		templ_7745c5c3_Var14, templ_7745c5c3_Err = templ.JoinStringErrs(fmt.Sprintf("txtype-%d", item.Id))
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/features/取引区分_views_gen.templ`, Line: 80, Col: 43}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/features/取引区分_views_gen.templ`, Line: 112, Col: 43}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var14))
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 13, "\" class=\"bg-surface-container-low\"><td class=\"py-4 px-6 w-10\"></td><td class=\"py-4 px-6 text-on-surface-variant text-sm\"><input type=\"text\" name=\"コード\" value=\"")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 21, "\" class=\"bg-surface-container-low\"><td class=\"py-4 px-6 w-10\"></td><td class=\"py-4 px-6 text-on-surface-variant text-sm\"><input type=\"text\" name=\"コード\" value=\"")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
 		var templ_7745c5c3_Var15 string
 		templ_7745c5c3_Var15, templ_7745c5c3_Err = templ.JoinStringErrs(item.コード)
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/features/取引区分_views_gen.templ`, Line: 82, Col: 114}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/features/取引区分_views_gen.templ`, Line: 114, Col: 114}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var15))
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 14, "\" form=\"")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 22, "\" form=\"")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
 		var templ_7745c5c3_Var16 string
 		templ_7745c5c3_Var16, templ_7745c5c3_Err = templ.JoinStringErrs(fmt.Sprintf("edit-form-%d", item.Id))
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/features/取引区分_views_gen.templ`, Line: 82, Col: 160}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/features/取引区分_views_gen.templ`, Line: 114, Col: 160}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var16))
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 15, "\" class=\"rounded-lg text-sm text-on-surface outline-none bg-surface-container-low border-2 border-transparent transition-[border-color,background-color] duration-200 focus:border-b-primary focus:bg-white py-1.5 px-2.5 w-full min-w-[7.5rem]\"></td><td class=\"py-4 px-6 text-on-surface-variant text-sm\"><input type=\"text\" name=\"名称\" value=\"")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 23, "\" class=\"rounded-lg text-sm text-on-surface outline-none bg-surface-container-low border-2 border-transparent transition-[border-color,background-color] duration-200 focus:border-b-primary focus:bg-white py-1.5 px-2.5 w-full min-w-[7.5rem]\"></td><td class=\"py-4 px-6 text-on-surface-variant text-sm\"><input type=\"text\" name=\"名称\" value=\"")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
 		var templ_7745c5c3_Var17 string
 		templ_7745c5c3_Var17, templ_7745c5c3_Err = templ.JoinStringErrs(item.名称)
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/features/取引区分_views_gen.templ`, Line: 83, Col: 108}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/features/取引区分_views_gen.templ`, Line: 115, Col: 108}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var17))
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 16, "\" form=\"")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 24, "\" form=\"")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
 		var templ_7745c5c3_Var18 string
 		templ_7745c5c3_Var18, templ_7745c5c3_Err = templ.JoinStringErrs(fmt.Sprintf("edit-form-%d", item.Id))
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/features/取引区分_views_gen.templ`, Line: 83, Col: 154}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/features/取引区分_views_gen.templ`, Line: 115, Col: 154}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var18))
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 17, "\" class=\"rounded-lg text-sm text-on-surface outline-none bg-surface-container-low border-2 border-transparent transition-[border-color,background-color] duration-200 focus:border-b-primary focus:bg-white py-1.5 px-2.5 w-full min-w-[7.5rem]\"></td><td class=\"py-4 px-6 text-on-surface-variant text-sm\"></td><td class=\"py-4 px-6 text-on-surface-variant text-sm\"><div class=\"flex gap-2\"><button class=\"text-sm py-2 px-4 rounded-lg cursor-pointer font-semibold transition-all duration-200 inline-flex items-center justify-center border-none bg-gradient-to-br from-primary to-primary-dark text-white hover:opacity-90 active:opacity-80\" hx-put=\"")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 25, "\" class=\"rounded-lg text-sm text-on-surface outline-none bg-surface-container-low border-2 border-transparent transition-[border-color,background-color] duration-200 focus:border-b-primary focus:bg-white py-1.5 px-2.5 w-full min-w-[7.5rem]\"></td><td class=\"py-4 px-6 text-on-surface-variant text-sm\"></td><td class=\"py-4 px-6 text-on-surface-variant text-sm\"><div class=\"flex gap-2\"><button class=\"text-sm py-2 px-4 rounded-lg cursor-pointer font-semibold transition-all duration-200 inline-flex items-center justify-center border-none bg-gradient-to-br from-primary to-primary-dark text-white hover:opacity-90 active:opacity-80\" hx-put=\"")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
 		var templ_7745c5c3_Var19 string
 		templ_7745c5c3_Var19, templ_7745c5c3_Err = templ.JoinStringErrs(fmt.Sprintf("/api/取引区分/%d", item.Id))
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/features/取引区分_views_gen.templ`, Line: 87, Col: 304}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/features/取引区分_views_gen.templ`, Line: 119, Col: 304}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var19))
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 18, "\" hx-target=\"")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 26, "\" hx-target=\"")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
 		var templ_7745c5c3_Var20 string
 		templ_7745c5c3_Var20, templ_7745c5c3_Err = templ.JoinStringErrs(fmt.Sprintf("#txtype-%d", item.Id))
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/features/取引区分_views_gen.templ`, Line: 87, Col: 353}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/features/取引区分_views_gen.templ`, Line: 119, Col: 353}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var20))
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 19, "\" hx-swap=\"outerHTML\" hx-include=\"")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 27, "\" hx-swap=\"outerHTML\" hx-include=\"")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
 		var templ_7745c5c3_Var21 string
 		templ_7745c5c3_Var21, templ_7745c5c3_Err = templ.JoinStringErrs(fmt.Sprintf("#edit-form-%d", item.Id))
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/features/取引区分_views_gen.templ`, Line: 87, Col: 426}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/features/取引区分_views_gen.templ`, Line: 119, Col: 426}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var21))
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 20, "\">保存</button> <button class=\"text-sm py-2 px-4 rounded-lg cursor-pointer font-semibold transition-all duration-200 inline-flex items-center justify-center border-none bg-transparent text-primary hover:bg-surface-container-high active:bg-surface-container-highest\" hx-get=\"")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 28, "\">保存</button> <button class=\"text-sm py-2 px-4 rounded-lg cursor-pointer font-semibold transition-all duration-200 inline-flex items-center justify-center border-none bg-transparent text-primary hover:bg-surface-container-high active:bg-surface-container-highest\" hx-get=\"")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
 		var templ_7745c5c3_Var22 string
 		templ_7745c5c3_Var22, templ_7745c5c3_Err = templ.JoinStringErrs(fmt.Sprintf("/api/取引区分/%d/edit", item.Id))
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/features/取引区分_views_gen.templ`, Line: 88, Col: 312}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/features/取引区分_views_gen.templ`, Line: 120, Col: 312}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var22))
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 21, "\" hx-target=\"")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 29, "\" hx-target=\"")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
 		var templ_7745c5c3_Var23 string
 		templ_7745c5c3_Var23, templ_7745c5c3_Err = templ.JoinStringErrs(fmt.Sprintf("#txtype-%d", item.Id))
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/features/取引区分_views_gen.templ`, Line: 88, Col: 361}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/features/取引区分_views_gen.templ`, Line: 120, Col: 361}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var23))
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 22, "\" hx-swap=\"outerHTML\">キャンセル</button></div></td></tr>")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 30, "\" hx-swap=\"outerHTML\">キャンセル</button></div></td></tr>")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
@@ -399,7 +463,7 @@ func RenderRows取引区分(result ListResult取引区分) templ.Component {
 			}
 		}
 		if len(result.Records) == 0 {
-			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 23, "<tr><td colspan=\"5\" class=\"text-center py-8 text-outline\">取引区分がありません</td></tr>")
+			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 31, "<tr><td colspan=\"5\" class=\"text-center py-8 text-outline\">取引区分がありません</td></tr>")
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
@@ -433,195 +497,195 @@ func RenderPagination取引区分(result ListResult取引区分) templ.Component
 			templ_7745c5c3_Var25 = templ.NopComponent
 		}
 		ctx = templ.ClearChildren(ctx)
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 24, "<div id=\"txtypes-pagination\" hx-swap-oob=\"true\" class=\"flex justify-between items-center py-4 px-6 bg-surface-container-low rounded-b-xl flex-wrap gap-3\"><div class=\"flex items-center gap-2 text-sm text-on-surface-variant\"><span>表示件数:</span> <select name=\"size\" hx-get=\"/api/取引区分\" hx-target=\"#txtypes-body\" hx-swap=\"innerHTML\" hx-include=\"this\" hx-vals='{\"page\": \"1\"}' class=\"bg-white rounded-md text-sm py-1 px-2 text-on-surface-variant border-none cursor-pointer outline-none focus:shadow-[0_0_0_1px_var(--color-primary)]\"><option value=\"20\"")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 32, "<div id=\"txtypes-pagination\" hx-swap-oob=\"true\" class=\"flex justify-between items-center py-4 px-6 bg-surface-container-low rounded-b-xl flex-wrap gap-3\"><div class=\"flex items-center gap-2 text-sm text-on-surface-variant\"><span>表示件数:</span> <select name=\"size\" hx-get=\"/api/取引区分\" hx-target=\"#txtypes-body\" hx-swap=\"innerHTML\" hx-include=\"this\" hx-vals='{\"page\": \"1\"}' class=\"bg-white rounded-md text-sm py-1 px-2 text-on-surface-variant border-none cursor-pointer outline-none focus:shadow-[0_0_0_1px_var(--color-primary)]\"><option value=\"20\"")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
 		if result.PageSize == 20 {
-			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 25, " selected")
+			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 33, " selected")
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
 		}
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 26, ">20件</option> <option value=\"50\"")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 34, ">20件</option> <option value=\"50\"")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
 		if result.PageSize == 50 {
-			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 27, " selected")
+			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 35, " selected")
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
 		}
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 28, ">50件</option> <option value=\"100\"")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 36, ">50件</option> <option value=\"100\"")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
 		if result.PageSize == 100 {
-			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 29, " selected")
+			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 37, " selected")
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
 		}
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 30, ">100件</option></select></div>")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 38, ">100件</option></select></div>")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
 		if result.TotalPages > 1 {
-			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 31, "<div class=\"flex items-center gap-1\">")
+			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 39, "<div class=\"flex items-center gap-1\">")
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
 			if result.CurrentPage > 1 {
-				templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 32, "<button class=\"w-8 h-8 flex items-center justify-center text-xs font-bold rounded-lg cursor-pointer text-on-surface hover:bg-surface-container-high border-none\" hx-get=\"")
+				templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 40, "<button class=\"w-8 h-8 flex items-center justify-center text-xs font-bold rounded-lg cursor-pointer text-on-surface hover:bg-surface-container-high border-none\" hx-get=\"")
 				if templ_7745c5c3_Err != nil {
 					return templ_7745c5c3_Err
 				}
 				var templ_7745c5c3_Var26 string
 				templ_7745c5c3_Var26, templ_7745c5c3_Err = templ.JoinStringErrs(fmt.Sprintf("/api/取引区分?page=%d&size=%d", result.CurrentPage-1, result.PageSize))
 				if templ_7745c5c3_Err != nil {
-					return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/features/取引区分_views_gen.templ`, Line: 117, Col: 262}
+					return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/features/取引区分_views_gen.templ`, Line: 149, Col: 262}
 				}
 				_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var26))
 				if templ_7745c5c3_Err != nil {
 					return templ_7745c5c3_Err
 				}
-				templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 33, "\" hx-target=\"#txtypes-body\" hx-swap=\"innerHTML\">&#8249;</button> ")
+				templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 41, "\" hx-target=\"#txtypes-body\" hx-swap=\"innerHTML\">&#8249;</button> ")
 				if templ_7745c5c3_Err != nil {
 					return templ_7745c5c3_Err
 				}
 			} else {
-				templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 34, "<span class=\"w-8 h-8 flex items-center justify-center text-xs rounded-lg text-outline-variant cursor-default border-none\">&#8249;</span> ")
+				templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 42, "<span class=\"w-8 h-8 flex items-center justify-center text-xs rounded-lg text-outline-variant cursor-default border-none\">&#8249;</span> ")
 				if templ_7745c5c3_Err != nil {
 					return templ_7745c5c3_Err
 				}
 			}
 			for i := 1; i <= result.TotalPages; i++ {
 				if i == result.CurrentPage {
-					templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 35, "<span class=\"w-8 h-8 flex items-center justify-center text-xs font-bold rounded-lg bg-gradient-to-br from-primary to-primary-dark text-white cursor-default border-none\">")
+					templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 43, "<span class=\"w-8 h-8 flex items-center justify-center text-xs font-bold rounded-lg bg-gradient-to-br from-primary to-primary-dark text-white cursor-default border-none\">")
 					if templ_7745c5c3_Err != nil {
 						return templ_7745c5c3_Err
 					}
 					var templ_7745c5c3_Var27 string
 					templ_7745c5c3_Var27, templ_7745c5c3_Err = templ.JoinStringErrs(fmt.Sprintf("%d", i))
 					if templ_7745c5c3_Err != nil {
-						return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/features/取引区分_views_gen.templ`, Line: 123, Col: 197}
+						return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/features/取引区分_views_gen.templ`, Line: 155, Col: 197}
 					}
 					_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var27))
 					if templ_7745c5c3_Err != nil {
 						return templ_7745c5c3_Err
 					}
-					templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 36, "</span> ")
+					templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 44, "</span> ")
 					if templ_7745c5c3_Err != nil {
 						return templ_7745c5c3_Err
 					}
 				} else {
-					templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 37, "<button class=\"w-8 h-8 flex items-center justify-center text-xs font-bold rounded-lg cursor-pointer text-on-surface hover:bg-surface-container-high border-none\" hx-get=\"")
+					templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 45, "<button class=\"w-8 h-8 flex items-center justify-center text-xs font-bold rounded-lg cursor-pointer text-on-surface hover:bg-surface-container-high border-none\" hx-get=\"")
 					if templ_7745c5c3_Err != nil {
 						return templ_7745c5c3_Err
 					}
 					var templ_7745c5c3_Var28 string
 					templ_7745c5c3_Var28, templ_7745c5c3_Err = templ.JoinStringErrs(fmt.Sprintf("/api/取引区分?page=%d&size=%d", i, result.PageSize))
 					if templ_7745c5c3_Err != nil {
-						return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/features/取引区分_views_gen.templ`, Line: 125, Col: 244}
+						return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/features/取引区分_views_gen.templ`, Line: 157, Col: 244}
 					}
 					_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var28))
 					if templ_7745c5c3_Err != nil {
 						return templ_7745c5c3_Err
 					}
-					templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 38, "\" hx-target=\"#txtypes-body\" hx-swap=\"innerHTML\">")
+					templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 46, "\" hx-target=\"#txtypes-body\" hx-swap=\"innerHTML\">")
 					if templ_7745c5c3_Err != nil {
 						return templ_7745c5c3_Err
 					}
 					var templ_7745c5c3_Var29 string
 					templ_7745c5c3_Var29, templ_7745c5c3_Err = templ.JoinStringErrs(fmt.Sprintf("%d", i))
 					if templ_7745c5c3_Err != nil {
-						return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/features/取引区分_views_gen.templ`, Line: 125, Col: 315}
+						return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/features/取引区分_views_gen.templ`, Line: 157, Col: 315}
 					}
 					_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var29))
 					if templ_7745c5c3_Err != nil {
 						return templ_7745c5c3_Err
 					}
-					templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 39, "</button> ")
+					templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 47, "</button> ")
 					if templ_7745c5c3_Err != nil {
 						return templ_7745c5c3_Err
 					}
 				}
 			}
 			if result.CurrentPage < result.TotalPages {
-				templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 40, "<button class=\"w-8 h-8 flex items-center justify-center text-xs font-bold rounded-lg cursor-pointer text-on-surface hover:bg-surface-container-high border-none\" hx-get=\"")
+				templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 48, "<button class=\"w-8 h-8 flex items-center justify-center text-xs font-bold rounded-lg cursor-pointer text-on-surface hover:bg-surface-container-high border-none\" hx-get=\"")
 				if templ_7745c5c3_Err != nil {
 					return templ_7745c5c3_Err
 				}
 				var templ_7745c5c3_Var30 string
 				templ_7745c5c3_Var30, templ_7745c5c3_Err = templ.JoinStringErrs(fmt.Sprintf("/api/取引区分?page=%d&size=%d", result.CurrentPage+1, result.PageSize))
 				if templ_7745c5c3_Err != nil {
-					return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/features/取引区分_views_gen.templ`, Line: 129, Col: 262}
+					return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/features/取引区分_views_gen.templ`, Line: 161, Col: 262}
 				}
 				_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var30))
 				if templ_7745c5c3_Err != nil {
 					return templ_7745c5c3_Err
 				}
-				templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 41, "\" hx-target=\"#txtypes-body\" hx-swap=\"innerHTML\">&#8250;</button> ")
+				templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 49, "\" hx-target=\"#txtypes-body\" hx-swap=\"innerHTML\">&#8250;</button> ")
 				if templ_7745c5c3_Err != nil {
 					return templ_7745c5c3_Err
 				}
 			} else {
-				templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 42, "<span class=\"w-8 h-8 flex items-center justify-center text-xs rounded-lg text-outline-variant cursor-default border-none\">&#8250;</span> ")
+				templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 50, "<span class=\"w-8 h-8 flex items-center justify-center text-xs rounded-lg text-outline-variant cursor-default border-none\">&#8250;</span> ")
 				if templ_7745c5c3_Err != nil {
 					return templ_7745c5c3_Err
 				}
 			}
-			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 43, "<span class=\"text-sm font-medium text-outline ml-4\">")
+			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 51, "<span class=\"text-sm font-medium text-outline ml-4\">")
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
 			var templ_7745c5c3_Var31 string
 			templ_7745c5c3_Var31, templ_7745c5c3_Err = templ.JoinStringErrs(fmt.Sprintf("%d", result.CurrentPage))
 			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/features/取引区分_views_gen.templ`, Line: 133, Col: 95}
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/features/取引区分_views_gen.templ`, Line: 165, Col: 95}
 			}
 			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var31))
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
-			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 44, " / ")
+			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 52, " / ")
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
 			var templ_7745c5c3_Var32 string
 			templ_7745c5c3_Var32, templ_7745c5c3_Err = templ.JoinStringErrs(fmt.Sprintf("%d", result.TotalPages))
 			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/features/取引区分_views_gen.templ`, Line: 133, Col: 138}
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/features/取引区分_views_gen.templ`, Line: 165, Col: 138}
 			}
 			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var32))
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
-			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 45, " ページ</span></div>")
+			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 53, " ページ</span></div>")
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
 		} else {
-			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 46, "<div class=\"flex items-center gap-1\"><span class=\"text-sm font-medium text-outline\">全 ")
+			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 54, "<div class=\"flex items-center gap-1\"><span class=\"text-sm font-medium text-outline\">全 ")
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
 			var templ_7745c5c3_Var33 string
 			templ_7745c5c3_Var33, templ_7745c5c3_Err = templ.JoinStringErrs(fmt.Sprintf("%d", result.TotalPages))
 			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/features/取引区分_views_gen.templ`, Line: 137, Col: 93}
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/features/取引区分_views_gen.templ`, Line: 169, Col: 93}
 			}
 			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var33))
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
-			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 47, " ページ</span></div>")
+			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 55, " ページ</span></div>")
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
 		}
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 48, "</div>")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 56, "</div>")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}

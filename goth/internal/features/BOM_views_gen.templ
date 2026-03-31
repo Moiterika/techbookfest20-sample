@@ -9,9 +9,7 @@ import (
 templ RenderPageBOM() {
 	@ui.Base("BOM管理") {
 		<main class="max-w-[87.5rem] mx-auto py-8 px-8">
-			<nav class="mb-4">
-				<a href="/" class="text-primary no-underline hover:underline">← ホーム</a>
-			</nav>
+			@ui.Nav("boms")
 			<h1 class="text-2xl font-bold mb-8 text-on-surface tracking-tight">BOM管理</h1>
 			<div class="flex justify-end mb-4">
 				<a href="/BOM/new" class="text-sm py-2 px-4 rounded-lg cursor-pointer font-semibold transition-all duration-200 inline-flex items-center justify-center border-none bg-gradient-to-br from-primary to-primary-dark text-white hover:opacity-90 active:opacity-80">＋ 新規BOM登録</a>
@@ -106,9 +104,7 @@ templ RenderPaginationBOM(result ListResultBOM) {
 templ RenderNewPageBOM() {
 	@ui.Base("新規BOM登録") {
 		<main class="max-w-[87.5rem] mx-auto py-8 px-8">
-			<nav class="mb-4">
-				<a href="/BOM" class="text-primary no-underline hover:underline">← BOM一覧</a>
-			</nav>
+			@ui.Nav("boms")
 			<h1 class="text-2xl font-bold mb-8 text-on-surface tracking-tight">新規BOM登録</h1>
 			<form hx-post="/api/BOM" hx-swap="innerHTML" hx-target="#bom-error">
 				<div id="bom-error" class="min-h-6 mb-2"></div>
@@ -163,9 +159,7 @@ templ RenderNewPageBOM() {
 templ RenderEditPageBOM(detail ResponseBOM詳細) {
 	@ui.Base("BOM編集") {
 		<main class="max-w-[87.5rem] mx-auto py-8 px-8">
-			<nav class="mb-4">
-				<a href="/BOM" class="text-primary no-underline hover:underline">← BOM一覧</a>
-			</nav>
+			@ui.Nav("boms")
 			<h1 class="text-2xl font-bold mb-8 text-on-surface tracking-tight">BOM編集</h1>
 			<form hx-put={ fmt.Sprintf("/api/BOM/%d", detail.Id) } hx-swap="innerHTML" hx-target="#bom-error">
 				<div id="bom-error" class="min-h-6 mb-2"></div>

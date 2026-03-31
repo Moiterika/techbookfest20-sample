@@ -35,7 +35,8 @@
       "Bash(bunx --bun astro build)",
       "Bash(bun scripts/gen-go.ts --all)",
       "Bash(grep)",
-      "Bash(ls)"
+      "Bash(ls)",
+      "Bash(ls:*)"
     ]
   },
   "enabledMcpjsonServers": [

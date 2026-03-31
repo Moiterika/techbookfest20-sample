@@ -321,13 +321,13 @@ function parseColumns(content: string): ColumnDef[] {
   let objMatch;
   while ((objMatch = objRegex.exec(body)) !== null) {
     const obj = objMatch[1];
-    const col = parseColumnObject(obj);
+    const col = parseColumnObject(obj, content);
     if (col) columns.push(col);
   }
   return columns;
 }
 
-function parseColumnObject(obj: string): ColumnDef | null {
+function parseColumnObject(obj: string, fileContent?: string): ColumnDef | null {
   const key = extractString(obj, "key");
   const label = extractString(obj, "label");
   if (!key || !label) return null;
@@ -342,7 +342,7 @@ function parseColumnObject(obj: string): ColumnDef | null {
   const minMatch = obj.match(/min:\s*(\d+)/);
   const min = minMatch ? Number(minMatch[1]) : undefined;
 
-  // options: リテラル配列をパース（変数参照は拾えない）
+  // options: リテラル配列をパース、変数参照も解決する
   const options: { value: string; label: string }[] = [];
   const optIdx = obj.indexOf("options:");
   if (optIdx >= 0) {
@@ -352,6 +352,22 @@ function parseColumnObject(obj: string): ColumnDef | null {
       let optMatch;
       while ((optMatch = optRegex.exec(optBody)) !== null) {
         options.push({ value: optMatch[1], label: optMatch[2] });
+      }
+    }
+    // インラインで見つからなかった場合、変数参照を解決
+    if (options.length === 0 && fileContent) {
+      const varRefMatch = obj.slice(optIdx).match(/options:\s*([A-Za-z_\u3000-\u9FFFぁ-んァ-ヶー]+)/);
+      if (varRefMatch) {
+        const varName = varRefMatch[1];
+        const varDefRegex = new RegExp(`(?:const|let|var)\\s+${varName}\\s*=\\s*\\[([\\s\\S]*?)\\];`);
+        const varDef = fileContent.match(varDefRegex);
+        if (varDef) {
+          const optRegex2 = /\{\s*value:\s*"([^"]*)",\s*label:\s*"([^"]*)"\s*\}/g;
+          let m;
+          while ((m = optRegex2.exec(varDef[1])) !== null) {
+            options.push({ value: m[1], label: m[2] });
+          }
+        }
       }
     }
   }
@@ -1168,8 +1184,12 @@ function genStyledEditCell(col: ColumnDef, apiPath: string, idPrefix: string, en
       return `<td${cls}><input type="number" name="${col.key}" value={ fmt.Sprintf("%d", item.${goField}) } form={ fmt.Sprintf("edit-form-%d", item.Id) }${inputCls}/></td>`;
     case "date":
       return `<td${cls}><input type="date" name="${col.key}" value={ item.${goField} } form={ fmt.Sprintf("edit-form-%d", item.Id) }${inputCls}/></td>`;
-    case "select":
-      return `<td${cls}>/* TODO: select ${col.label} */</td>`;
+    case "select": {
+      const opts = (col.options || []).map(o =>
+        `<option value="${o.value}" if fmt.Sprintf("%v", item.${goField}) == "${o.value}" { selected }>${o.label}</option>`
+      ).join("");
+      return `<td${cls}><select name="${col.key}" form={ fmt.Sprintf("edit-form-%d", item.Id) }${inputCls}>${opts}</select></td>`;
+    }
     case "computed":
       return `<td${cls}>{ fmt.Sprintf("%d", item.${goField}) }</td>`;
     case "readonlyLookup":
@@ -1193,8 +1213,10 @@ function genStyledFormField(col: ColumnDef, TW: { labelStyle: string; inputStyle
       return `<label${lblCls}>${col.label}<input type="number" name="${col.key}" value="${col.defaultValue || "0"}"${col.min !== undefined ? ` min="${col.min}"` : ""}${col.required ? " required" : ""}${inputCls}/></label>`;
     case "date":
       return `<label${lblCls}>${col.label}<input type="date" name="${col.key}"${col.required ? " required" : ""}${inputCls}/></label>`;
-    case "select":
-      return `<label${lblCls}>${col.label}<select name="${col.key}"${col.required ? " required" : ""}${inputCls}>/* TODO: options */</select></label>`;
+    case "select": {
+      const opts = (col.options || []).map(o => `<option value="${o.value}">${o.label}</option>`).join("");
+      return `<label${lblCls}>${col.label}<select name="${col.key}"${col.required ? " required" : ""}${inputCls}>${opts}</select></label>`;
+    }
     case "barcode":
       return `<div x-data="{ barcodeVal: '' }"><label${lblCls}>${col.label}<input type="text" name="${col.key}" x-model="barcodeVal"${col.placeholder ? ` placeholder="${col.placeholder}"` : ""}${inputCls}/></label><div class="mt-2 flex justify-center"><react-barcode x-bind:value="barcodeVal"></react-barcode></div></div>`;
     case "itemCode":
@@ -1902,6 +1924,10 @@ function genHeaderBodyViewsTempl(parentEntity: EntityDef, fm: FeatureMapping, hb
     disabledPageBtn: "w-8 h-8 flex items-center justify-center text-xs rounded-lg text-outline-variant cursor-default border-none",
     inputStyle: "rounded-lg text-sm text-on-surface outline-none bg-surface-container-low border-2 border-transparent transition-[border-color,background-color] duration-200 focus:border-b-primary focus:bg-white px-3 py-2.5 w-full",
     inputStyleSm: "rounded-lg text-sm text-on-surface outline-none bg-surface-container-low border-2 border-transparent transition-[border-color,background-color] duration-200 focus:border-b-primary focus:bg-white py-1.5 px-2.5 w-full min-w-[7.5rem]",
+    editBtn: "inline-flex items-center gap-1 text-primary text-xs font-bold px-2 py-1 rounded-md cursor-pointer border-none bg-transparent no-underline hover:bg-primary/10",
+    kebabBtn: "inline-flex items-center justify-center w-7 h-7 rounded-full cursor-pointer text-outline border-none bg-transparent hover:text-on-surface hover:bg-surface-container-low",
+    kebabMenu: "absolute right-0 top-full z-20 mt-1 bg-white rounded-lg shadow-[0_10px_30px_-5px_rgba(18,28,42,0.08)] py-1 min-w-[120px]",
+    kebabItem: "flex items-center gap-2 w-full text-left px-3 py-2 text-sm cursor-pointer text-error border-none bg-transparent hover:bg-error-container/30",
   };
 
   const lines: string[] = [];
@@ -1952,11 +1978,20 @@ function genHeaderBodyViewsTempl(parentEntity: EntityDef, fm: FeatureMapping, hb
   }
   lines.push(`\t\t<td class="py-4 px-6 text-right">`);
   lines.push(`\t\t\t<div class="flex items-center justify-end gap-2">`);
-  lines.push(`\t\t\t\t<a href={ fmt.Sprintf("/${JP}/%d", item.Id) } class="inline-flex items-center gap-1 text-primary text-xs font-bold px-2 py-1 rounded-md cursor-pointer border-none bg-transparent no-underline hover:bg-primary/10">編集</a>`);
+  usedIcons.add("pencil-square"); usedIcons.add("ellipsis-vertical-solid"); usedIcons.add("trash");
+  lines.push(`\t\t\t\t<a href={ fmt.Sprintf("/${JP}/%d", item.Id) } class="${TW.editBtn} no-underline">`);
+  lines.push(`\t\t\t\t\t@ui.Icon("pencil-square", "w-3.5 h-3.5")`);
+  lines.push(`\t\t\t\t\t編集`);
+  lines.push(`\t\t\t\t</a>`);
   lines.push(`\t\t\t\t<div class="relative" x-data="{ menuOpen: false }" @click.outside="menuOpen = false">`);
-  lines.push(`\t\t\t\t\t<button class="inline-flex items-center justify-center w-7 h-7 rounded-full cursor-pointer text-outline border-none bg-transparent hover:text-on-surface hover:bg-surface-container-low" @click="menuOpen = !menuOpen" type="button">&#8942;</button>`);
-  lines.push(`\t\t\t\t\t<div class="absolute right-0 top-full z-20 mt-1 bg-white rounded-lg shadow-[0_10px_30px_-5px_rgba(18,28,42,0.08)] py-1 min-w-[120px]" x-show="menuOpen" x-transition x-cloak>`);
-  lines.push(`\t\t\t\t\t\t<button class="flex items-center gap-2 w-full text-left px-3 py-2 text-sm cursor-pointer text-error border-none bg-transparent hover:bg-error-container/30" hx-delete={ fmt.Sprintf("${apiPath}/%d", item.Id) } hx-target={ fmt.Sprintf("#${config.idPrefix}-%d", item.Id) } hx-swap="outerHTML swap:0.3s" hx-confirm="${config.deleteConfirmTemplate}" @click="menuOpen = false">削除</button>`);
+  lines.push(`\t\t\t\t\t<button class="${TW.kebabBtn}" @click="menuOpen = !menuOpen" type="button">`);
+  lines.push(`\t\t\t\t\t\t@ui.Icon("ellipsis-vertical-solid", "w-5 h-5")`);
+  lines.push(`\t\t\t\t\t</button>`);
+  lines.push(`\t\t\t\t\t<div class="${TW.kebabMenu}" x-show="menuOpen" x-transition x-cloak>`);
+  lines.push(`\t\t\t\t\t\t<button class="${TW.kebabItem}" hx-delete={ fmt.Sprintf("${apiPath}/%d", item.Id) } hx-target={ fmt.Sprintf("#${config.idPrefix}-%d", item.Id) } hx-swap="outerHTML swap:0.3s" hx-confirm="${config.deleteConfirmTemplate}" @click="menuOpen = false">`);
+  lines.push(`\t\t\t\t\t\t\t@ui.Icon("trash", "w-4 h-4")`);
+  lines.push(`\t\t\t\t\t\t\t削除`);
+  lines.push(`\t\t\t\t\t\t</button>`);
   lines.push(`\t\t\t\t\t</div>`);
   lines.push(`\t\t\t\t</div>`);
   lines.push(`\t\t\t</div>`);

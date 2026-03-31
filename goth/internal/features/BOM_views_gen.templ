@@ -40,11 +40,19 @@ templ RenderRowBOM(item ResponseBOM) {
 		<td class="py-4 px-6 text-on-surface-variant text-sm">{ item.名称 }</td>
 		<td class="py-4 px-6 text-right">
 			<div class="flex items-center justify-end gap-2">
-				<a href={ fmt.Sprintf("/BOM/%d", item.Id) } class="inline-flex items-center gap-1 text-primary text-xs font-bold px-2 py-1 rounded-md cursor-pointer border-none bg-transparent no-underline hover:bg-primary/10">編集</a>
+				<a href={ fmt.Sprintf("/BOM/%d", item.Id) } class="inline-flex items-center gap-1 text-primary text-xs font-bold px-2 py-1 rounded-md cursor-pointer border-none bg-transparent no-underline hover:bg-primary/10 no-underline">
+					@ui.Icon("pencil-square", "w-3.5 h-3.5")
+					編集
+				</a>
 				<div class="relative" x-data="{ menuOpen: false }" @click.outside="menuOpen = false">
-					<button class="inline-flex items-center justify-center w-7 h-7 rounded-full cursor-pointer text-outline border-none bg-transparent hover:text-on-surface hover:bg-surface-container-low" @click="menuOpen = !menuOpen" type="button">&#8942;</button>
+					<button class="inline-flex items-center justify-center w-7 h-7 rounded-full cursor-pointer text-outline border-none bg-transparent hover:text-on-surface hover:bg-surface-container-low" @click="menuOpen = !menuOpen" type="button">
+						@ui.Icon("ellipsis-vertical-solid", "w-5 h-5")
+					</button>
 					<div class="absolute right-0 top-full z-20 mt-1 bg-white rounded-lg shadow-[0_10px_30px_-5px_rgba(18,28,42,0.08)] py-1 min-w-[120px]" x-show="menuOpen" x-transition x-cloak>
-						<button class="flex items-center gap-2 w-full text-left px-3 py-2 text-sm cursor-pointer text-error border-none bg-transparent hover:bg-error-container/30" hx-delete={ fmt.Sprintf("/api/BOM/%d", item.Id) } hx-target={ fmt.Sprintf("#bom-%d", item.Id) } hx-swap="outerHTML swap:0.3s" hx-confirm="「{名称}」を削除しますか？" @click="menuOpen = false">削除</button>
+						<button class="flex items-center gap-2 w-full text-left px-3 py-2 text-sm cursor-pointer text-error border-none bg-transparent hover:bg-error-container/30" hx-delete={ fmt.Sprintf("/api/BOM/%d", item.Id) } hx-target={ fmt.Sprintf("#bom-%d", item.Id) } hx-swap="outerHTML swap:0.3s" hx-confirm="「{名称}」を削除しますか？" @click="menuOpen = false">
+							@ui.Icon("trash", "w-4 h-4")
+							削除
+						</button>
 					</div>
 				</div>
 			</div>

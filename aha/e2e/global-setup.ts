@@ -10,12 +10,12 @@ const testDb = "e2e_testdb";
 export default async function globalSetup() {
   const sql = postgres({ host, port, username: user, password, database: "postgres" });
 
-  const [{ exists }] = await sql<[{ exists: boolean }]>`
-    SELECT EXISTS (SELECT 1 FROM pg_database WHERE datname = ${testDb})
-  `;
-  if (!exists) {
-    await sql.unsafe(`CREATE DATABASE ${testDb}`);
-  }
+  // 既存接続を切断してから DROP → 再作成
+  await sql.unsafe(
+    `SELECT pg_terminate_backend(pid) FROM pg_stat_activity WHERE datname = '${testDb}' AND pid <> pg_backend_pid()`,
+  );
+  await sql.unsafe(`DROP DATABASE IF EXISTS ${testDb}`);
+  await sql.unsafe(`CREATE DATABASE ${testDb}`);
   await sql.end();
 
   execSync("bunx drizzle-kit push --force", {

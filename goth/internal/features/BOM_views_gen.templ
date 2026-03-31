@@ -12,7 +12,7 @@ templ RenderPageBOM() {
 			@ui.Nav("boms")
 			<h1 class="text-2xl font-bold mb-8 text-on-surface tracking-tight">BOM管理</h1>
 			<div class="flex justify-end mb-4">
-				<a href="/BOM/new" class="text-sm py-2 px-4 rounded-lg cursor-pointer font-semibold transition-all duration-200 inline-flex items-center justify-center border-none bg-gradient-to-br from-primary to-primary-dark text-white hover:opacity-90 active:opacity-80">＋ 新規BOM登録</a>
+				<a href="/BOM/new" class="text-sm py-2 px-4 rounded-lg cursor-pointer font-semibold transition-all duration-200 inline-flex items-center justify-center border-none bg-gradient-to-br from-primary to-primary-dark text-white hover:opacity-90 active:opacity-80">+ 新規BOM登録</a>
 			</div>
 			<div class="overflow-x-auto rounded-xl bg-white">
 				<table style="width: 100%; border-collapse: collapse;">
@@ -110,10 +110,10 @@ templ RenderPaginationBOM(result ListResultBOM) {
 }
 
 templ RenderNewPageBOM() {
-	@ui.Base("新規BOM登録") {
+	@ui.Base("BOM登録") {
 		<main class="max-w-[87.5rem] mx-auto py-8 px-8">
 			@ui.Nav("boms")
-			<h1 class="text-2xl font-bold mb-8 text-on-surface tracking-tight">新規BOM登録</h1>
+			<h1 class="text-2xl font-bold mb-8 text-on-surface tracking-tight">BOM登録</h1>
 			<form hx-post="/api/BOM" hx-swap="innerHTML" hx-target="#bom-error">
 				<div id="bom-error" class="min-h-6 mb-2"></div>
 				<div class="mb-6 p-6 rounded-xl bg-white">
@@ -234,6 +234,7 @@ templ RenderExistingLineRowBOM0(line BOM明細) {
 		<td class="py-4 px-6 text-on-surface-variant text-sm"><span id={ fmt.Sprintf("lookup-%d-itemName", line.Id) } class="text-sm text-outline">{ line.品目名 }</span></td>
 		<td class="py-4 px-6 text-on-surface-variant text-sm"><input type="number" step="0.0001" name="line数量" value={ line.数量 } class="rounded-lg text-sm text-on-surface outline-none bg-surface-container-low border-2 border-transparent transition-[border-color,background-color] duration-200 focus:border-b-primary focus:bg-white py-1.5 px-2.5 w-full min-w-[7.5rem]"/></td>
 		<td class="py-4 px-6 text-on-surface-variant text-sm">@RenderSelectLineBOM0単位(line.単位)</td>
+		<td class="py-4 px-6 text-on-surface-variant text-sm" style="width: 3rem;"><button type="button" class="inline-flex items-center justify-center w-7 h-7 rounded-full cursor-pointer text-error border-none bg-transparent text-sm hover:bg-error/10" onclick="this.closest('tr').remove()">&times;</button></td>
 	</tr>
 }
 
@@ -246,6 +247,7 @@ templ RenderExistingLineRowBOM1(line BOM明細) {
 		<td class="py-4 px-6 text-on-surface-variant text-sm">@RenderSelectLineBOM1単位(line.単位)</td>
 		<td class="py-4 px-6 text-on-surface-variant text-sm"><input type="text" name="line参照BOMコード" value={ NullStrOr(line.参照BOMコード, "") } class="rounded-lg text-sm text-on-surface outline-none bg-surface-container-low border-2 border-transparent transition-[border-color,background-color] duration-200 focus:border-b-primary focus:bg-white py-1.5 px-2.5 w-full min-w-[7.5rem]"/></td>
 		<td class="py-4 px-6 text-on-surface-variant text-sm"><input type="text" name="line参照BOM版" value={ NullStrOr(line.参照BOM版, "") } class="rounded-lg text-sm text-on-surface outline-none bg-surface-container-low border-2 border-transparent transition-[border-color,background-color] duration-200 focus:border-b-primary focus:bg-white py-1.5 px-2.5 w-full min-w-[7.5rem]"/></td>
+		<td class="py-4 px-6 text-on-surface-variant text-sm" style="width: 3rem;"><button type="button" class="inline-flex items-center justify-center w-7 h-7 rounded-full cursor-pointer text-error border-none bg-transparent text-sm hover:bg-error/10" onclick="this.closest('tr').remove()">&times;</button></td>
 	</tr>
 }
 
@@ -286,6 +288,7 @@ templ RenderEmptyLineRowBOM0(rowKey string) {
 		<td class="py-4 px-6 text-on-surface-variant text-sm"><span id={ fmt.Sprintf("lookup-%s-itemName", rowKey) } class="text-sm text-outline"></span></td>
 		<td class="py-4 px-6 text-on-surface-variant text-sm"><input type="number" step="0.0001" min="0" name="line数量" placeholder="0" class="rounded-lg text-sm text-on-surface outline-none bg-surface-container-low border-2 border-transparent transition-[border-color,background-color] duration-200 focus:border-b-primary focus:bg-white py-1.5 px-2.5 w-full min-w-[7.5rem]"/></td>
 		<td class="py-4 px-6 text-on-surface-variant text-sm">@RenderSelectLineBOM0単位("pcs")</td>
+		<td class="py-4 px-6 text-on-surface-variant text-sm" style="width: 3rem;"><button type="button" class="inline-flex items-center justify-center w-7 h-7 rounded-full cursor-pointer text-error border-none bg-transparent text-sm hover:bg-error/10" onclick="this.closest('tr').remove()">&times;</button></td>
 	</tr>
 }
 
@@ -298,6 +301,7 @@ templ RenderEmptyLineRowBOM1(rowKey string) {
 		<td class="py-4 px-6 text-on-surface-variant text-sm">@RenderSelectLineBOM1単位("pcs")</td>
 		<td class="py-4 px-6 text-on-surface-variant text-sm"><input type="text" name="line参照BOMコード" placeholder="BOMコード" class="rounded-lg text-sm text-on-surface outline-none bg-surface-container-low border-2 border-transparent transition-[border-color,background-color] duration-200 focus:border-b-primary focus:bg-white py-1.5 px-2.5 w-full min-w-[7.5rem]"/></td>
 		<td class="py-4 px-6 text-on-surface-variant text-sm"><input type="text" name="line参照BOM版" placeholder="版" class="rounded-lg text-sm text-on-surface outline-none bg-surface-container-low border-2 border-transparent transition-[border-color,background-color] duration-200 focus:border-b-primary focus:bg-white py-1.5 px-2.5 w-full min-w-[7.5rem]"/></td>
+		<td class="py-4 px-6 text-on-surface-variant text-sm" style="width: 3rem;"><button type="button" class="inline-flex items-center justify-center w-7 h-7 rounded-full cursor-pointer text-error border-none bg-transparent text-sm hover:bg-error/10" onclick="this.closest('tr').remove()">&times;</button></td>
 	</tr>
 }
 

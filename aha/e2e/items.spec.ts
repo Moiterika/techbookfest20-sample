@@ -21,6 +21,9 @@ async function addItem(
   }
 
   await withHtmx(page, "/api/品目", () => form.getByText("登録する").click());
+
+  // フォームが閉じるのを待つ（Alpine.js の open = false 反映待ち）
+  await expect(form).not.toBeVisible();
 }
 
 test.describe("品目管理", () => {

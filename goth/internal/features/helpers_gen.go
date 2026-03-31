@@ -14,6 +14,32 @@ import (
 
 var _ = fmt.Sprintf
 
+// SelectOption はフォーム select のオプションを表す
+type SelectOption struct {
+	Value string
+	Label string
+}
+
+// FetchSelectOptions は参照テーブルから SelectOption スライスを取得する
+func FetchSelectOptions(db *sql.DB, tableName string) ([]SelectOption, error) {
+	query := fmt.Sprintf("SELECT id, 名称 FROM %s ORDER BY id", tableName)
+	rows, err := db.Query(query)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	var options []SelectOption
+	for rows.Next() {
+		var id int
+		var name string
+		if err := rows.Scan(&id, &name); err != nil {
+			return nil, err
+		}
+		options = append(options, SelectOption{Value: fmt.Sprintf("%d", id), Label: name})
+	}
+	return options, rows.Err()
+}
+
 // ParseDeleteForm は DELETE リクエストのボディをパースする。
 // Go の ParseForm は DELETE メソッドのボディを読まないため手動でパースする。
 func ParseDeleteForm(r *http.Request) (url.Values, error) {

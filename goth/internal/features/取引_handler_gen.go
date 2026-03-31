@@ -23,7 +23,12 @@ func (h *Handler取引) RegisterRoutes取引(mux *http.ServeMux) {
 
 func (h *Handler取引) HandlePage取引(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "text/html; charset=utf-8")
-	RenderPage取引().Render(r.Context(), w)
+	取引区分IDOptions, err := FetchSelectOptions(h.DB, "取引区分")
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+	RenderPage取引(取引区分IDOptions).Render(r.Context(), w)
 }
 
 func (h *Handler取引) Handle一覧取引(w http.ResponseWriter, r *http.Request) {
@@ -131,7 +136,12 @@ func (h *Handler取引) HandleEdit取引(w http.ResponseWriter, r *http.Request)
 		return
 	}
 	w.Header().Set("Content-Type", "text/html; charset=utf-8")
-	RenderEditRow取引(item).Render(r.Context(), w)
+	取引区分IDOptions, optErr := FetchSelectOptions(h.DB, "取引区分")
+	if optErr != nil {
+		http.Error(w, optErr.Error(), http.StatusInternalServerError)
+		return
+	}
+	RenderEditRow取引(item, 取引区分IDOptions).Render(r.Context(), w)
 }
 
 func (h *Handler取引) HandleExport取引(w http.ResponseWriter, r *http.Request) {

@@ -15,6 +15,7 @@ async function ensureItem(page: Page): Promise<{ code: string }> {
   await form.getByLabel("単価").fill("500");
 
   await withHtmx(page, "/api/品目", () => form.getByText("登録する").click());
+  await expect(form).not.toBeVisible();
 
   return { code };
 }
@@ -39,6 +40,7 @@ async function ensureTxType(page: Page): Promise<void> {
   await withHtmx(page, "/api/取引区分", () =>
     form.getByText("登録する").click(),
   );
+  await expect(form).not.toBeVisible();
 }
 
 test.describe("取引管理", () => {
@@ -88,11 +90,15 @@ test.describe("取引管理", () => {
     await form.getByLabel("単価").fill("500");
     await form.getByLabel("数量").fill("3");
 
+    // 登録前は取引がないことを確認
+    await expect(page.locator("#tx-body")).toContainText("取引がありません");
+
     // 登録
     await withHtmx(page, "/api/取引", () => form.getByText("登録する").click());
 
-    // テーブルに取引が表示される
-    await expect(page.locator("#tx-body")).toContainText(code);
+    // 登録後は「取引がありません」が消え、データ行が1件表示される
+    await expect(page.locator("#tx-body")).not.toContainText("取引がありません");
+    await expect(page.locator("#tx-body tr")).toHaveCount(1);
   });
 
   test("選択コピー・選択削除ボタンは未選択時に無効", async ({ page }) => {

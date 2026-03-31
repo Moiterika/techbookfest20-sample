@@ -19,6 +19,7 @@ async function ensureItem(
   await form.getByLabel("単価").fill("100");
 
   await withHtmx(page, "/api/品目", () => form.getByText("登録する").click());
+  await expect(form).not.toBeVisible();
   return { code, name };
 }
 

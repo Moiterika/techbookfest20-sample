@@ -105,9 +105,9 @@ func RenderRowBOM(item ResponseBOM) templ.Component {
 			return templ_7745c5c3_Err
 		}
 		var templ_7745c5c3_Var5 string
-		templ_7745c5c3_Var5, templ_7745c5c3_Err = templ.JoinStringErrs(item.Code)
+		templ_7745c5c3_Var5, templ_7745c5c3_Err = templ.JoinStringErrs(item.コード)
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/features/BOM_views_gen.templ`, Line: 40, Col: 67}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/features/BOM_views_gen.templ`, Line: 40, Col: 72}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var5))
 		if templ_7745c5c3_Err != nil {
@@ -118,9 +118,9 @@ func RenderRowBOM(item ResponseBOM) templ.Component {
 			return templ_7745c5c3_Err
 		}
 		var templ_7745c5c3_Var6 string
-		templ_7745c5c3_Var6, templ_7745c5c3_Err = templ.JoinStringErrs(item.Version)
+		templ_7745c5c3_Var6, templ_7745c5c3_Err = templ.JoinStringErrs(item.版)
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/features/BOM_views_gen.templ`, Line: 41, Col: 70}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/features/BOM_views_gen.templ`, Line: 41, Col: 66}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var6))
 		if templ_7745c5c3_Err != nil {
@@ -131,9 +131,9 @@ func RenderRowBOM(item ResponseBOM) templ.Component {
 			return templ_7745c5c3_Err
 		}
 		var templ_7745c5c3_Var7 string
-		templ_7745c5c3_Var7, templ_7745c5c3_Err = templ.JoinStringErrs(item.Name)
+		templ_7745c5c3_Var7, templ_7745c5c3_Err = templ.JoinStringErrs(item.名称)
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/features/BOM_views_gen.templ`, Line: 42, Col: 67}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/features/BOM_views_gen.templ`, Line: 42, Col: 69}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var7))
 		if templ_7745c5c3_Err != nil {
@@ -178,7 +178,7 @@ func RenderRowBOM(item ResponseBOM) templ.Component {
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 9, "\" hx-swap=\"outerHTML swap:0.3s\" hx-confirm=\"「{name}」を削除しますか？\" @click=\"menuOpen = false\">削除</button></div></div></div></td></tr>")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 9, "\" hx-swap=\"outerHTML swap:0.3s\" hx-confirm=\"「{名称}」を削除しますか？\" @click=\"menuOpen = false\">削除</button></div></div></div></td></tr>")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
@@ -477,7 +477,7 @@ func RenderNewPageBOM() templ.Component {
 				}()
 			}
 			ctx = templ.InitializeContext(ctx)
-			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 36, "<main class=\"max-w-[87.5rem] mx-auto py-8 px-8\"><nav class=\"mb-4\"><a href=\"/BOM\" class=\"text-primary no-underline hover:underline\">← BOM一覧</a></nav><h1 class=\"text-2xl font-bold mb-8 text-on-surface tracking-tight\">新規BOM登録</h1><form hx-post=\"/api/BOM\" hx-swap=\"innerHTML\" hx-target=\"#bom-error\"><div id=\"bom-error\" class=\"min-h-6 mb-2\"></div><div class=\"mb-6 p-6 rounded-xl bg-white\"><h2 class=\"text-lg font-bold text-on-surface mb-4 tracking-tight\">新規BOM登録</h2><div class=\"grid grid-cols-3 gap-4 mb-2\"><label class=\"flex flex-col gap-2 text-[0.625rem] font-bold uppercase tracking-wider text-outline\">BOMコード<input type=\"text\" name=\"code\" placeholder=\"例: BOM-001\" required class=\"rounded-lg text-sm text-on-surface outline-none bg-surface-container-low border-2 border-transparent transition-[border-color,background-color] duration-200 focus:border-b-primary focus:bg-white px-3 py-2.5 w-full\"></label> <label class=\"flex flex-col gap-2 text-[0.625rem] font-bold uppercase tracking-wider text-outline\">版<input type=\"text\" name=\"version\" placeholder=\"例: 1\" required class=\"rounded-lg text-sm text-on-surface outline-none bg-surface-container-low border-2 border-transparent transition-[border-color,background-color] duration-200 focus:border-b-primary focus:bg-white px-3 py-2.5 w-full\"></label> <label class=\"flex flex-col gap-2 text-[0.625rem] font-bold uppercase tracking-wider text-outline\">名称<input type=\"text\" name=\"name\" placeholder=\"例: 製品A 部品表\" required class=\"rounded-lg text-sm text-on-surface outline-none bg-surface-container-low border-2 border-transparent transition-[border-color,background-color] duration-200 focus:border-b-primary focus:bg-white px-3 py-2.5 w-full\"></label></div></div><div class=\"mb-6 p-6 rounded-xl bg-white\"><div class=\"text-base font-bold text-on-surface mb-3 flex items-center gap-2\"><span class=\"text-xs font-bold px-2 py-0.5 rounded-full text-white\" style=\"background: #1e40af;\">製造品目</span>製造品目（アウトプット）</div><table style=\"width: 100%; border-collapse: collapse;\"><thead><tr><th class=\"py-4 px-6 text-[0.625rem] font-bold text-on-surface-variant uppercase tracking-widest\">品目コード</th><th class=\"py-4 px-6 text-[0.625rem] font-bold text-on-surface-variant uppercase tracking-widest\">品目名</th><th class=\"py-4 px-6 text-[0.625rem] font-bold text-on-surface-variant uppercase tracking-widest\">数量</th><th class=\"py-4 px-6 text-[0.625rem] font-bold text-on-surface-variant uppercase tracking-widest\">単位</th><th class=\"py-4 px-6 text-[0.625rem] font-bold text-on-surface-variant uppercase tracking-widest\" style=\"width: 3rem;\"></th></tr></thead> <tbody id=\"section-0-lines\"></tbody></table><div style=\"margin-top: 0.5rem;\"><button type=\"button\" class=\"inline-flex items-center gap-1 text-sm text-primary font-semibold cursor-pointer border-none bg-transparent px-2 py-1.5 rounded-md hover:bg-surface-container-high\" hx-get=\"/api/BOM/line-row?section=0\" hx-target=\"#section-0-lines\" hx-swap=\"beforeend\">+ 行追加</button></div></div><div class=\"mb-6 p-6 rounded-xl bg-white\"><div class=\"text-base font-bold text-on-surface mb-3 flex items-center gap-2\"><span class=\"text-xs font-bold px-2 py-0.5 rounded-full text-white\" style=\"background: #b45309;\">投入品目</span>投入品目（インプット）</div><table style=\"width: 100%; border-collapse: collapse;\"><thead><tr><th class=\"py-4 px-6 text-[0.625rem] font-bold text-on-surface-variant uppercase tracking-widest\">品目コード</th><th class=\"py-4 px-6 text-[0.625rem] font-bold text-on-surface-variant uppercase tracking-widest\">品目名</th><th class=\"py-4 px-6 text-[0.625rem] font-bold text-on-surface-variant uppercase tracking-widest\">数量</th><th class=\"py-4 px-6 text-[0.625rem] font-bold text-on-surface-variant uppercase tracking-widest\">単位</th><th class=\"py-4 px-6 text-[0.625rem] font-bold text-on-surface-variant uppercase tracking-widest\">BOMコード</th><th class=\"py-4 px-6 text-[0.625rem] font-bold text-on-surface-variant uppercase tracking-widest\">版</th><th class=\"py-4 px-6 text-[0.625rem] font-bold text-on-surface-variant uppercase tracking-widest\" style=\"width: 3rem;\"></th></tr></thead> <tbody id=\"section-1-lines\"></tbody></table><div style=\"margin-top: 0.5rem;\"><button type=\"button\" class=\"inline-flex items-center gap-1 text-sm text-primary font-semibold cursor-pointer border-none bg-transparent px-2 py-1.5 rounded-md hover:bg-surface-container-high\" hx-get=\"/api/BOM/line-row?section=1\" hx-target=\"#section-1-lines\" hx-swap=\"beforeend\">+ 行追加</button></div></div><div class=\"flex gap-3 justify-end mt-6\"><a href=\"/BOM\" class=\"text-sm py-2 px-4 rounded-lg cursor-pointer font-semibold transition-all duration-200 inline-flex items-center justify-center border-none bg-transparent text-primary hover:bg-surface-container-high active:bg-surface-container-highest\">キャンセル</a> <button type=\"submit\" class=\"text-sm py-2 px-4 rounded-lg cursor-pointer font-semibold transition-all duration-200 inline-flex items-center justify-center border-none bg-gradient-to-br from-primary to-primary-dark text-white hover:opacity-90 active:opacity-80\">登録</button></div></form></main>")
+			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 36, "<main class=\"max-w-[87.5rem] mx-auto py-8 px-8\"><nav class=\"mb-4\"><a href=\"/BOM\" class=\"text-primary no-underline hover:underline\">← BOM一覧</a></nav><h1 class=\"text-2xl font-bold mb-8 text-on-surface tracking-tight\">新規BOM登録</h1><form hx-post=\"/api/BOM\" hx-swap=\"innerHTML\" hx-target=\"#bom-error\"><div id=\"bom-error\" class=\"min-h-6 mb-2\"></div><div class=\"mb-6 p-6 rounded-xl bg-white\"><h2 class=\"text-lg font-bold text-on-surface mb-4 tracking-tight\">新規BOM登録</h2><div class=\"grid grid-cols-3 gap-4 mb-2\"><label class=\"flex flex-col gap-2 text-[0.625rem] font-bold uppercase tracking-wider text-outline\">BOMコード<input type=\"text\" name=\"コード\" placeholder=\"例: BOM-001\" required class=\"rounded-lg text-sm text-on-surface outline-none bg-surface-container-low border-2 border-transparent transition-[border-color,background-color] duration-200 focus:border-b-primary focus:bg-white px-3 py-2.5 w-full\"></label> <label class=\"flex flex-col gap-2 text-[0.625rem] font-bold uppercase tracking-wider text-outline\">版<input type=\"text\" name=\"版\" placeholder=\"例: 1\" required class=\"rounded-lg text-sm text-on-surface outline-none bg-surface-container-low border-2 border-transparent transition-[border-color,background-color] duration-200 focus:border-b-primary focus:bg-white px-3 py-2.5 w-full\"></label> <label class=\"flex flex-col gap-2 text-[0.625rem] font-bold uppercase tracking-wider text-outline\">名称<input type=\"text\" name=\"名称\" placeholder=\"例: 製品A 部品表\" required class=\"rounded-lg text-sm text-on-surface outline-none bg-surface-container-low border-2 border-transparent transition-[border-color,background-color] duration-200 focus:border-b-primary focus:bg-white px-3 py-2.5 w-full\"></label></div></div><div class=\"mb-6 p-6 rounded-xl bg-white\"><div class=\"text-base font-bold text-on-surface mb-3 flex items-center gap-2\"><span class=\"text-xs font-bold px-2 py-0.5 rounded-full text-white\" style=\"background: #1e40af;\">製造品目</span>製造品目（アウトプット）</div><table style=\"width: 100%; border-collapse: collapse;\"><thead><tr><th class=\"py-4 px-6 text-[0.625rem] font-bold text-on-surface-variant uppercase tracking-widest\">品目コード</th><th class=\"py-4 px-6 text-[0.625rem] font-bold text-on-surface-variant uppercase tracking-widest\">品目名</th><th class=\"py-4 px-6 text-[0.625rem] font-bold text-on-surface-variant uppercase tracking-widest\">数量</th><th class=\"py-4 px-6 text-[0.625rem] font-bold text-on-surface-variant uppercase tracking-widest\">単位</th><th class=\"py-4 px-6 text-[0.625rem] font-bold text-on-surface-variant uppercase tracking-widest\" style=\"width: 3rem;\"></th></tr></thead> <tbody id=\"section-0-lines\"></tbody></table><div style=\"margin-top: 0.5rem;\"><button type=\"button\" class=\"inline-flex items-center gap-1 text-sm text-primary font-semibold cursor-pointer border-none bg-transparent px-2 py-1.5 rounded-md hover:bg-surface-container-high\" hx-get=\"/api/BOM/line-row?section=0\" hx-target=\"#section-0-lines\" hx-swap=\"beforeend\">+ 行追加</button></div></div><div class=\"mb-6 p-6 rounded-xl bg-white\"><div class=\"text-base font-bold text-on-surface mb-3 flex items-center gap-2\"><span class=\"text-xs font-bold px-2 py-0.5 rounded-full text-white\" style=\"background: #b45309;\">投入品目</span>投入品目（インプット）</div><table style=\"width: 100%; border-collapse: collapse;\"><thead><tr><th class=\"py-4 px-6 text-[0.625rem] font-bold text-on-surface-variant uppercase tracking-widest\">品目コード</th><th class=\"py-4 px-6 text-[0.625rem] font-bold text-on-surface-variant uppercase tracking-widest\">品目名</th><th class=\"py-4 px-6 text-[0.625rem] font-bold text-on-surface-variant uppercase tracking-widest\">数量</th><th class=\"py-4 px-6 text-[0.625rem] font-bold text-on-surface-variant uppercase tracking-widest\">単位</th><th class=\"py-4 px-6 text-[0.625rem] font-bold text-on-surface-variant uppercase tracking-widest\">BOMコード</th><th class=\"py-4 px-6 text-[0.625rem] font-bold text-on-surface-variant uppercase tracking-widest\">版</th><th class=\"py-4 px-6 text-[0.625rem] font-bold text-on-surface-variant uppercase tracking-widest\" style=\"width: 3rem;\"></th></tr></thead> <tbody id=\"section-1-lines\"></tbody></table><div style=\"margin-top: 0.5rem;\"><button type=\"button\" class=\"inline-flex items-center gap-1 text-sm text-primary font-semibold cursor-pointer border-none bg-transparent px-2 py-1.5 rounded-md hover:bg-surface-container-high\" hx-get=\"/api/BOM/line-row?section=1\" hx-target=\"#section-1-lines\" hx-swap=\"beforeend\">+ 行追加</button></div></div><div class=\"flex gap-3 justify-end mt-6\"><a href=\"/BOM\" class=\"text-sm py-2 px-4 rounded-lg cursor-pointer font-semibold transition-all duration-200 inline-flex items-center justify-center border-none bg-transparent text-primary hover:bg-surface-container-high active:bg-surface-container-highest\">キャンセル</a> <button type=\"submit\" class=\"text-sm py-2 px-4 rounded-lg cursor-pointer font-semibold transition-all duration-200 inline-flex items-center justify-center border-none bg-gradient-to-br from-primary to-primary-dark text-white hover:opacity-90 active:opacity-80\">登録</button></div></form></main>")
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
@@ -541,40 +541,40 @@ func RenderEditPageBOM(detail ResponseBOM詳細) templ.Component {
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
-			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 38, "\" hx-swap=\"innerHTML\" hx-target=\"#bom-error\"><div id=\"bom-error\" class=\"min-h-6 mb-2\"></div><div class=\"mb-6 p-6 rounded-xl bg-white\"><h2 class=\"text-lg font-bold text-on-surface mb-4 tracking-tight\">BOM情報</h2><div class=\"grid grid-cols-3 gap-4 mb-2\"><label class=\"flex flex-col gap-2 text-[0.625rem] font-bold uppercase tracking-wider text-outline\">BOMコード<input type=\"text\" name=\"code\" value=\"")
+			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 38, "\" hx-swap=\"innerHTML\" hx-target=\"#bom-error\"><div id=\"bom-error\" class=\"min-h-6 mb-2\"></div><div class=\"mb-6 p-6 rounded-xl bg-white\"><h2 class=\"text-lg font-bold text-on-surface mb-4 tracking-tight\">BOM情報</h2><div class=\"grid grid-cols-3 gap-4 mb-2\"><label class=\"flex flex-col gap-2 text-[0.625rem] font-bold uppercase tracking-wider text-outline\">BOMコード<input type=\"text\" name=\"コード\" value=\"")
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
 			var templ_7745c5c3_Var26 string
-			templ_7745c5c3_Var26, templ_7745c5c3_Err = templ.JoinStringErrs(detail.Code)
+			templ_7745c5c3_Var26, templ_7745c5c3_Err = templ.JoinStringErrs(detail.コード)
 			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/features/BOM_views_gen.templ`, Line: 175, Col: 167}
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/features/BOM_views_gen.templ`, Line: 175, Col: 177}
 			}
 			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var26))
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
-			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 39, "\" placeholder=\"例: BOM-001\" required class=\"rounded-lg text-sm text-on-surface outline-none bg-surface-container-low border-2 border-transparent transition-[border-color,background-color] duration-200 focus:border-b-primary focus:bg-white px-3 py-2.5 w-full\"></label> <label class=\"flex flex-col gap-2 text-[0.625rem] font-bold uppercase tracking-wider text-outline\">版<input type=\"text\" name=\"version\" value=\"")
+			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 39, "\" placeholder=\"例: BOM-001\" required class=\"rounded-lg text-sm text-on-surface outline-none bg-surface-container-low border-2 border-transparent transition-[border-color,background-color] duration-200 focus:border-b-primary focus:bg-white px-3 py-2.5 w-full\"></label> <label class=\"flex flex-col gap-2 text-[0.625rem] font-bold uppercase tracking-wider text-outline\">版<input type=\"text\" name=\"版\" value=\"")
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
 			var templ_7745c5c3_Var27 string
-			templ_7745c5c3_Var27, templ_7745c5c3_Err = templ.JoinStringErrs(detail.Version)
+			templ_7745c5c3_Var27, templ_7745c5c3_Err = templ.JoinStringErrs(detail.版)
 			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/features/BOM_views_gen.templ`, Line: 176, Col: 164}
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/features/BOM_views_gen.templ`, Line: 176, Col: 156}
 			}
 			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var27))
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
-			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 40, "\" placeholder=\"例: 1\" required class=\"rounded-lg text-sm text-on-surface outline-none bg-surface-container-low border-2 border-transparent transition-[border-color,background-color] duration-200 focus:border-b-primary focus:bg-white px-3 py-2.5 w-full\"></label> <label class=\"flex flex-col gap-2 text-[0.625rem] font-bold uppercase tracking-wider text-outline\">名称<input type=\"text\" name=\"name\" value=\"")
+			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 40, "\" placeholder=\"例: 1\" required class=\"rounded-lg text-sm text-on-surface outline-none bg-surface-container-low border-2 border-transparent transition-[border-color,background-color] duration-200 focus:border-b-primary focus:bg-white px-3 py-2.5 w-full\"></label> <label class=\"flex flex-col gap-2 text-[0.625rem] font-bold uppercase tracking-wider text-outline\">名称<input type=\"text\" name=\"名称\" value=\"")
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
 			var templ_7745c5c3_Var28 string
-			templ_7745c5c3_Var28, templ_7745c5c3_Err = templ.JoinStringErrs(detail.Name)
+			templ_7745c5c3_Var28, templ_7745c5c3_Err = templ.JoinStringErrs(detail.名称)
 			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/features/BOM_views_gen.templ`, Line: 177, Col: 161}
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/features/BOM_views_gen.templ`, Line: 177, Col: 165}
 			}
 			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var28))
 			if templ_7745c5c3_Err != nil {
@@ -618,7 +618,7 @@ func RenderEditPageBOM(detail ResponseBOM詳細) templ.Component {
 	})
 }
 
-func RenderExistingLineRowBOM0(line BomLines) templ.Component {
+func RenderExistingLineRowBOM0(line BOM明細) templ.Component {
 	return templruntime.GeneratedTemplate(func(templ_7745c5c3_Input templruntime.GeneratedComponentInput) (templ_7745c5c3_Err error) {
 		templ_7745c5c3_W, ctx := templ_7745c5c3_Input.Writer, templ_7745c5c3_Input.Context
 		if templ_7745c5c3_CtxErr := ctx.Err(); templ_7745c5c3_CtxErr != nil {
@@ -639,11 +639,11 @@ func RenderExistingLineRowBOM0(line BomLines) templ.Component {
 			templ_7745c5c3_Var29 = templ.NopComponent
 		}
 		ctx = templ.ClearChildren(ctx)
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 44, "<tr class=\"transition-all duration-200 ease-in-out hover:bg-surface-container-low [&.htmx-swapping]:opacity-0\"><input type=\"hidden\" name=\"lineType\" value=\"2\"><td class=\"py-4 px-6 text-on-surface-variant text-sm\">")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 44, "<tr class=\"transition-all duration-200 ease-in-out hover:bg-surface-container-low [&.htmx-swapping]:opacity-0\"><input type=\"hidden\" name=\"line区分\" value=\"2\"><td class=\"py-4 px-6 text-on-surface-variant text-sm\">")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		templ_7745c5c3_Err = RenderTypeahead品目("lineItemId", line.ItemId, line.ItemCode, line.ItemName, true, true, fmt.Sprintf("lookup-%d-itemName", line.Id)).Render(ctx, templ_7745c5c3_Buffer)
+		templ_7745c5c3_Err = RenderTypeahead品目("line品目ID", line.品目ID, line.品目コード, line.品目名, true, true, fmt.Sprintf("lookup-%d-itemName", line.Id)).Render(ctx, templ_7745c5c3_Buffer)
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
@@ -665,22 +665,22 @@ func RenderExistingLineRowBOM0(line BomLines) templ.Component {
 			return templ_7745c5c3_Err
 		}
 		var templ_7745c5c3_Var31 string
-		templ_7745c5c3_Var31, templ_7745c5c3_Err = templ.JoinStringErrs(line.ItemName)
+		templ_7745c5c3_Var31, templ_7745c5c3_Err = templ.JoinStringErrs(line.品目名)
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/features/BOM_views_gen.templ`, Line: 232, Col: 156}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/features/BOM_views_gen.templ`, Line: 232, Col: 157}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var31))
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 47, "</span></td><td class=\"py-4 px-6 text-on-surface-variant text-sm\"><input type=\"number\" step=\"0.0001\" name=\"lineQuantity\" value=\"")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 47, "</span></td><td class=\"py-4 px-6 text-on-surface-variant text-sm\"><input type=\"number\" step=\"0.0001\" name=\"line数量\" value=\"")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
 		var templ_7745c5c3_Var32 string
-		templ_7745c5c3_Var32, templ_7745c5c3_Err = templ.JoinStringErrs(line.Quantity)
+		templ_7745c5c3_Var32, templ_7745c5c3_Err = templ.JoinStringErrs(line.数量)
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/features/BOM_views_gen.templ`, Line: 233, Col: 132}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/features/BOM_views_gen.templ`, Line: 233, Col: 128}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var32))
 		if templ_7745c5c3_Err != nil {
@@ -690,7 +690,7 @@ func RenderExistingLineRowBOM0(line BomLines) templ.Component {
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		templ_7745c5c3_Err = RenderSelectLineBOM0Unit(line.Unit).Render(ctx, templ_7745c5c3_Buffer)
+		templ_7745c5c3_Err = RenderSelectLineBOM0単位(line.単位).Render(ctx, templ_7745c5c3_Buffer)
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
@@ -702,7 +702,7 @@ func RenderExistingLineRowBOM0(line BomLines) templ.Component {
 	})
 }
 
-func RenderExistingLineRowBOM1(line BomLines) templ.Component {
+func RenderExistingLineRowBOM1(line BOM明細) templ.Component {
 	return templruntime.GeneratedTemplate(func(templ_7745c5c3_Input templruntime.GeneratedComponentInput) (templ_7745c5c3_Err error) {
 		templ_7745c5c3_W, ctx := templ_7745c5c3_Input.Writer, templ_7745c5c3_Input.Context
 		if templ_7745c5c3_CtxErr := ctx.Err(); templ_7745c5c3_CtxErr != nil {
@@ -723,11 +723,11 @@ func RenderExistingLineRowBOM1(line BomLines) templ.Component {
 			templ_7745c5c3_Var33 = templ.NopComponent
 		}
 		ctx = templ.ClearChildren(ctx)
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 50, "<tr class=\"transition-all duration-200 ease-in-out hover:bg-surface-container-low [&.htmx-swapping]:opacity-0\"><input type=\"hidden\" name=\"lineType\" value=\"1\"><td class=\"py-4 px-6 text-on-surface-variant text-sm\">")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 50, "<tr class=\"transition-all duration-200 ease-in-out hover:bg-surface-container-low [&.htmx-swapping]:opacity-0\"><input type=\"hidden\" name=\"line区分\" value=\"1\"><td class=\"py-4 px-6 text-on-surface-variant text-sm\">")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		templ_7745c5c3_Err = RenderTypeahead品目("lineItemId", line.ItemId, line.ItemCode, line.ItemName, true, true, fmt.Sprintf("lookup-%d-itemName", line.Id)).Render(ctx, templ_7745c5c3_Buffer)
+		templ_7745c5c3_Err = RenderTypeahead品目("line品目ID", line.品目ID, line.品目コード, line.品目名, true, true, fmt.Sprintf("lookup-%d-itemName", line.Id)).Render(ctx, templ_7745c5c3_Buffer)
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
@@ -749,22 +749,22 @@ func RenderExistingLineRowBOM1(line BomLines) templ.Component {
 			return templ_7745c5c3_Err
 		}
 		var templ_7745c5c3_Var35 string
-		templ_7745c5c3_Var35, templ_7745c5c3_Err = templ.JoinStringErrs(line.ItemName)
+		templ_7745c5c3_Var35, templ_7745c5c3_Err = templ.JoinStringErrs(line.品目名)
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/features/BOM_views_gen.templ`, Line: 242, Col: 156}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/features/BOM_views_gen.templ`, Line: 242, Col: 157}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var35))
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 53, "</span></td><td class=\"py-4 px-6 text-on-surface-variant text-sm\"><input type=\"number\" step=\"0.0001\" name=\"lineQuantity\" value=\"")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 53, "</span></td><td class=\"py-4 px-6 text-on-surface-variant text-sm\"><input type=\"number\" step=\"0.0001\" name=\"line数量\" value=\"")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
 		var templ_7745c5c3_Var36 string
-		templ_7745c5c3_Var36, templ_7745c5c3_Err = templ.JoinStringErrs(line.Quantity)
+		templ_7745c5c3_Var36, templ_7745c5c3_Err = templ.JoinStringErrs(line.数量)
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/features/BOM_views_gen.templ`, Line: 243, Col: 132}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/features/BOM_views_gen.templ`, Line: 243, Col: 128}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var36))
 		if templ_7745c5c3_Err != nil {
@@ -774,31 +774,31 @@ func RenderExistingLineRowBOM1(line BomLines) templ.Component {
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		templ_7745c5c3_Err = RenderSelectLineBOM1Unit(line.Unit).Render(ctx, templ_7745c5c3_Buffer)
+		templ_7745c5c3_Err = RenderSelectLineBOM1単位(line.単位).Render(ctx, templ_7745c5c3_Buffer)
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 55, "</td><td class=\"py-4 px-6 text-on-surface-variant text-sm\"><input type=\"text\" name=\"lineRefBomCode\" value=\"")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 55, "</td><td class=\"py-4 px-6 text-on-surface-variant text-sm\"><input type=\"text\" name=\"line参照BOMコード\" value=\"")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
 		var templ_7745c5c3_Var37 string
-		templ_7745c5c3_Var37, templ_7745c5c3_Err = templ.JoinStringErrs(NullStrOr(line.RefBomCode, ""))
+		templ_7745c5c3_Var37, templ_7745c5c3_Err = templ.JoinStringErrs(NullStrOr(line.参照BOMコード, ""))
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/features/BOM_views_gen.templ`, Line: 245, Col: 135}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/features/BOM_views_gen.templ`, Line: 245, Col: 151}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var37))
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 56, "\" class=\"rounded-lg text-sm text-on-surface outline-none bg-surface-container-low border-2 border-transparent transition-[border-color,background-color] duration-200 focus:border-b-primary focus:bg-white py-1.5 px-2.5 w-full min-w-[7.5rem]\"></td><td class=\"py-4 px-6 text-on-surface-variant text-sm\"><input type=\"text\" name=\"lineRefBomVersion\" value=\"")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 56, "\" class=\"rounded-lg text-sm text-on-surface outline-none bg-surface-container-low border-2 border-transparent transition-[border-color,background-color] duration-200 focus:border-b-primary focus:bg-white py-1.5 px-2.5 w-full min-w-[7.5rem]\"></td><td class=\"py-4 px-6 text-on-surface-variant text-sm\"><input type=\"text\" name=\"line参照BOM版\" value=\"")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
 		var templ_7745c5c3_Var38 string
-		templ_7745c5c3_Var38, templ_7745c5c3_Err = templ.JoinStringErrs(NullStrOr(line.RefBomVersion, ""))
+		templ_7745c5c3_Var38, templ_7745c5c3_Err = templ.JoinStringErrs(NullStrOr(line.参照BOM版, ""))
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/features/BOM_views_gen.templ`, Line: 246, Col: 141}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/features/BOM_views_gen.templ`, Line: 246, Col: 139}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var38))
 		if templ_7745c5c3_Err != nil {
@@ -812,7 +812,7 @@ func RenderExistingLineRowBOM1(line BomLines) templ.Component {
 	})
 }
 
-func RenderSelectLineBOM0Unit(selected string) templ.Component {
+func RenderSelectLineBOM0単位(selected string) templ.Component {
 	return templruntime.GeneratedTemplate(func(templ_7745c5c3_Input templruntime.GeneratedComponentInput) (templ_7745c5c3_Err error) {
 		templ_7745c5c3_W, ctx := templ_7745c5c3_Input.Writer, templ_7745c5c3_Input.Context
 		if templ_7745c5c3_CtxErr := ctx.Err(); templ_7745c5c3_CtxErr != nil {
@@ -833,7 +833,7 @@ func RenderSelectLineBOM0Unit(selected string) templ.Component {
 			templ_7745c5c3_Var39 = templ.NopComponent
 		}
 		ctx = templ.ClearChildren(ctx)
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 58, "<select name=\"lineUnit\" class=\"rounded-lg text-sm text-on-surface outline-none bg-surface-container-low border-2 border-transparent transition-[border-color,background-color] duration-200 focus:border-b-primary focus:bg-white py-1.5 px-2.5 min-w-20\"><option value=\"pcs\"")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 58, "<select name=\"line単位\" class=\"rounded-lg text-sm text-on-surface outline-none bg-surface-container-low border-2 border-transparent transition-[border-color,background-color] duration-200 focus:border-b-primary focus:bg-white py-1.5 px-2.5 min-w-20\"><option value=\"pcs\"")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
@@ -941,7 +941,7 @@ func RenderSelectLineBOM0Unit(selected string) templ.Component {
 	})
 }
 
-func RenderSelectLineBOM1Unit(selected string) templ.Component {
+func RenderSelectLineBOM1単位(selected string) templ.Component {
 	return templruntime.GeneratedTemplate(func(templ_7745c5c3_Input templruntime.GeneratedComponentInput) (templ_7745c5c3_Err error) {
 		templ_7745c5c3_W, ctx := templ_7745c5c3_Input.Writer, templ_7745c5c3_Input.Context
 		if templ_7745c5c3_CtxErr := ctx.Err(); templ_7745c5c3_CtxErr != nil {
@@ -962,7 +962,7 @@ func RenderSelectLineBOM1Unit(selected string) templ.Component {
 			templ_7745c5c3_Var40 = templ.NopComponent
 		}
 		ctx = templ.ClearChildren(ctx)
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 79, "<select name=\"lineUnit\" class=\"rounded-lg text-sm text-on-surface outline-none bg-surface-container-low border-2 border-transparent transition-[border-color,background-color] duration-200 focus:border-b-primary focus:bg-white py-1.5 px-2.5 min-w-20\"><option value=\"pcs\"")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 79, "<select name=\"line単位\" class=\"rounded-lg text-sm text-on-surface outline-none bg-surface-container-low border-2 border-transparent transition-[border-color,background-color] duration-200 focus:border-b-primary focus:bg-white py-1.5 px-2.5 min-w-20\"><option value=\"pcs\"")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
@@ -1091,11 +1091,11 @@ func RenderEmptyLineRowBOM0(rowKey string) templ.Component {
 			templ_7745c5c3_Var41 = templ.NopComponent
 		}
 		ctx = templ.ClearChildren(ctx)
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 100, "<tr class=\"transition-all duration-200 ease-in-out hover:bg-surface-container-low [&.htmx-swapping]:opacity-0\"><input type=\"hidden\" name=\"lineType\" value=\"2\"><td class=\"py-4 px-6 text-on-surface-variant text-sm\">")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 100, "<tr class=\"transition-all duration-200 ease-in-out hover:bg-surface-container-low [&.htmx-swapping]:opacity-0\"><input type=\"hidden\" name=\"line区分\" value=\"2\"><td class=\"py-4 px-6 text-on-surface-variant text-sm\">")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		templ_7745c5c3_Err = RenderTypeahead品目("lineItemId", 0, "", "", true, true, fmt.Sprintf("lookup-%s-itemName", rowKey)).Render(ctx, templ_7745c5c3_Buffer)
+		templ_7745c5c3_Err = RenderTypeahead品目("line品目ID", 0, "", "", true, true, fmt.Sprintf("lookup-%s-itemName", rowKey)).Render(ctx, templ_7745c5c3_Buffer)
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
@@ -1112,11 +1112,11 @@ func RenderEmptyLineRowBOM0(rowKey string) templ.Component {
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 102, "\" class=\"text-sm text-outline\"></span></td><td class=\"py-4 px-6 text-on-surface-variant text-sm\"><input type=\"number\" step=\"0.0001\" min=\"0\" name=\"lineQuantity\" placeholder=\"0\" class=\"rounded-lg text-sm text-on-surface outline-none bg-surface-container-low border-2 border-transparent transition-[border-color,background-color] duration-200 focus:border-b-primary focus:bg-white py-1.5 px-2.5 w-full min-w-[7.5rem]\"></td><td class=\"py-4 px-6 text-on-surface-variant text-sm\">")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 102, "\" class=\"text-sm text-outline\"></span></td><td class=\"py-4 px-6 text-on-surface-variant text-sm\"><input type=\"number\" step=\"0.0001\" min=\"0\" name=\"line数量\" placeholder=\"0\" class=\"rounded-lg text-sm text-on-surface outline-none bg-surface-container-low border-2 border-transparent transition-[border-color,background-color] duration-200 focus:border-b-primary focus:bg-white py-1.5 px-2.5 w-full min-w-[7.5rem]\"></td><td class=\"py-4 px-6 text-on-surface-variant text-sm\">")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		templ_7745c5c3_Err = RenderSelectLineBOM0Unit("pcs").Render(ctx, templ_7745c5c3_Buffer)
+		templ_7745c5c3_Err = RenderSelectLineBOM0単位("pcs").Render(ctx, templ_7745c5c3_Buffer)
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
@@ -1149,11 +1149,11 @@ func RenderEmptyLineRowBOM1(rowKey string) templ.Component {
 			templ_7745c5c3_Var43 = templ.NopComponent
 		}
 		ctx = templ.ClearChildren(ctx)
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 104, "<tr class=\"transition-all duration-200 ease-in-out hover:bg-surface-container-low [&.htmx-swapping]:opacity-0\"><input type=\"hidden\" name=\"lineType\" value=\"1\"><td class=\"py-4 px-6 text-on-surface-variant text-sm\">")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 104, "<tr class=\"transition-all duration-200 ease-in-out hover:bg-surface-container-low [&.htmx-swapping]:opacity-0\"><input type=\"hidden\" name=\"line区分\" value=\"1\"><td class=\"py-4 px-6 text-on-surface-variant text-sm\">")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		templ_7745c5c3_Err = RenderTypeahead品目("lineItemId", 0, "", "", true, true, fmt.Sprintf("lookup-%s-itemName", rowKey)).Render(ctx, templ_7745c5c3_Buffer)
+		templ_7745c5c3_Err = RenderTypeahead品目("line品目ID", 0, "", "", true, true, fmt.Sprintf("lookup-%s-itemName", rowKey)).Render(ctx, templ_7745c5c3_Buffer)
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
@@ -1170,15 +1170,15 @@ func RenderEmptyLineRowBOM1(rowKey string) templ.Component {
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 106, "\" class=\"text-sm text-outline\"></span></td><td class=\"py-4 px-6 text-on-surface-variant text-sm\"><input type=\"number\" step=\"0.0001\" min=\"0\" name=\"lineQuantity\" placeholder=\"0\" class=\"rounded-lg text-sm text-on-surface outline-none bg-surface-container-low border-2 border-transparent transition-[border-color,background-color] duration-200 focus:border-b-primary focus:bg-white py-1.5 px-2.5 w-full min-w-[7.5rem]\"></td><td class=\"py-4 px-6 text-on-surface-variant text-sm\">")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 106, "\" class=\"text-sm text-outline\"></span></td><td class=\"py-4 px-6 text-on-surface-variant text-sm\"><input type=\"number\" step=\"0.0001\" min=\"0\" name=\"line数量\" placeholder=\"0\" class=\"rounded-lg text-sm text-on-surface outline-none bg-surface-container-low border-2 border-transparent transition-[border-color,background-color] duration-200 focus:border-b-primary focus:bg-white py-1.5 px-2.5 w-full min-w-[7.5rem]\"></td><td class=\"py-4 px-6 text-on-surface-variant text-sm\">")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		templ_7745c5c3_Err = RenderSelectLineBOM1Unit("pcs").Render(ctx, templ_7745c5c3_Buffer)
+		templ_7745c5c3_Err = RenderSelectLineBOM1単位("pcs").Render(ctx, templ_7745c5c3_Buffer)
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 107, "</td><td class=\"py-4 px-6 text-on-surface-variant text-sm\"><input type=\"text\" name=\"lineRefBomCode\" placeholder=\"BOMコード\" class=\"rounded-lg text-sm text-on-surface outline-none bg-surface-container-low border-2 border-transparent transition-[border-color,background-color] duration-200 focus:border-b-primary focus:bg-white py-1.5 px-2.5 w-full min-w-[7.5rem]\"></td><td class=\"py-4 px-6 text-on-surface-variant text-sm\"><input type=\"text\" name=\"lineRefBomVersion\" placeholder=\"版\" class=\"rounded-lg text-sm text-on-surface outline-none bg-surface-container-low border-2 border-transparent transition-[border-color,background-color] duration-200 focus:border-b-primary focus:bg-white py-1.5 px-2.5 w-full min-w-[7.5rem]\"></td></tr>")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 107, "</td><td class=\"py-4 px-6 text-on-surface-variant text-sm\"><input type=\"text\" name=\"line参照BOMコード\" placeholder=\"BOMコード\" class=\"rounded-lg text-sm text-on-surface outline-none bg-surface-container-low border-2 border-transparent transition-[border-color,background-color] duration-200 focus:border-b-primary focus:bg-white py-1.5 px-2.5 w-full min-w-[7.5rem]\"></td><td class=\"py-4 px-6 text-on-surface-variant text-sm\"><input type=\"text\" name=\"line参照BOM版\" placeholder=\"版\" class=\"rounded-lg text-sm text-on-surface outline-none bg-surface-container-low border-2 border-transparent transition-[border-color,background-color] duration-200 focus:border-b-primary focus:bg-white py-1.5 px-2.5 w-full min-w-[7.5rem]\"></td></tr>")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}

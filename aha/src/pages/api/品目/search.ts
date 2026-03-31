@@ -20,7 +20,7 @@ export const GET: APIRoute = async ({ url }) => {
 
   const rows = await db
     .select({
-      ID: 品目テーブル.ID,
+      id: 品目テーブル.id,
       コード: 品目テーブル.コード,
       名称: 品目テーブル.名称,
       単価: 品目テーブル.単価,
@@ -46,10 +46,10 @@ export const GET: APIRoute = async ({ url }) => {
     .map(
       (r) =>
         `<li class="${dropdownItem}" ` +
-        `data-item-id="${r.ID}" ` +
+        `data-item-id="${r.id}" ` +
         `data-item-code="${escapeHtml(r.コード)}" ` +
         `data-item-name="${escapeHtml(r.名称)}" ` +
-        `hx-get="/api/品目/typeahead?action=select&amp;itemId=${r.ID}" ` +
+        `hx-get="/api/品目/typeahead?action=select&amp;itemId=${r.id}" ` +
         `hx-target="closest [data-typeahead]" ` +
         `hx-swap="innerHTML">` +
         `<strong>${escapeHtml(r.コード)}</strong> ${escapeHtml(r.名称)}</li>`,

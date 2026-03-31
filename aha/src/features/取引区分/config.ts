@@ -12,6 +12,7 @@ export const 取引区分カラム: Column[] = [
     label: "取引区分コード",
     required: true,
     placeholder: "例: IN-001",
+    readonlyOnEdit: true,
   },
   {
     key: "名称",

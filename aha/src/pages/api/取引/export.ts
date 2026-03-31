@@ -27,9 +27,9 @@ export const GET: APIRoute = async ({ url }) => {
       金額: 取引テーブル.金額,
     })
     .from(取引テーブル)
-    .leftJoin(品目テーブル, eq(取引テーブル.品目ID, 品目テーブル.ID))
+    .leftJoin(品目テーブル, eq(取引テーブル.品目ID, 品目テーブル.id))
     .where(dateFilter)
-    .orderBy(desc(取引テーブル.ID));
+    .orderBy(desc(取引テーブル.id));
 
   const data: (string | number)[][] = [
     HEADERS,

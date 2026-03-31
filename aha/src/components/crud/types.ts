@@ -69,6 +69,8 @@ interface ColumnBase {
   defaultValue?: string | number;
   /** フォーム（新規登録）で非表示にする */
   hideInForm?: boolean;
+  /** 編集行で読み取り専用にする */
+  readonlyOnEdit?: boolean;
 }
 
 interface TextColumn extends ColumnBase {
@@ -106,7 +108,7 @@ interface TypeaheadColumn extends ColumnBase {
 /** @deprecated TypeaheadColumn を使用してください */
 interface ItemCodeColumn extends ColumnBase {
   type: "itemCode";
-  /** hidden input の name（デフォルト: "itemId"） */
+  /** hidden input の name（デフォルト: "品目ID"） */
   valueName?: string;
 }
 

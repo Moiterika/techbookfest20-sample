@@ -26,9 +26,9 @@ func (h *Handler取引) Handle一覧取引(w http.ResponseWriter, r *http.Reques
 	if page < 1 { page = 1 }
 	size, _ := strconv.Atoi(r.URL.Query().Get("size"))
 	if size < 1 { size = 20 }
-	dateFromParam := r.URL.Query().Get("dateFrom")
-	dateToParam := r.URL.Query().Get("dateTo")
-	result, err := h.Get一覧取引(r.Context(), 一覧Input取引{Page: page, Size: size, DateFrom: dateFromParam, DateTo: dateToParam})
+	開始日Param := r.URL.Query().Get("開始日")
+	終了日Param := r.URL.Query().Get("終了日")
+	result, err := h.Get一覧取引(r.Context(), 一覧Input取引{Page: page, Size: size, 開始日: 開始日Param, 終了日: 終了日Param})
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return

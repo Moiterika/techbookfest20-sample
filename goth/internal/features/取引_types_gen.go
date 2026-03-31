@@ -5,36 +5,36 @@ import (
 	"time"
 )
 
-// Row取引 は transactions テーブルの行
+// Row取引 は 取引 テーブルの行
 type Row取引 struct {
 	Id int `db:"id"`
-	Date string `db:"date"`
-	TransactionTypeId int `db:"transaction_type_id"`
-	ItemId int `db:"item_id"`
-	UnitPrice int `db:"unit_price"`
-	Quantity int `db:"quantity"`
-	Amount int `db:"amount"`
+	日付 string `db:"日付"`
+	取引区分ID int `db:"取引区分ID"`
+	品目ID int `db:"品目ID"`
+	単価 int `db:"単価"`
+	数量 int `db:"数量"`
+	金額 int `db:"金額"`
 	CreatedAt time.Time `db:"created_at"`
 	UpdatedAt time.Time `db:"updated_at"`
 }
 
 type 作成Input取引 struct {
-	Date string
-	TransactionTypeId int
-	ItemId int
-	UnitPrice int
-	Quantity int
-	Amount int
+	日付 string
+	取引区分ID int
+	品目ID int
+	単価 int
+	数量 int
+	金額 int
 }
 
 type 更新Input取引 struct {
 	ID int
-	Date string
-	TransactionTypeId int
-	ItemId int
-	UnitPrice int
-	Quantity int
-	Amount int
+	日付 string
+	取引区分ID int
+	品目ID int
+	単価 int
+	数量 int
+	金額 int
 }
 
 type 削除Input取引 struct { ID int }
@@ -42,8 +42,8 @@ type 一括削除Input取引 struct { IDs []int }
 type 一覧Input取引 struct {
 	Page int
 	Size int
-	DateFrom string
-	DateTo string
+	開始日 string
+	終了日 string
 }
 
 type Response取引 struct { Row取引 }

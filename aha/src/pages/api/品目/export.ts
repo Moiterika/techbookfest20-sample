@@ -30,7 +30,7 @@ export const GET: APIRoute = async ({ url }) => {
     .select()
     .from(品目テーブル)
     .where(searchFilter)
-    .orderBy(desc(品目テーブル.ID));
+    .orderBy(desc(品目テーブル.id));
 
   const data: (string | number)[][] = [
     HEADERS,

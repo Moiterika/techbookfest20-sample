@@ -6,33 +6,33 @@ import (
 	"time"
 )
 
-// Row品目 は items テーブルの行
+// Row品目 は 品目 テーブルの行
 type Row品目 struct {
 	Id int `db:"id"`
-	Code string `db:"code"`
-	Name string `db:"name"`
-	Category sql.NullString `db:"category"`
-	Price int `db:"price"`
-	Barcode sql.NullString `db:"barcode"`
+	コード string `db:"コード"`
+	名称 string `db:"名称"`
+	カテゴリ sql.NullString `db:"カテゴリ"`
+	単価 int `db:"単価"`
+	バーコード sql.NullString `db:"バーコード"`
 	CreatedAt time.Time `db:"created_at"`
 	UpdatedAt time.Time `db:"updated_at"`
 }
 
 type 作成Input品目 struct {
-	Code string
-	Name string
-	Category *string
-	Price int
-	Barcode *string
+	コード string
+	名称 string
+	カテゴリ *string
+	単価 int
+	バーコード *string
 }
 
 type 更新Input品目 struct {
 	ID int
-	Code string
-	Name string
-	Category *string
-	Price int
-	Barcode *string
+	コード string
+	名称 string
+	カテゴリ *string
+	単価 int
+	バーコード *string
 }
 
 type 削除Input品目 struct { ID int }
@@ -41,7 +41,7 @@ type 一覧Input品目 struct {
 	Page int
 	Size int
 	Q string
-	Category string
+	カテゴリ string
 }
 
 type Response品目 struct { Row品目 }

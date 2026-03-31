@@ -24,7 +24,7 @@ func SearchItems(ctx context.Context, db *sql.DB, q string, limit int) ([]Typeah
 		limit = 10
 	}
 	rows, err := db.QueryContext(ctx,
-		`SELECT id, code, name, price FROM items WHERE code ILIKE $1 OR name ILIKE $1 ORDER BY code LIMIT $2`,
+		`SELECT id, "コード", "名称", "単価" FROM "品目" WHERE "コード" ILIKE $1 OR "名称" ILIKE $1 ORDER BY "コード" LIMIT $2`,
 		"%"+q+"%", limit)
 	if err != nil {
 		return nil, err
@@ -46,7 +46,7 @@ func SearchItems(ctx context.Context, db *sql.DB, q string, limit int) ([]Typeah
 func GetItemByID(ctx context.Context, db *sql.DB, id int) (TypeaheadItem, error) {
 	var it TypeaheadItem
 	err := db.QueryRowContext(ctx,
-		`SELECT id, code, name, price FROM items WHERE id=$1`, id,
+		`SELECT id, "コード", "名称", "単価" FROM "品目" WHERE id=$1`, id,
 	).Scan(&it.ID, &it.Code, &it.Name, &it.Price)
 	return it, err
 }
@@ -87,7 +87,7 @@ func (h *Handler品目) HandleTypeahead(w http.ResponseWriter, r *http.Request) 
 	action := r.URL.Query().Get("action")
 	taName := r.URL.Query().Get("taName")
 	if taName == "" {
-		taName = "itemId"
+		taName = "品目ID"
 	}
 	taCompact := r.URL.Query().Get("taCompact") == "true"
 	taHideNameLabel := r.URL.Query().Get("taHideNameLabel") == "true"

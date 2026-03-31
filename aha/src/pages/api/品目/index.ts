@@ -2,8 +2,8 @@ import type { APIRoute } from "astro";
 import { experimental_AstroContainer as AstroContainer } from "astro/container";
 import {
   品目一覧Query,
-  品目登録Command,
-  品目一括削除Command,
+  品目CreateCommand,
+  品目BulkDeleteCommand,
 } from "../../../features/品目";
 import { 品目カラム, 品目エンティティ } from "../../../features/品目";
 // @ts-ignore
@@ -40,7 +40,7 @@ export const POST: APIRoute = async ({ request }) => {
   const form = await request.formData();
 
   try {
-    await 品目登録Command.execute({
+    await 品目CreateCommand.execute({
       コード: form.get("コード") as string,
       名称: form.get("名称") as string,
       カテゴリ: (form.get("カテゴリ") as string) || undefined,
@@ -84,6 +84,6 @@ export const DELETE: APIRoute = async ({ request }) => {
   if (numIds.length === 0) {
     return new Response("", { status: 400 });
   }
-  await 品目一括削除Command.execute({ ids: numIds });
+  await 品目BulkDeleteCommand.execute({ ids: numIds });
   return new Response("", { status: 200 });
 };

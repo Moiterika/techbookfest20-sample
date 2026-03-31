@@ -27,8 +27,8 @@ func (h *Handler品目) Handle一覧品目(w http.ResponseWriter, r *http.Reques
 	size, _ := strconv.Atoi(r.URL.Query().Get("size"))
 	if size < 1 { size = 20 }
 	qParam := r.URL.Query().Get("q")
-	categoryParam := r.URL.Query().Get("category")
-	result, err := h.Get一覧品目(r.Context(), 一覧Input品目{Page: page, Size: size, Q: qParam, Category: categoryParam})
+	カテゴリParam := r.URL.Query().Get("カテゴリ")
+	result, err := h.Get一覧品目(r.Context(), 一覧Input品目{Page: page, Size: size, Q: qParam, カテゴリ: カテゴリParam})
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return

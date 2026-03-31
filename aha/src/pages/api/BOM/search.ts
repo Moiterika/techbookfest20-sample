@@ -20,7 +20,7 @@ export const GET: APIRoute = async ({ url }) => {
 
   const rows = await db
     .select({
-      id: BOMテーブル.ID,
+      id: BOMテーブル.id,
       code: BOMテーブル.コード,
       version: BOMテーブル.版,
       name: BOMテーブル.名称,

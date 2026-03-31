@@ -1,16 +1,16 @@
 import type { APIRoute } from "astro";
-import { BOM更新Command } from "../../../../features/BOM/更新/BOM更新Command";
-import { BOM削除Command } from "../../../../features/BOM/削除/BOM削除Command";
+import { BOMUpdateCommand } from "../../../../features/BOM/update/BOMUpdateCommand";
+import { BOMDeleteCommand } from "../../../../features/BOM/delete/BOMDeleteCommand";
 import { errorText } from "../../../../styles/common";
 
 /** FormData から明細行を組み立てる */
 function parseLines(form: FormData) {
-  const types = form.getAll("lineType") as string[];
-  const itemIds = form.getAll("lineItemId") as string[];
-  const quantities = form.getAll("lineQuantity") as string[];
-  const units = form.getAll("lineUnit") as string[];
-  const refBomCodes = form.getAll("lineRefBomCode") as string[];
-  const refBomVersions = form.getAll("lineRefBomVersion") as string[];
+  const types = form.getAll("line区分") as string[];
+  const itemIds = form.getAll("line品目ID") as string[];
+  const quantities = form.getAll("line数量") as string[];
+  const units = form.getAll("line単位") as string[];
+  const refBomCodes = form.getAll("line参照BOMコード") as string[];
+  const refBomVersions = form.getAll("line参照BOM版") as string[];
 
   return types.map((t, i) => ({
     区分: Number(t),
@@ -28,13 +28,13 @@ export const PUT: APIRoute = async ({ params, request }) => {
   if (!id) return new Response("", { status: 400 });
 
   const form = await request.formData();
-  const コード = ((form.get("code") as string) || "").trim();
-  const 版 = ((form.get("version") as string) || "").trim();
-  const 名称 = ((form.get("name") as string) || "").trim();
+  const コード = ((form.get("コード") as string) || "").trim();
+  const 版 = ((form.get("版") as string) || "").trim();
+  const 名称 = ((form.get("名称") as string) || "").trim();
   const 明細 = parseLines(form);
 
   try {
-    await BOM更新Command.execute({ ID: id, コード, 版, 名称, 明細 });
+    await BOMUpdateCommand.execute({ id, コード, 版, 名称, 明細 });
   } catch (e: any) {
     return new Response(`<p class="${errorText}">${e.message}</p>`, {
       status: 422,
@@ -53,7 +53,7 @@ export const DELETE: APIRoute = async ({ params }) => {
   const id = Number(params.id);
   if (!id) return new Response("", { status: 400 });
 
-  await BOM削除Command.execute({ ID: id });
+  await BOMDeleteCommand.execute({ id });
 
   return new Response("", {
     status: 204,

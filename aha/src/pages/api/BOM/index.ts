@@ -1,8 +1,8 @@
 import type { APIRoute } from "astro";
 import { experimental_AstroContainer as AstroContainer } from "astro/container";
-import { BOM一覧Query } from "../../../features/BOM/一覧/BOM一覧Query";
-import { BOM登録Command } from "../../../features/BOM/登録/BOM登録Command";
-import { BOM一括削除Command } from "../../../features/BOM/削除/BOM一括削除Command";
+import { BOM一覧Query } from "../../../features/BOM/query/BOM一覧Query";
+import { BOMCreateCommand } from "../../../features/BOM/create/BOMCreateCommand";
+import { BOMBulkDeleteCommand } from "../../../features/BOM/delete/BOMBulkDeleteCommand";
 import HeaderBodyListRows from "../../../components/header-body/HeaderBodyListRows.astro";
 import { BOMヘッダーボディ } from "../../../features/BOM/gen-go.config";
 import { errorText } from "../../../styles/common";
@@ -12,12 +12,12 @@ const config = BOMヘッダーボディ;
 
 /** FormData から明細行を組み立てる */
 function parseLines(form: FormData) {
-  const types = form.getAll("lineType") as string[];
-  const itemIds = form.getAll("lineItemId") as string[];
-  const quantities = form.getAll("lineQuantity") as string[];
-  const units = form.getAll("lineUnit") as string[];
-  const refBomCodes = form.getAll("lineRefBomCode") as string[];
-  const refBomVersions = form.getAll("lineRefBomVersion") as string[];
+  const types = form.getAll("line区分") as string[];
+  const itemIds = form.getAll("line品目ID") as string[];
+  const quantities = form.getAll("line数量") as string[];
+  const units = form.getAll("line単位") as string[];
+  const refBomCodes = form.getAll("line参照BOMコード") as string[];
+  const refBomVersions = form.getAll("line参照BOM版") as string[];
 
   return types.map((t, i) => ({
     区分: Number(t),
@@ -53,14 +53,14 @@ export const GET: APIRoute = async ({ url }) => {
 /** POST /api/BOM — BOM新規作成 */
 export const POST: APIRoute = async ({ request }) => {
   const form = await request.formData();
-  const コード = ((form.get("code") as string) || "").trim();
-  const 版 = ((form.get("version") as string) || "").trim();
-  const 名称 = ((form.get("name") as string) || "").trim();
+  const コード = ((form.get("コード") as string) || "").trim();
+  const 版 = ((form.get("版") as string) || "").trim();
+  const 名称 = ((form.get("名称") as string) || "").trim();
   const 明細 = parseLines(form);
 
   let newBom;
   try {
-    newBom = await BOM登録Command.execute({
+    newBom = await BOMCreateCommand.execute({
       コード,
       版,
       名称,
@@ -86,6 +86,6 @@ export const DELETE: APIRoute = async ({ request }) => {
   if (numIds.length === 0) {
     return new Response("", { status: 400 });
   }
-  await BOM一括削除Command.execute({ ids: numIds });
+  await BOMBulkDeleteCommand.execute({ ids: numIds });
   return new Response("", { status: 200 });
 };

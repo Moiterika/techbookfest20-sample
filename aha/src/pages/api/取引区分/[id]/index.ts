@@ -1,7 +1,7 @@
 import type { APIRoute } from "astro";
 import { experimental_AstroContainer as AstroContainer } from "astro/container";
-import { 取引区分更新Command } from "../../../../features/取引区分/更新/取引区分更新Command";
-import { 取引区分削除Command } from "../../../../features/取引区分/削除/取引区分削除Command";
+import { 取引区分UpdateCommand } from "../../../../features/取引区分/update/取引区分UpdateCommand";
+import { 取引区分DeleteCommand } from "../../../../features/取引区分/delete/取引区分DeleteCommand";
 import {
   取引区分カラム,
   取引区分エンティティ,
@@ -19,8 +19,8 @@ export const PUT: APIRoute = async ({ params, request }) => {
 
   let row;
   try {
-    row = await 取引区分更新Command.execute({
-      ID: id,
+    row = await 取引区分UpdateCommand.execute({
+      id,
       コード: form.get("コード") as string,
       名称: form.get("名称") as string,
       係数: Number(form.get("係数")) || 0,
@@ -52,6 +52,6 @@ export const PUT: APIRoute = async ({ params, request }) => {
 /** DELETE /api/取引区分/:id — 取引区分を削除 */
 export const DELETE: APIRoute = async ({ params }) => {
   const id = Number(params.id);
-  await 取引区分削除Command.execute({ ID: id });
+  await 取引区分DeleteCommand.execute({ id });
   return new Response("", { headers: { "Content-Type": "text/html" } });
 };

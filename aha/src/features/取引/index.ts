@@ -3,7 +3,7 @@ export {
   get取引カラム,
   取引エンティティ,
 } from "./config";
-export { 取引一覧Query } from "./一覧/取引一覧Query";
-export { 取引登録Command } from "./登録/取引登録Command";
-export { 取引一括削除Command } from "./削除/取引一括削除Command";
+export { 取引一覧Query } from "./query/取引一覧Query";
+export { 取引CreateCommand } from "./create/取引CreateCommand";
+export { 取引BulkDeleteCommand } from "./delete/取引BulkDeleteCommand";
 export type { 取引Response } from "./取引Response";

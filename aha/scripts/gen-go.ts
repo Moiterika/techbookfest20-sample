@@ -161,7 +161,7 @@ function parseSchemaFile(): Map<string, EntityDef> {
   const content = fs.readFileSync(path.join(srcRoot, "db/schema.ts"), "utf-8");
   const entities = new Map<string, EntityDef>();
 
-  const tableStartRegex = /export const (\w+) = pgTable\("(\w+)",\s*\{/g;
+  const tableStartRegex = /export const ([\w\u3000-\u9FFF\uFF00-\uFFEF]+) = pgTable\(\s*"([^"]+)",\s*\{/g;
   let startMatch;
 
   while ((startMatch = tableStartRegex.exec(content)) !== null) {
@@ -193,7 +193,7 @@ function parseTableFields(body: string): FieldDef[] {
     const trimmed = line.trim();
     if (!trimmed || trimmed.startsWith("//") || trimmed.startsWith("/**") || trimmed.startsWith("*")) continue;
 
-    const m = trimmed.match(/^(\w+):\s*(serial|varchar|integer|numeric|timestamp|date)\("([^"]+)"[^)]*\)(.*)/);
+    const m = trimmed.match(/^([\w\u3000-\u9FFF\uFF00-\uFFEF]+):\s*(serial|varchar|integer|numeric|timestamp|date)\("([^"]+)"[^)]*\)(.*)/);
     if (!m) continue;
     const [, fieldName, colType, dbColumn, rest] = m;
     const isPK = rest.includes(".primaryKey()");
@@ -399,7 +399,27 @@ function extractFromConfig(content: string, key: string): string | null {
 // ─── ユーティリティ ────────────────────────
 
 function toPascalCase(s: string): string {
+  // 日本語を含む場合はそのまま返す（Go は Unicode 識別子をサポート）
+  if (/[\u3000-\u9FFF\uFF00-\uFFEF]/.test(s)) return s;
   return s.split(/[-_]/).map((w) => w.charAt(0).toUpperCase() + w.slice(1)).join("");
+}
+
+/** 親テーブルへの FK カラムかどうかを判定 */
+function isParentFKColumn(f: FieldDef, parentTableName: string): boolean {
+  // dbColumn が "親テーブル名_ID" or "親テーブル名_id" の形式
+  const upper = f.dbColumn.toUpperCase();
+  const parentUpper = parentTableName.toUpperCase();
+  if (upper === `${parentUpper}_ID`) return true;
+  // snake_case 形式: parent_table_id
+  if (upper === `${parentUpper.replace(/ /g, "_")}_ID`) return true;
+  return false;
+}
+
+/** SQL 識別子をダブルクォート（非 ASCII or 予約語の場合） */
+function sqlQ(name: string): string {
+  // id, created_at, updated_at 等の ASCII 識別子はクォート不要
+  if (/^[a-z_][a-z0-9_]*$/.test(name)) return name;
+  return `"${name}"`;
 }
 
 function pgTypeToGoType(colType: string, isNotNull: boolean): string {
@@ -484,7 +504,7 @@ function genTypes(entity: EntityDef, fm: FeatureMapping, searchFields?: SearchFi
   lines.push("");
 
   // Input structs
-  const inputFields = entity.fields.filter((f) => !f.isPrimaryKey && !f.name.endsWith("At"));
+  const inputFields = entity.fields.filter((f) => !f.isPrimaryKey && f.goType !== "time.Time");
 
   lines.push(`type 作成Input${JP} struct {`);
   for (const f of inputFields) {
@@ -1096,7 +1116,7 @@ func Parse更新Form${JP}(r *http.Request, id int) 更新Input${JP} {
 
 function genManualSQL(fm: FeatureMapping): string {
   const JP = fm.jpName;
-  const table = fm.tableName;
+  const table = sqlQ(fm.tableName);
   return `package features
 
 import (
@@ -1111,7 +1131,7 @@ func Execute一覧SQL${JP}(ctx context.Context, db *sql.DB, input 一覧Input${J
 \t_ = fmt.Sprintf
 \t_ = strings.Join
 \t_ = time.Now
-\t// TODO: SELECT + COUNT + pagination
+\t// TODO: SELECT + COUNT + pagination from ${table}
 \treturn ListResult${JP}{}, nil
 }
 
@@ -1392,15 +1412,15 @@ function genHeaderBodyTypes(parentEntity: EntityDef, childEntities: Map<string, 
     }
     if (childHasItemCode.has(child.tableName)) {
       lines.push(`\t// JOIN 結果`);
-      lines.push(`\tItemCode string`);
-      lines.push(`\tItemName string`);
+      lines.push(`\t品目コード string`);
+      lines.push(`\t品目名 string`);
     }
     lines.push("}");
     lines.push("");
   }
 
   // Parent Input structs
-  const parentInputFields = parentEntity.fields.filter((f) => !f.isPrimaryKey && !f.name.endsWith("At"));
+  const parentInputFields = parentEntity.fields.filter((f) => !f.isPrimaryKey && f.goType !== "time.Time");
 
   lines.push(`type 作成Input${JP} struct {`);
   for (const f of parentInputFields) {
@@ -1414,8 +1434,10 @@ function genHeaderBodyTypes(parentEntity: EntityDef, childEntities: Map<string, 
     const childStruct = toPascalCase(child.tableName);
     const childEntity = childEntities.get(child.tableName);
     if (!childEntity) continue;
+    // 親テーブルへの FK カラムを除外（dbColumn に親テーブル名を含む or _ID/_id で終わる参照列）
+    const parentTable = parentEntity.tableName;
     const childInputFields = childEntity.fields.filter(
-      (f) => !f.isPrimaryKey && !f.name.endsWith("At") && f.name !== parentEntity.tableName.replace(/s$/, "") + "Id",
+      (f) => !f.isPrimaryKey && f.goType !== "time.Time" && !isParentFKColumn(f, parentTable),
     );
     // Generate a child input struct
     lines.push("}");
@@ -1993,9 +2015,9 @@ function genHeaderBodyViewsTempl(parentEntity: EntityDef, fm: FeatureMapping, hb
       if (col.type === "deleteAction") {
         lines.push(`\t\t<td class="${TW.tdCell}" style="width: 3rem;"><button type="button" class="inline-flex items-center justify-center w-7 h-7 rounded-full cursor-pointer text-error border-none bg-transparent text-sm hover:bg-error/10" onclick="this.closest('tr').remove()">&times;</button></td>`);
       } else if (col.type === "itemCode") {
-        lines.push(`\t\t<td class="${TW.tdCell}">@RenderTypeahead品目("lineItemId", line.ItemId, line.ItemCode, line.ItemName, true, true, fmt.Sprintf("lookup-%d-itemName", line.Id))</td>`);
+        lines.push(`\t\t<td class="${TW.tdCell}">@RenderTypeahead品目("line品目ID", line.品目ID, line.品目コード, line.品目名, true, true, fmt.Sprintf("lookup-%d-itemName", line.Id))</td>`);
       } else if (col.type === "readonlyLookup") {
-        lines.push(`\t\t<td class="${TW.tdCell}"><span id={ fmt.Sprintf("lookup-%d-itemName", line.Id) } class="text-sm text-outline">{ line.ItemName }</span></td>`);
+        lines.push(`\t\t<td class="${TW.tdCell}"><span id={ fmt.Sprintf("lookup-%d-itemName", line.Id) } class="text-sm text-outline">{ line.品目名 }</span></td>`);
       } else if (col.type === "number") {
         const goField = toPascalCase(col.key);
         lines.push(`\t\t<td class="${TW.tdCell}"><input type="number" step="0.0001" name="line${toPascalCase(col.key)}" value={ line.${goField} } class="${TW.inputStyleSm}"/></td>`);
@@ -2045,7 +2067,7 @@ function genHeaderBodyViewsTempl(parentEntity: EntityDef, fm: FeatureMapping, hb
       if (col.type === "deleteAction") {
         lines.push(`\t\t<td class="${TW.tdCell}" style="width: 3rem;"><button type="button" class="inline-flex items-center justify-center w-7 h-7 rounded-full cursor-pointer text-error border-none bg-transparent text-sm hover:bg-error/10" onclick="this.closest('tr').remove()">&times;</button></td>`);
       } else if (col.type === "itemCode") {
-        lines.push(`\t\t<td class="${TW.tdCell}">@RenderTypeahead品目("lineItemId", 0, "", "", true, true, fmt.Sprintf("lookup-%s-itemName", rowKey))</td>`);
+        lines.push(`\t\t<td class="${TW.tdCell}">@RenderTypeahead品目("line品目ID", 0, "", "", true, true, fmt.Sprintf("lookup-%s-itemName", rowKey))</td>`);
       } else if (col.type === "readonlyLookup") {
         lines.push(`\t\t<td class="${TW.tdCell}"><span id={ fmt.Sprintf("lookup-%s-itemName", rowKey) } class="text-sm text-outline"></span></td>`);
       } else if (col.type === "number") {
@@ -2114,7 +2136,7 @@ func Parse更新Form${JP}(r *http.Request, id int) 更新Input${JP}WithLines {
 
 function genHeaderBodyManualSQL(fm: FeatureMapping): string {
   const JP = fm.jpName;
-  const table = fm.tableName;
+  const table = sqlQ(fm.tableName);
   return `package features
 
 import (

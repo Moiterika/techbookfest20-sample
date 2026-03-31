@@ -10,7 +10,7 @@ interface Props {
   compact?: boolean;
 }
 
-const { config, name = "itemId", formId, compact = false } = Astro.props;
+const { config, name = "品目ID", formId, compact = false } = Astro.props;
 const searchUrl = `/api/${config.entityName}/search`;
 ---
 

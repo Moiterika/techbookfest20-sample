@@ -10,7 +10,7 @@ interface Props {
 }
 
 const { record, columns, entity } = Astro.props;
-const rowId = `${entity.idPrefix}-${record.ID}`;
+const rowId = `${entity.idPrefix}-${record.id}`;
 
 /** カラムの minWidth を反映した td クラスを返す */
 function cellCls(col: { minWidth?: string }): string {
@@ -50,7 +50,7 @@ const checkboxStyle = "rounded-sm cursor-pointer accent-primary";
     <input
       type="checkbox"
       name="rowSelect"
-      value={record.ID}
+      value={record.id}
       class={checkboxStyle}
     />
   </td>
@@ -64,7 +64,7 @@ const checkboxStyle = "rounded-sm cursor-pointer accent-primary";
           <td class={actionsCell}>
             <div class={actionsRow}>
               <button
-                hx-get={`${entity.baseUrl}/${record.ID}/edit`}
+                hx-get={`${entity.baseUrl}/${record.id}/edit`}
                 hx-target={`#${rowId}`}
                 hx-swap="outerHTML"
                 class={editBtn}
@@ -90,7 +90,7 @@ const checkboxStyle = "rounded-sm cursor-pointer accent-primary";
                 <div class={kebabMenu} x-show="menuOpen" x-transition x-cloak>
                   <button
                     class={kebabItem}
-                    hx-delete={`${entity.baseUrl}/${record.ID}`}
+                    hx-delete={`${entity.baseUrl}/${record.id}`}
                     hx-target={`#${rowId}`}
                     hx-swap="outerHTML swap:0.3s"
                     hx-confirm={getDeleteConfirm()}

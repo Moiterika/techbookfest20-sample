@@ -1,7 +1,7 @@
 import type { APIRoute } from "astro";
 import { experimental_AstroContainer as AstroContainer } from "astro/container";
-import { 品目更新Command } from "../../../../features/品目/更新/品目更新Command";
-import { 品目削除Command } from "../../../../features/品目/削除/品目削除Command";
+import { 品目UpdateCommand } from "../../../../features/品目/update/品目UpdateCommand";
+import { 品目DeleteCommand } from "../../../../features/品目/delete/品目DeleteCommand";
 import { 品目カラム, 品目エンティティ } from "../../../../features/品目";
 // @ts-ignore
 import CrudRow from "../../../../components/crud/CrudRow.astro";
@@ -16,8 +16,8 @@ export const PUT: APIRoute = async ({ params, request }) => {
 
   let row;
   try {
-    row = await 品目更新Command.execute({
-      ID: id,
+    row = await 品目UpdateCommand.execute({
+      id,
       コード: form.get("コード") as string,
       名称: form.get("名称") as string,
       カテゴリ: (form.get("カテゴリ") as string) || undefined,
@@ -47,6 +47,6 @@ export const PUT: APIRoute = async ({ params, request }) => {
 /** DELETE /api/品目/:id — 品目を削除 */
 export const DELETE: APIRoute = async ({ params }) => {
   const id = Number(params.id);
-  await 品目削除Command.execute({ ID: id });
+  await 品目DeleteCommand.execute({ id });
   return new Response("", { headers: { "Content-Type": "text/html" } });
 };

@@ -18,7 +18,7 @@ export const GET: APIRoute = async ({ params }) => {
   const [row] = await db
     .select()
     .from(取引区分テーブル)
-    .where(eq(取引区分テーブル.ID, id));
+    .where(eq(取引区分テーブル.id, id));
 
   if (!row) {
     return new Response("", { status: 404 });

@@ -13,7 +13,7 @@ export const 品目作成Schema = z.object({
 export type 品目作成入力 = z.infer<typeof 品目作成Schema>;
 
 export const 品目更新Schema = 品目作成Schema.extend({
-  ID: z.coerce.number(),
+  id: z.coerce.number(),
 });
 
 export type 品目更新入力 = z.infer<typeof 品目更新Schema>;
@@ -43,7 +43,7 @@ export const 取引区分作成Schema = z.object({
 export type 取引区分作成入力 = z.infer<typeof 取引区分作成Schema>;
 
 export const 取引区分更新Schema = 取引区分作成Schema.extend({
-  ID: z.coerce.number(),
+  id: z.coerce.number(),
 });
 
 export type 取引区分更新入力 = z.infer<typeof 取引区分更新Schema>;
@@ -68,7 +68,7 @@ export const 取引作成Schema = z.object({
 export type 取引作成入力 = z.infer<typeof 取引作成Schema>;
 
 export const 取引更新Schema = 取引作成Schema.extend({
-  ID: z.coerce.number(),
+  id: z.coerce.number(),
 });
 
 export type 取引更新入力 = z.infer<typeof 取引更新Schema>;
@@ -103,7 +103,7 @@ export const BOM作成Schema = z.object({
 export type BOM作成入力 = z.infer<typeof BOM作成Schema>;
 
 export const BOM更新Schema = BOM作成Schema.extend({
-  ID: z.coerce.number(),
+  id: z.coerce.number(),
 });
 
 export type BOM更新入力 = z.infer<typeof BOM更新Schema>;
@@ -125,7 +125,7 @@ export const 一括削除Schema = z.object({
 export type 一括削除入力 = z.infer<typeof 一括削除Schema>;
 
 export const 単一削除Schema = z.object({
-  ID: z.coerce.number(),
+  id: z.coerce.number(),
 });
 
 export type 単一削除入力 = z.infer<typeof 単一削除Schema>;

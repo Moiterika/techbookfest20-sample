@@ -9,11 +9,11 @@ import (
 	"strings"
 )
 
-func validateBomLines(lines []作成InputBomLines) error {
+func validateBomLines(lines []作成InputBOM明細) error {
 	// 製造行が少なくとも1行必要
 	hasOutput := false
 	for _, l := range lines {
-		if l.Type == 2 {
+		if l.区分 == 2 {
 			hasOutput = true
 			break
 		}
@@ -24,11 +24,11 @@ func validateBomLines(lines []作成InputBomLines) error {
 
 	// 各行の品目・数量・単位は必須
 	for _, l := range lines {
-		if l.ItemId == 0 || strings.TrimSpace(l.Quantity) == "" || strings.TrimSpace(l.Unit) == "" {
+		if l.品目ID == 0 || strings.TrimSpace(l.数量) == "" || strings.TrimSpace(l.単位) == "" {
 			return errors.New("各行の品目・数量・単位は必須です")
 		}
 		// BOM版を指定する場合、BOMコードも必要
-		if l.RefBomVersion != nil && *l.RefBomVersion != "" && (l.RefBomCode == nil || *l.RefBomCode == "") {
+		if l.参照BOM版 != nil && *l.参照BOM版 != "" && (l.参照BOMコード == nil || *l.参照BOMコード == "") {
 			return errors.New("BOM版を指定する場合、BOMコードも必要です")
 		}
 	}
@@ -36,12 +36,12 @@ func validateBomLines(lines []作成InputBomLines) error {
 	// 製造品目と投入品目に同じ品目は登録できない
 	outputItemIds := map[int]bool{}
 	for _, l := range lines {
-		if l.Type == 2 {
-			outputItemIds[l.ItemId] = true
+		if l.区分 == 2 {
+			outputItemIds[l.品目ID] = true
 		}
 	}
 	for _, l := range lines {
-		if l.Type == 1 && outputItemIds[l.ItemId] {
+		if l.区分 == 1 && outputItemIds[l.品目ID] {
 			return errors.New("製造品目と投入品目に同じ品目は登録できません")
 		}
 	}
@@ -50,22 +50,22 @@ func validateBomLines(lines []作成InputBomLines) error {
 }
 
 func Validate登録BOM(_ context.Context, _ *sql.DB, input 作成InputBOMWithLines) error {
-	return validateBomLines(input.LinesBomLines)
+	return validateBomLines(input.LinesBOM明細)
 }
 
 func Validate更新BOM(_ context.Context, _ *sql.DB, input 更新InputBOMWithLines) error {
-	return validateBomLines(input.LinesBomLines)
+	return validateBomLines(input.LinesBOM明細)
 }
 
 func Parse作成FormBOM(r *http.Request) 作成InputBOMWithLines {
 	lines := parseBomLines(r)
 	return 作成InputBOMWithLines{
 		作成InputBOM: 作成InputBOM{
-			Code:    r.FormValue("code"),
-			Version: r.FormValue("version"),
-			Name:    r.FormValue("name"),
+			コード: r.FormValue("コード"),
+			版:    r.FormValue("版"),
+			名称:  r.FormValue("名称"),
 		},
-		LinesBomLines: lines,
+		LinesBOM明細: lines,
 	}
 }
 
@@ -73,34 +73,34 @@ func Parse更新FormBOM(r *http.Request, id int) 更新InputBOMWithLines {
 	lines := parseBomLines(r)
 	return 更新InputBOMWithLines{
 		更新InputBOM: 更新InputBOM{
-			ID:      id,
-			Code:    r.FormValue("code"),
-			Version: r.FormValue("version"),
-			Name:    r.FormValue("name"),
+			ID:  id,
+			コード: r.FormValue("コード"),
+			版:    r.FormValue("版"),
+			名称:  r.FormValue("名称"),
 		},
-		LinesBomLines: lines,
+		LinesBOM明細: lines,
 	}
 }
 
-func parseBomLines(r *http.Request) []作成InputBomLines {
-	types := r.Form["lineType"]
-	itemIds := r.Form["lineItemId"]
-	quantities := r.Form["lineQuantity"]
-	units := r.Form["lineUnit"]
-	refCodes := r.Form["lineRefBomCode"]
-	refVersions := r.Form["lineRefBomVersion"]
+func parseBomLines(r *http.Request) []作成InputBOM明細 {
+	types := r.Form["line区分"]
+	itemIds := r.Form["line品目ID"]
+	quantities := r.Form["line数量"]
+	units := r.Form["line単位"]
+	refCodes := r.Form["line参照BOMコード"]
+	refVersions := r.Form["line参照BOM版"]
 
-	var lines []作成InputBomLines
+	var lines []作成InputBOM明細
 	for i := range types {
 		refCode := stringOrNil(safeIndex(refCodes, i))
 		refVersion := stringOrNil(safeIndex(refVersions, i))
-		lines = append(lines, 作成InputBomLines{
-			Type:          parseInt(safeIndex(types, i)),
-			ItemId:        parseInt(safeIndex(itemIds, i)),
-			Quantity:      safeIndex(quantities, i),
-			Unit:          safeIndex(units, i),
-			RefBomCode:    refCode,
-			RefBomVersion: refVersion,
+		lines = append(lines, 作成InputBOM明細{
+			区分:         parseInt(safeIndex(types, i)),
+			品目ID:       parseInt(safeIndex(itemIds, i)),
+			数量:         safeIndex(quantities, i),
+			単位:         safeIndex(units, i),
+			参照BOMコード: refCode,
+			参照BOM版:    refVersion,
 		})
 	}
 	return lines
@@ -121,7 +121,7 @@ func stringOrNil(s string) *string {
 	return &s
 }
 
-// parseInt は文字列を int に変換���るヘルパー
+// parseInt は文字列を int に変換するヘルパー
 func parseInt(s string) int {
 	v, _ := strconv.Atoi(s)
 	return v

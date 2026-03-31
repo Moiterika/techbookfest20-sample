@@ -11,13 +11,13 @@ import {
 import BomLineRow from "./BomLineRow.astro";
 
 interface BomLineData {
-  itemId: number;
-  itemCode: string;
-  itemName: string;
-  quantity: string;
-  unit: string;
-  refBomCode?: string;
-  refBomVersion?: string;
+  品目ID: number;
+  品目コード: string;
+  品目名: string;
+  数量: string;
+  単位: string;
+  参照BOMコード?: string;
+  参照BOM版?: string;
 }
 
 interface Props {
@@ -41,7 +41,7 @@ const {
 } = Astro.props;
 
 const isEdit = mode === "edit";
-const actionUrl = isEdit ? `/api/boms/${bomId}` : "/api/boms";
+const actionUrl = isEdit ? `/api/BOM/${bomId}` : "/api/BOM";
 const httpMethod = isEdit ? "hx-put" : "hx-post";
 
 const inputStyleWide =
@@ -73,7 +73,7 @@ const errorArea = "min-h-6 mb-2";
         BOMコード
         <input
           type="text"
-          name="code"
+          name="コード"
           class={inputStyleWide}
           value={code}
           placeholder="例: BOM-001"
@@ -84,7 +84,7 @@ const errorArea = "min-h-6 mb-2";
         版
         <input
           type="text"
-          name="version"
+          name="版"
           class={inputStyleWide}
           value={version}
           placeholder="例: 1"
@@ -95,7 +95,7 @@ const errorArea = "min-h-6 mb-2";
         名称
         <input
           type="text"
-          name="name"
+          name="名称"
           class={inputStyleWide}
           value={name}
           placeholder="例: 製品A 部品表"
@@ -128,11 +128,11 @@ const errorArea = "min-h-6 mb-2";
               <BomLineRow
                 section="output"
                 rowKey={`out-${i}`}
-                itemId={l.itemId}
-                itemCode={l.itemCode}
-                itemName={l.itemName}
-                quantity={l.quantity}
-                unit={l.unit}
+                品目ID={l.品目ID}
+                品目コード={l.品目コード}
+                品目名={l.品目名}
+                数量={l.数量}
+                単位={l.単位}
               />
             ))
           }
@@ -143,7 +143,7 @@ const errorArea = "min-h-6 mb-2";
       <button
         type="button"
         class={addBtn}
-        hx-get="/api/boms/line-row?section=output"
+        hx-get="/api/BOM/line-row?section=output"
         hx-target="#output-lines"
         hx-swap="beforeend"
       >
@@ -177,13 +177,13 @@ const errorArea = "min-h-6 mb-2";
               <BomLineRow
                 section="input"
                 rowKey={`in-${i}`}
-                itemId={l.itemId}
-                itemCode={l.itemCode}
-                itemName={l.itemName}
-                quantity={l.quantity}
-                unit={l.unit}
-                refBomCode={l.refBomCode}
-                refBomVersion={l.refBomVersion}
+                品目ID={l.品目ID}
+                品目コード={l.品目コード}
+                品目名={l.品目名}
+                数量={l.数量}
+                単位={l.単位}
+                参照BOMコード={l.参照BOMコード}
+                参照BOM版={l.参照BOM版}
               />
             ))
           }
@@ -194,7 +194,7 @@ const errorArea = "min-h-6 mb-2";
       <button
         type="button"
         class={addBtn}
-        hx-get="/api/boms/line-row?section=input"
+        hx-get="/api/BOM/line-row?section=input"
         hx-target="#input-lines"
         hx-swap="beforeend"
       >
@@ -205,7 +205,7 @@ const errorArea = "min-h-6 mb-2";
 
   <!-- フッター -->
   <div class={footerBar}>
-    <a href="/boms" class={button({ intent: "secondary" })}>キャンセル</a>
+    <a href="/BOM" class={button({ intent: "secondary" })}>キャンセル</a>
     <button type="submit" class={button({ intent: "primary" })}>
       {isEdit ? "更新" : "登録"}
     </button>

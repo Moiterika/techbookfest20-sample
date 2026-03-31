@@ -17,8 +17,8 @@ interface Props {
 }
 
 const { record, columns, entity } = Astro.props;
-const rowId = `${entity.idPrefix}-${record.ID}`;
-const formId = `edit-${entity.idPrefix}-${record.ID}`;
+const rowId = `${entity.idPrefix}-${record.id}`;
+const formId = `edit-${entity.idPrefix}-${record.id}`;
 
 // 編集行レベルの Alpine x-data
 const alpineData = entity.alpineInitEditRow
@@ -36,7 +36,7 @@ function buildBeforeRequest(): string | undefined {
     (c) => c.type === "itemCode" || c.type === "typeahead",
   );
   if (!itemCol) return undefined;
-  const valueName = (itemCol as any).valueName ?? "itemId";
+  const valueName = (itemCol as any).valueName ?? "品目ID";
   return `
     const itemId = document.querySelector('[form=${formId}][name=${valueName}]');
     if (!itemId || !itemId.value) {
@@ -60,7 +60,7 @@ function buildBeforeRequest(): string | undefined {
             <div class={flexRow}>
               <form
                 id={formId}
-                hx-put={`${entity.baseUrl}/${record.ID}`}
+                hx-put={`${entity.baseUrl}/${record.id}`}
                 hx-target={`#${rowId}`}
                 hx-swap="outerHTML"
                 {...(buildBeforeRequest()
@@ -104,7 +104,7 @@ function buildBeforeRequest(): string | undefined {
       }
 
       if (type === "itemCode" || type === "typeahead") {
-        const valueName = (col as any).valueName ?? "itemId";
+        const valueName = (col as any).valueName ?? "品目ID";
         const lookupCol = columns.find((c) => c.type === "readonlyLookup");
         const lookupId = lookupCol
           ? `lookup-${rowId}-${lookupCol.key}`
@@ -116,7 +116,7 @@ function buildBeforeRequest(): string | undefined {
               name={valueName}
               selectedId={record[valueName]}
               selectedCode={val ?? ""}
-              selectedName={record.itemName ?? ""}
+              selectedName={record.品目名 ?? ""}
               formId={formId}
               compact
               hideNameLabel
@@ -202,6 +202,14 @@ function buildBeforeRequest(): string | undefined {
       }
 
       // text (default)
+      if (col.readonlyOnEdit) {
+        return (
+          <td class={tdCell} style={cellStyle(col)}>
+            <span class="text-sm">{val ?? ""}</span>
+            <input type="hidden" name={col.key} value={val ?? ""} form={formId} />
+          </td>
+        );
+      }
       return (
         <td class={tdCell} style={cellStyle(col)}>
           <input

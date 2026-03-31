@@ -9,8 +9,8 @@ export async function fetch取引区分オプション(): Promise<
   const rows = await db
     .select()
     .from(取引区分テーブル)
-    .orderBy(取引区分テーブル.ID);
-  return rows.map((r) => ({ value: String(r.ID), label: r.名称 }));
+    .orderBy(取引区分テーブル.id);
+  return rows.map((r) => ({ value: String(r.id), label: r.名称 }));
 }
 
 /** 取引区分オプション付きのカラム定義を取得する */

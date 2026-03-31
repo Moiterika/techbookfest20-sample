@@ -5,27 +5,27 @@ import (
 	"time"
 )
 
-// Row取引区分 は transaction_types テーブルの行
+// Row取引区分 は 取引区分 テーブルの行
 type Row取引区分 struct {
 	Id int `db:"id"`
-	Code string `db:"code"`
-	Name string `db:"name"`
-	Coefficient int `db:"coefficient"`
+	コード string `db:"コード"`
+	名称 string `db:"名称"`
+	係数 int `db:"係数"`
 	CreatedAt time.Time `db:"created_at"`
 	UpdatedAt time.Time `db:"updated_at"`
 }
 
 type 作成Input取引区分 struct {
-	Code string
-	Name string
-	Coefficient int
+	コード string
+	名称 string
+	係数 int
 }
 
 type 更新Input取引区分 struct {
 	ID int
-	Code string
-	Name string
-	Coefficient int
+	コード string
+	名称 string
+	係数 int
 }
 
 type 削除Input取引区分 struct { ID int }

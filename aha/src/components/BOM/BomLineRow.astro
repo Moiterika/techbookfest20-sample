@@ -7,30 +7,30 @@ import { 品目Typeahead } from "../../features/shared/typeahead-configs";
 interface Props {
   section: "output" | "input";
   rowKey: string;
-  itemId?: number;
-  itemCode?: string;
-  itemName?: string;
-  quantity?: string;
-  unit?: string;
-  refBomCode?: string;
-  refBomVersion?: string;
+  品目ID?: number;
+  品目コード?: string;
+  品目名?: string;
+  数量?: string;
+  単位?: string;
+  参照BOMコード?: string;
+  参照BOM版?: string;
 }
 
 const {
   section,
   rowKey,
-  itemId,
-  itemCode,
-  itemName,
-  quantity = "",
-  unit = "pcs",
-  refBomCode = "",
-  refBomVersion = "",
+  品目ID,
+  品目コード,
+  品目名,
+  数量 = "",
+  単位 = "pcs",
+  参照BOMコード = "",
+  参照BOM版 = "",
 } = Astro.props;
 
 const lineType = section === "output" ? "2" : "1";
 const unitOptions = Object.entries(unitLabels) as [Unit, string][];
-const lookupId = `lookup-${rowKey}-itemName`;
+const lookupId = `lookup-${rowKey}-品目名`;
 
 const cellSelect =
   "rounded-lg text-sm text-on-surface outline-none bg-surface-container-low border-2 border-transparent transition-[border-color,background-color] duration-200 focus:border-b-primary focus:bg-white py-1.5 px-2.5 min-w-20";
@@ -40,38 +40,38 @@ const lookupText = "text-sm text-outline";
 ---
 
 <tr id={`bom-line-${rowKey}`} class={row}>
-  <input type="hidden" name="lineType" value={lineType} />
+  <input type="hidden" name="line区分" value={lineType} />
   <td class={tdCell}>
     <Typeahead
       config={品目Typeahead}
-      name="lineItemId"
-      selectedId={itemId}
-      selectedCode={itemCode ?? ""}
-      selectedName={itemName ?? ""}
+      name="line品目ID"
+      selectedId={品目ID}
+      selectedCode={品目コード ?? ""}
+      selectedName={品目名 ?? ""}
       compact
       hideNameLabel
       lookupTargetId={lookupId}
     />
   </td>
   <td class={tdCell}>
-    <span id={lookupId} class={lookupText}>{itemName ?? ""}</span>
+    <span id={lookupId} class={lookupText}>{品目名 ?? ""}</span>
   </td>
   <td class={tdCell}>
     <input
       type="number"
       step="0.0001"
       min="0"
-      name="lineQuantity"
-      value={quantity}
+      name="line数量"
+      value={数量}
       class={inputStyleSm}
       placeholder="0"
     />
   </td>
   <td class={tdCell}>
-    <select name="lineUnit" class={cellSelect}>
+    <select name="line単位" class={cellSelect}>
       {
         unitOptions.map(([val, label]) => (
-          <option value={val} selected={val === unit}>
+          <option value={val} selected={val === 単位}>
             {label}
           </option>
         ))
@@ -84,8 +84,8 @@ const lookupText = "text-sm text-outline";
         <td class={tdCell}>
           <input
             type="text"
-            name="lineRefBomCode"
-            value={refBomCode}
+            name="line参照BOMコード"
+            value={参照BOMコード}
             class={inputStyleSm}
             placeholder="BOMコード"
           />
@@ -93,8 +93,8 @@ const lookupText = "text-sm text-outline";
         <td class={tdCell}>
           <input
             type="text"
-            name="lineRefBomVersion"
-            value={refBomVersion}
+            name="line参照BOM版"
+            value={参照BOM版}
             class={inputStyleSm}
             placeholder="版"
           />
@@ -102,8 +102,8 @@ const lookupText = "text-sm text-outline";
       </>
     ) : (
       <>
-        <input type="hidden" name="lineRefBomCode" value="" />
-        <input type="hidden" name="lineRefBomVersion" value="" />
+        <input type="hidden" name="line参照BOMコード" value="" />
+        <input type="hidden" name="line参照BOM版" value="" />
       </>
     )
   }

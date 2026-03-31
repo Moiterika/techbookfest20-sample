@@ -12,7 +12,7 @@ const container = await AstroContainer.create();
 /** GET /api/品目/typeahead?action=select|clear */
 export const GET: APIRoute = async ({ url }) => {
   const action = url.searchParams.get("action") || "clear";
-  const taName = url.searchParams.get("taName") || "itemId";
+  const taName = url.searchParams.get("taName") || "品目ID";
   const taFormId = url.searchParams.get("taFormId") || "";
   const taCompact = url.searchParams.get("taCompact") === "true";
   const taHideNameLabel = url.searchParams.get("taHideNameLabel") === "true";
@@ -26,13 +26,13 @@ export const GET: APIRoute = async ({ url }) => {
 
     const [item] = await db
       .select({
-        ID: 品目テーブル.ID,
+        id: 品目テーブル.id,
         コード: 品目テーブル.コード,
         名称: 品目テーブル.名称,
         単価: 品目テーブル.単価,
       })
       .from(品目テーブル)
-      .where(eq(品目テーブル.ID, itemId))
+      .where(eq(品目テーブル.id, itemId))
       .limit(1);
 
     if (!item) {
@@ -43,7 +43,7 @@ export const GET: APIRoute = async ({ url }) => {
       props: {
         config: 品目Typeahead,
         name: taName,
-        selectedId: item.ID,
+        selectedId: item.id,
         selectedCode: item.コード,
         selectedName: item.名称,
         selectedExtra: { price: String(item.単価) },

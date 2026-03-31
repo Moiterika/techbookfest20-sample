@@ -6,63 +6,63 @@ import (
 	"time"
 )
 
-// RowBOM は boms テーブルの行
+// RowBOM は BOM テーブルの行
 type RowBOM struct {
 	Id int `db:"id"`
-	Code string `db:"code"`
-	Version string `db:"version"`
-	Name string `db:"name"`
+	コード string `db:"コード"`
+	版 string `db:"版"`
+	名称 string `db:"名称"`
 	CreatedAt time.Time `db:"created_at"`
 	UpdatedAt time.Time `db:"updated_at"`
 }
 
-// BomLines は bom_lines テーブルの行
-type BomLines struct {
+// BOM明細 は BOM明細 テーブルの行
+type BOM明細 struct {
 	Id int `db:"id"`
-	BomId int `db:"bom_id"`
-	Type int `db:"type"`
-	ItemId int `db:"item_id"`
-	Quantity string `db:"quantity"`
-	Unit string `db:"unit"`
-	RefBomCode sql.NullString `db:"ref_bom_code"`
-	RefBomVersion sql.NullString `db:"ref_bom_version"`
+	BOMID int `db:"BOM_ID"`
+	区分 int `db:"区分"`
+	品目ID int `db:"品目ID"`
+	数量 string `db:"数量"`
+	単位 string `db:"単位"`
+	参照BOMコード sql.NullString `db:"参照BOMコード"`
+	参照BOM版 sql.NullString `db:"参照BOM版"`
 	CreatedAt time.Time `db:"created_at"`
 	UpdatedAt time.Time `db:"updated_at"`
 	// JOIN 結果
-	ItemCode string
-	ItemName string
+	品目コード string
+	品目名 string
 }
 
 type 作成InputBOM struct {
-	Code string
-	Version string
-	Name string
+	コード string
+	版 string
+	名称 string
 }
 
-type 作成InputBomLines struct {
-	Type int
-	ItemId int
-	Quantity string
-	Unit string
-	RefBomCode *string
-	RefBomVersion *string
+type 作成InputBOM明細 struct {
+	区分 int
+	品目ID int
+	数量 string
+	単位 string
+	参照BOMコード *string
+	参照BOM版 *string
 }
 
 type 作成InputBOMWithLines struct {
 	作成InputBOM
-	LinesBomLines []作成InputBomLines
+	LinesBOM明細 []作成InputBOM明細
 }
 
 type 更新InputBOM struct {
 	ID int
-	Code string
-	Version string
-	Name string
+	コード string
+	版 string
+	名称 string
 }
 
 type 更新InputBOMWithLines struct {
 	更新InputBOM
-	LinesBomLines []作成InputBomLines
+	LinesBOM明細 []作成InputBOM明細
 }
 
 type 削除InputBOM struct { ID int }
@@ -73,8 +73,8 @@ type ResponseBOM struct { RowBOM }
 
 type ResponseBOM詳細 struct {
 	RowBOM
-	製造品目アウトプット []BomLines
-	投入品目インプット []BomLines
+	製造品目アウトプット []BOM明細
+	投入品目インプット []BOM明細
 }
 
 type ListResultBOM struct {

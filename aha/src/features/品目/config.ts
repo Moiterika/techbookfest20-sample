@@ -6,6 +6,7 @@ export const 品目カラム: Column[] = [
     label: "品目コード",
     required: true,
     placeholder: "例: NPC-001",
+    readonlyOnEdit: true,
   },
   { key: "名称", label: "品目名", required: true, placeholder: "例: ノートPC" },
   { key: "カテゴリ", label: "カテゴリ", placeholder: "例: 備品" },

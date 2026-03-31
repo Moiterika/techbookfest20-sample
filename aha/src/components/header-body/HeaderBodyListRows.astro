@@ -62,9 +62,9 @@ const colCount =
     </tr>
   ) : (
     records.map((r) => {
-      const rowId = config.idPrefix + "-" + r.ID;
-      const editUrl = listUrl + "/" + r.ID;
-      const deleteUrl = config.baseUrl + "/" + r.ID;
+      const rowId = config.idPrefix + "-" + r.id;
+      const editUrl = listUrl + "/" + r.id;
+      const deleteUrl = config.baseUrl + "/" + r.id;
       const targetId = "#" + rowId;
       return (
         <tr id={rowId} class={row}>

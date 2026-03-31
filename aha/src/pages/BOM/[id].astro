@@ -17,24 +17,24 @@ const showSavedToast = Astro.url.searchParams.has("saved");
 const [bom] = await db
   .select()
   .from(BOMテーブル)
-  .where(eq(BOMテーブル.ID, id))
+  .where(eq(BOMテーブル.id, id))
   .limit(1);
 if (!bom) return Astro.redirect("/BOM");
 
 const lines = await db
   .select({
-    id: BOM明細テーブル.ID,
+    id: BOM明細テーブル.id,
     区分: BOM明細テーブル.区分,
-    itemId: BOM明細テーブル.品目ID,
-    quantity: BOM明細テーブル.数量,
-    unit: BOM明細テーブル.単位,
-    refBomCode: BOM明細テーブル.参照BOMコード,
-    refBomVersion: BOM明細テーブル.参照BOM版,
-    itemCode: 品目テーブル.コード,
-    itemName: 品目テーブル.名称,
+    品目ID: BOM明細テーブル.品目ID,
+    数量: BOM明細テーブル.数量,
+    単位: BOM明細テーブル.単位,
+    参照BOMコード: BOM明細テーブル.参照BOMコード,
+    参照BOM版: BOM明細テーブル.参照BOM版,
+    品目コード: 品目テーブル.コード,
+    品目名: 品目テーブル.名称,
   })
   .from(BOM明細テーブル)
-  .leftJoin(品目テーブル, eq(BOM明細テーブル.品目ID, 品目テーブル.ID))
+  .leftJoin(品目テーブル, eq(BOM明細テーブル.品目ID, 品目テーブル.id))
   .where(eq(BOM明細テーブル.BOM_ID, id));
 
 // Build childrenData from config.children discriminator definitions
@@ -45,13 +45,13 @@ const childrenData = config.children.map((child) => {
     : lines;
   return {
     records: filtered.map((l) => ({
-      itemId: l.itemId,
-      itemCode: l.itemCode || "",
-      itemName: l.itemName || "",
-      quantity: l.quantity,
-      unit: l.unit,
-      refBomCode: l.refBomCode || "",
-      refBomVersion: l.refBomVersion || "",
+      品目ID: l.品目ID,
+      品目コード: l.品目コード || "",
+      品目名: l.品目名 || "",
+      数量: l.数量,
+      単位: l.単位,
+      参照BOMコード: l.参照BOMコード || "",
+      参照BOM版: l.参照BOM版 || "",
     })),
   };
 });
@@ -70,7 +70,7 @@ const headerValues = {
     <HeaderBodyForm
       config={config}
       mode="edit"
-      recordId={bom.ID}
+      recordId={bom.id}
       headerValues={headerValues}
       childrenData={childrenData}
     />

@@ -76,14 +76,15 @@ function widthStyle(col: Column): string | undefined {
       }
 
       if (type === "itemCode" || type === "typeahead") {
+        const valueName = (col as any).valueName ?? "品目ID";
         return (
           <td class={tdCell}>
             <Typeahead
               config={品目Typeahead}
-              name="lineItemId"
-              selectedId={values.itemId}
-              selectedCode={values.itemCode ?? ""}
-              selectedName={values.itemName ?? ""}
+              name={"line" + valueName}
+              selectedId={values[valueName]}
+              selectedCode={values[col.key] ?? ""}
+              selectedName={values.品目名 ?? ""}
               compact
               hideNameLabel
               lookupTargetId={lookupId}

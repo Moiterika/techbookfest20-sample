@@ -2,8 +2,8 @@ import type { APIRoute } from "astro";
 import { experimental_AstroContainer as AstroContainer } from "astro/container";
 import {
   取引区分一覧Query,
-  取引区分登録Command,
-  取引区分一括削除Command,
+  取引区分CreateCommand,
+  取引区分BulkDeleteCommand,
 } from "../../../features/取引区分";
 import {
   取引区分カラム,
@@ -41,7 +41,7 @@ export const POST: APIRoute = async ({ request }) => {
   const form = await request.formData();
 
   try {
-    await 取引区分登録Command.execute({
+    await 取引区分CreateCommand.execute({
       コード: form.get("コード") as string,
       名称: form.get("名称") as string,
       係数: Number(form.get("係数")) || 0,
@@ -83,6 +83,6 @@ export const DELETE: APIRoute = async ({ request }) => {
   if (numIds.length === 0) {
     return new Response("", { status: 400 });
   }
-  await 取引区分一括削除Command.execute({ ids: numIds });
+  await 取引区分BulkDeleteCommand.execute({ ids: numIds });
   return new Response("", { status: 200 });
 };

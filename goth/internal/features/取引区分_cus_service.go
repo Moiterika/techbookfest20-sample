@@ -5,14 +5,14 @@ import (
 	"net/http"
 	"strconv"
 
-	"github.com/go-gorp/gorp/v3"
+	"database/sql"
 )
 
-func Validate登録取引区分(_ context.Context, _ *gorp.DbMap, _ 作成Input取引区分) error {
+func Validate登録取引区分(_ context.Context, _ *sql.DB, _ 作成Input取引区分) error {
 	return nil
 }
 
-func Validate更新取引区分(_ context.Context, _ *gorp.DbMap, _ 更新Input取引区分) error {
+func Validate更新取引区分(_ context.Context, _ *sql.DB, _ 更新Input取引区分) error {
 	return nil
 }
 

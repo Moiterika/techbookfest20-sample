@@ -1,14 +1,14 @@
 package web
 
 import (
+	"database/sql"
 	"net/http"
 
 	"aha-goth/internal/features"
-	"github.com/go-gorp/gorp/v3"
 )
 
 // RegisterRoutes は全 feature のルートを登録する
-func RegisterRoutes(mux *http.ServeMux, db *gorp.DbMap) {
+func RegisterRoutes(mux *http.ServeMux, db *sql.DB) {
 	// ── ページ ──
 	mux.HandleFunc("GET /{$}", handleHome)
 

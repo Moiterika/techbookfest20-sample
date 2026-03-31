@@ -1,4 +1,4 @@
-// cmd/gen-dao/main.go — _dao_gen.go + dbmap_gen.go を生成する
+// cmd/gen-dao/main.go — dao_config.json → _dao_gen.go を生成する
 package main
 
 import (
@@ -16,23 +16,23 @@ type Config struct {
 }
 
 type Entity struct {
-	Name                string   `json:"name"`
-	Table               string   `json:"table"`
-	RowStruct           string   `json:"rowStruct"`
-	ResponseStruct      string   `json:"responseStruct"`
-	ListResultStruct    string   `json:"listResultStruct"`
-	CreateInput         string   `json:"createInput"`
-	UpdateInput         string   `json:"updateInput"`
-	DeleteInput         string   `json:"deleteInput"`
-	BatchDeleteInput    string   `json:"batchDeleteInput"`
-	ListInput           string   `json:"listInput"`
-	CreateWithLines     string   `json:"createWithLinesInput"`
-	UpdateWithLines     string   `json:"updateWithLinesInput"`
-	Fields              []Field  `json:"fields"`
-	Search              *Search  `json:"search"`
-	Filters             []Filter `json:"filters"`
-	Child               *Child   `json:"child"`
-	Detail              *Detail  `json:"detail"`
+	Name             string   `json:"name"`
+	Table            string   `json:"table"`
+	RowStruct        string   `json:"rowStruct"`
+	ResponseStruct   string   `json:"responseStruct"`
+	ListResultStruct string   `json:"listResultStruct"`
+	CreateInput      string   `json:"createInput"`
+	UpdateInput      string   `json:"updateInput"`
+	DeleteInput      string   `json:"deleteInput"`
+	BatchDeleteInput string   `json:"batchDeleteInput"`
+	ListInput        string   `json:"listInput"`
+	CreateWithLines  string   `json:"createWithLinesInput"`
+	UpdateWithLines  string   `json:"updateWithLinesInput"`
+	Fields           []Field  `json:"fields"`
+	Search           *Search  `json:"search"`
+	Filters          []Filter `json:"filters"`
+	Child            *Child   `json:"child"`
+	Detail           *Detail  `json:"detail"`
 }
 
 type Field struct {
@@ -54,7 +54,7 @@ type Search struct {
 type Filter struct {
 	InputField string `json:"inputField"`
 	Column     string `json:"column"`
-	Op         string `json:"op"` // "ilike", "eq", "gte", "lte"
+	Op         string `json:"op"`
 }
 
 type Child struct {
@@ -103,7 +103,7 @@ type Group struct {
 	ResponseField string `json:"responseField"`
 }
 
-// ── SQL クォート ──
+// ── helpers ──
 
 func sqlQ(name string) string {
 	for _, c := range name {
@@ -111,11 +111,117 @@ func sqlQ(name string) string {
 			return `"` + name + `"`
 		}
 	}
-	// ASCII but uppercase or mixed → quote
 	if strings.ContainsAny(name, "ABCDEFGHIJKLMNOPQRSTUVWXYZ ") {
 		return `"` + name + `"`
 	}
 	return name
+}
+
+// dataFields returns fields that are not PK/auto and not timestamps
+func dataFields(fields []Field) []Field {
+	var out []Field
+	for _, f := range fields {
+		if f.PK && f.Auto {
+			continue
+		}
+		if f.Timestamp {
+			continue
+		}
+		out = append(out, f)
+	}
+	return out
+}
+
+// allCols/allScan for SELECT *
+func allCols(fields []Field) string {
+	var cols []string
+	for _, f := range fields {
+		cols = append(cols, sqlQ(f.DB))
+	}
+	return strings.Join(cols, ", ")
+}
+
+func allScan(fields []Field, varName string) string {
+	var args []string
+	for _, f := range fields {
+		args = append(args, "&"+varName+"."+f.Go)
+	}
+	return strings.Join(args, ", ")
+}
+
+// insertCols/insertPlaceholders/insertArgs for INSERT
+func insertCols(fields []Field) string {
+	df := dataFields(fields)
+	var cols []string
+	for _, f := range df {
+		cols = append(cols, sqlQ(f.DB))
+	}
+	// + timestamps
+	cols = append(cols, "created_at", "updated_at")
+	return strings.Join(cols, ", ")
+}
+
+func insertPlaceholders(fields []Field) string {
+	df := dataFields(fields)
+	n := len(df) + 2 // +2 for timestamps
+	var ph []string
+	for i := 1; i <= n; i++ {
+		ph = append(ph, fmt.Sprintf("$%d", i))
+	}
+	return strings.Join(ph, ", ")
+}
+
+func insertArgs(fields []Field, inputVar string) string {
+	df := dataFields(fields)
+	var args []string
+	for _, f := range df {
+		if f.Nullable {
+			args = append(args, fmt.Sprintf("toNullString(%s.%s)", inputVar, f.Go))
+		} else {
+			args = append(args, fmt.Sprintf("%s.%s", inputVar, f.Go))
+		}
+	}
+	args = append(args, "now", "now")
+	return strings.Join(args, ", ")
+}
+
+// updateSetClauses for UPDATE SET
+func updateSetClauses(fields []Field) string {
+	df := dataFields(fields)
+	var parts []string
+	idx := 1
+	for _, f := range df {
+		parts = append(parts, fmt.Sprintf("%s=$%d", sqlQ(f.DB), idx))
+		idx++
+	}
+	parts = append(parts, fmt.Sprintf("updated_at=$%d", idx))
+	return strings.Join(parts, ", ")
+}
+
+func updateArgs(fields []Field, inputVar string) string {
+	df := dataFields(fields)
+	var args []string
+	for _, f := range df {
+		if f.Nullable {
+			args = append(args, fmt.Sprintf("toNullString(%s.%s)", inputVar, f.Go))
+		} else {
+			args = append(args, fmt.Sprintf("%s.%s", inputVar, f.Go))
+		}
+	}
+	args = append(args, "now")
+	return strings.Join(args, ", ")
+}
+
+func updateArgCount(fields []Field) int {
+	return len(dataFields(fields)) + 1 // +1 for updated_at
+}
+
+func repeatIdx(n int) string {
+	parts := make([]string, n)
+	for i := range parts {
+		parts[i] = "idx"
+	}
+	return strings.Join(parts, ", ")
 }
 
 // ── メイン ──
@@ -137,7 +243,7 @@ func main() {
 
 	for _, e := range cfg.Entities {
 		var sb strings.Builder
-		genHeader(&sb, e)
+		genHeader(&sb)
 		genList(&sb, e)
 		if e.Child != nil {
 			genCreateWithLines(&sb, e)
@@ -153,46 +259,33 @@ func main() {
 			genDetail(&sb, e)
 		}
 
-		prefix := e.Name
-		outPath := fmt.Sprintf("internal/features/%s_dao_gen.go", prefix)
+		outPath := fmt.Sprintf("internal/features/%s_dao_gen.go", e.Name)
 		if err := os.WriteFile(outPath, []byte(sb.String()), 0644); err != nil {
 			log.Fatalf("%s 書き込み失敗: %v", outPath, err)
 		}
 		fmt.Printf("generated %s\n", outPath)
 	}
-
-	// dbmap_gen.go
-	genDbMap(cfg)
-	fmt.Println("generated internal/features/dbmap_gen.go")
 }
 
 // ── ヘッダー ──
 
-func genHeader(sb *strings.Builder, e Entity) {
+func genHeader(sb *strings.Builder) {
 	sb.WriteString("// Code generated by gen-dao. DO NOT EDIT.\n")
 	sb.WriteString("package features\n\n")
-
-	imports := []string{
-		`"context"`,
-		`"fmt"`,
-		`"math"`,
-		`"strings"`,
-		`"time"`,
-		`"github.com/go-gorp/gorp/v3"`,
-	}
-
 	sb.WriteString("import (\n")
-	for _, imp := range imports {
-		sb.WriteString("\t" + imp + "\n")
-	}
+	sb.WriteString("\t\"context\"\n")
+	sb.WriteString("\t\"database/sql\"\n")
+	sb.WriteString("\t\"fmt\"\n")
+	sb.WriteString("\t\"math\"\n")
+	sb.WriteString("\t\"strings\"\n")
+	sb.WriteString("\t\"time\"\n")
 	sb.WriteString(")\n\n")
-
-	// suppress unused imports
 	sb.WriteString("var (\n")
 	sb.WriteString("\t_ = fmt.Sprintf\n")
 	sb.WriteString("\t_ = strings.Join\n")
 	sb.WriteString("\t_ = time.Now\n")
 	sb.WriteString("\t_ = math.Max\n")
+	sb.WriteString("\t_ sql.NullString\n")
 	sb.WriteString(")\n\n")
 }
 
@@ -201,28 +294,15 @@ func genHeader(sb *strings.Builder, e Entity) {
 func genList(sb *strings.Builder, e Entity) {
 	JP := e.Name
 	table := sqlQ(e.Table)
+	selectList := allCols(e.Fields)
+	scanList := allScan(e.Fields, "r")
 
-	// SELECT columns
-	var selCols []string
-	for _, f := range e.Fields {
-		selCols = append(selCols, sqlQ(f.DB))
-	}
-	selectList := strings.Join(selCols, ", ")
-
-	// Scan args
-	var scanArgs []string
-	for _, f := range e.Fields {
-		scanArgs = append(scanArgs, "&r."+f.Go)
-	}
-	scanList := strings.Join(scanArgs, ", ")
-
-	sb.WriteString(fmt.Sprintf("func Execute一覧SQL%s(ctx context.Context, dbmap *gorp.DbMap, input %s) (%s, error) {\n", JP, e.ListInput, e.ListResultStruct))
+	sb.WriteString(fmt.Sprintf("func Execute一覧SQL%s(ctx context.Context, db *sql.DB, input %s) (%s, error) {\n", JP, e.ListInput, e.ListResultStruct))
 	sb.WriteString("\tsize := input.Size\n")
 	sb.WriteString("\tif size != 20 && size != 50 && size != 100 {\n\t\tsize = 20\n\t}\n\n")
-	sb.WriteString(fmt.Sprintf("\twhere := \"WHERE 1=1\"\n"))
+	sb.WriteString("\twhere := \"WHERE 1=1\"\n")
 	sb.WriteString("\targs := []any{}\n")
 
-	// search clause
 	if e.Search != nil && len(e.Search.Columns) > 0 {
 		sb.WriteString(fmt.Sprintf("\tif input.%s != \"\" {\n", e.Search.InputField))
 		sb.WriteString(fmt.Sprintf("\t\targs = append(args, \"%%\"+input.%s+\"%%\")\n", e.Search.InputField))
@@ -230,14 +310,12 @@ func genList(sb *strings.Builder, e Entity) {
 		for _, col := range e.Search.Columns {
 			clauses = append(clauses, fmt.Sprintf(`%s ILIKE $%%d`, sqlQ(col)))
 		}
-		sb.WriteString(fmt.Sprintf("\t\tidx := len(args)\n"))
+		sb.WriteString("\t\tidx := len(args)\n")
 		joined := strings.Join(clauses, " OR ")
-		sb.WriteString(fmt.Sprintf("\t\twhere += fmt.Sprintf(` AND (%s)`, %s)\n",
-			joined, repeatIdx(len(e.Search.Columns))))
+		sb.WriteString(fmt.Sprintf("\t\twhere += fmt.Sprintf(` AND (%s)`, %s)\n", joined, repeatIdx(len(e.Search.Columns))))
 		sb.WriteString("\t}\n")
 	}
 
-	// filter clauses
 	for _, f := range e.Filters {
 		sb.WriteString(fmt.Sprintf("\tif input.%s != \"\" {\n", f.InputField))
 		switch f.Op {
@@ -258,7 +336,7 @@ func genList(sb *strings.Builder, e Entity) {
 	}
 
 	sb.WriteString("\n\tvar total int\n")
-	sb.WriteString(fmt.Sprintf("\tif err := dbmap.SelectOne(&total, `SELECT COUNT(*) FROM %s `+where, args...); err != nil {\n", table))
+	sb.WriteString(fmt.Sprintf("\tif err := db.QueryRowContext(ctx, `SELECT COUNT(*) FROM %s `+where, args...).Scan(&total); err != nil {\n", table))
 	sb.WriteString(fmt.Sprintf("\t\treturn %s{}, err\n\t}\n\n", e.ListResultStruct))
 
 	sb.WriteString("\ttotalPages := int(math.Max(1, math.Ceil(float64(total)/float64(size))))\n")
@@ -267,7 +345,7 @@ func genList(sb *strings.Builder, e Entity) {
 	sb.WriteString("\tif page > totalPages { page = totalPages }\n\n")
 
 	sb.WriteString("\toffset := len(args)\n")
-	sb.WriteString(fmt.Sprintf("\trows, err := dbmap.Db.QueryContext(ctx,\n"))
+	sb.WriteString("\trows, err := db.QueryContext(ctx,\n")
 	sb.WriteString(fmt.Sprintf("\t\tfmt.Sprintf(`SELECT %s FROM %s %%s ORDER BY id DESC LIMIT $%%d OFFSET $%%d`, where, offset+1, offset+2),\n", selectList, table))
 	sb.WriteString("\t\tappend(args, size, (page-1)*size)...)\n")
 	sb.WriteString("\tif err != nil {\n")
@@ -286,70 +364,41 @@ func genList(sb *strings.Builder, e Entity) {
 	sb.WriteString("}\n\n")
 }
 
-// repeatIdx generates "idx, idx, idx..." for N search columns
-func repeatIdx(n int) string {
-	parts := make([]string, n)
-	for i := range parts {
-		parts[i] = "idx"
-	}
-	return strings.Join(parts, ", ")
-}
-
-// ── 登録 (Create) — 単純CRUD ──
+// ── 登録 (Create) ──
 
 func genCreate(sb *strings.Builder, e Entity) {
 	JP := e.Name
+	table := sqlQ(e.Table)
 
-	sb.WriteString(fmt.Sprintf("func Execute登録SQL%s(ctx context.Context, dbmap *gorp.DbMap, input %s) (%s, error) {\n", JP, e.CreateInput, e.ResponseStruct))
+	sb.WriteString(fmt.Sprintf("func Execute登録SQL%s(ctx context.Context, db *sql.DB, input %s) (%s, error) {\n", JP, e.CreateInput, e.ResponseStruct))
 	sb.WriteString("\tnow := time.Now()\n")
-	sb.WriteString(fmt.Sprintf("\tr := %s{\n", e.RowStruct))
-	for _, f := range e.Fields {
-		if f.PK && f.Auto {
-			continue
-		}
-		if f.Timestamp {
-			sb.WriteString(fmt.Sprintf("\t\t%s: now,\n", f.Go))
-			continue
-		}
-		if f.Nullable {
-			sb.WriteString(fmt.Sprintf("\t\t%s: toNullString(input.%s),\n", f.Go, f.Go))
-		} else {
-			sb.WriteString(fmt.Sprintf("\t\t%s: input.%s,\n", f.Go, f.Go))
-		}
-	}
-	sb.WriteString("\t}\n")
-	sb.WriteString("\tif err := dbmap.WithContext(ctx).Insert(&r); err != nil {\n")
+	sb.WriteString(fmt.Sprintf("\tvar r %s\n", e.RowStruct))
+	sb.WriteString(fmt.Sprintf("\terr := db.QueryRowContext(ctx,\n"))
+	sb.WriteString(fmt.Sprintf("\t\t`INSERT INTO %s (%s) VALUES (%s) RETURNING %s`,\n",
+		table, insertCols(e.Fields), insertPlaceholders(e.Fields), allCols(e.Fields)))
+	sb.WriteString(fmt.Sprintf("\t\t%s,\n", insertArgs(e.Fields, "input")))
+	sb.WriteString(fmt.Sprintf("\t).Scan(%s)\n", allScan(e.Fields, "r")))
+	sb.WriteString("\tif err != nil {\n")
 	sb.WriteString(fmt.Sprintf("\t\treturn %s{}, err\n\t}\n", e.ResponseStruct))
 	sb.WriteString(fmt.Sprintf("\treturn %s{%s: r}, nil\n", e.ResponseStruct, e.RowStruct))
 	sb.WriteString("}\n\n")
 }
 
-// ── 更新 (Update) — 単純CRUD ──
+// ── 更新 (Update) ──
 
 func genUpdate(sb *strings.Builder, e Entity) {
 	JP := e.Name
+	table := sqlQ(e.Table)
+	idIdx := updateArgCount(e.Fields) + 1
 
-	sb.WriteString(fmt.Sprintf("func Execute更新SQL%s(ctx context.Context, dbmap *gorp.DbMap, input %s) (%s, error) {\n", JP, e.UpdateInput, e.ResponseStruct))
-	sb.WriteString(fmt.Sprintf("\tobj, err := dbmap.WithContext(ctx).Get(%s{}, input.ID)\n", e.RowStruct))
+	sb.WriteString(fmt.Sprintf("func Execute更新SQL%s(ctx context.Context, db *sql.DB, input %s) (%s, error) {\n", JP, e.UpdateInput, e.ResponseStruct))
+	sb.WriteString("\tnow := time.Now()\n")
+	sb.WriteString(fmt.Sprintf("\t_, err := db.ExecContext(ctx,\n"))
+	sb.WriteString(fmt.Sprintf("\t\t`UPDATE %s SET %s WHERE id=$%d`,\n", table, updateSetClauses(e.Fields), idIdx))
+	sb.WriteString(fmt.Sprintf("\t\t%s, input.ID)\n", updateArgs(e.Fields, "input")))
 	sb.WriteString("\tif err != nil {\n")
 	sb.WriteString(fmt.Sprintf("\t\treturn %s{}, err\n\t}\n", e.ResponseStruct))
-	sb.WriteString("\tif obj == nil {\n")
-	sb.WriteString(fmt.Sprintf("\t\treturn %s{}, fmt.Errorf(\"record not found: %%d\", input.ID)\n\t}\n", e.ResponseStruct))
-	sb.WriteString(fmt.Sprintf("\tr := obj.(*%s)\n", e.RowStruct))
-	for _, f := range e.Fields {
-		if f.PK || f.Timestamp {
-			continue
-		}
-		if f.Nullable {
-			sb.WriteString(fmt.Sprintf("\tr.%s = toNullString(input.%s)\n", f.Go, f.Go))
-		} else {
-			sb.WriteString(fmt.Sprintf("\tr.%s = input.%s\n", f.Go, f.Go))
-		}
-	}
-	sb.WriteString("\tr.UpdatedAt = time.Now()\n")
-	sb.WriteString("\tif _, err := dbmap.WithContext(ctx).Update(r); err != nil {\n")
-	sb.WriteString(fmt.Sprintf("\t\treturn %s{}, err\n\t}\n", e.ResponseStruct))
-	sb.WriteString(fmt.Sprintf("\treturn %s{%s: *r}, nil\n", e.ResponseStruct, e.RowStruct))
+	sb.WriteString(fmt.Sprintf("\treturn GetByIDSQL%s(ctx, db, input.ID)\n", JP))
 	sb.WriteString("}\n\n")
 }
 
@@ -358,49 +407,82 @@ func genUpdate(sb *strings.Builder, e Entity) {
 func genCreateWithLines(sb *strings.Builder, e Entity) {
 	JP := e.Name
 	ch := e.Child
+	table := sqlQ(e.Table)
+	childTable := sqlQ(ch.Table)
 
-	sb.WriteString(fmt.Sprintf("func Execute登録SQL%s(ctx context.Context, dbmap *gorp.DbMap, input %s) (%s, error) {\n", JP, e.CreateWithLines, e.ResponseStruct))
+	sb.WriteString(fmt.Sprintf("func Execute登録SQL%s(ctx context.Context, db *sql.DB, input %s) (%s, error) {\n", JP, e.CreateWithLines, e.ResponseStruct))
 	sb.WriteString("\tnow := time.Now()\n")
-	sb.WriteString("\ttx, err := dbmap.Begin()\n")
+	sb.WriteString("\ttx, err := db.BeginTx(ctx, nil)\n")
 	sb.WriteString("\tif err != nil {\n")
 	sb.WriteString(fmt.Sprintf("\t\treturn %s{}, err\n\t}\n", e.ResponseStruct))
 	sb.WriteString("\tdefer tx.Rollback()\n\n")
 
-	// Insert parent
-	sb.WriteString(fmt.Sprintf("\tr := %s{\n", e.RowStruct))
-	for _, f := range e.Fields {
-		if f.PK && f.Auto {
-			continue
-		}
-		if f.Timestamp {
-			sb.WriteString(fmt.Sprintf("\t\t%s: now,\n", f.Go))
-			continue
-		}
-		if f.Nullable {
-			sb.WriteString(fmt.Sprintf("\t\t%s: toNullString(input.%s),\n", f.Go, f.Go))
-		} else {
-			sb.WriteString(fmt.Sprintf("\t\t%s: input.%s,\n", f.Go, f.Go))
-		}
-	}
-	sb.WriteString("\t}\n")
-	sb.WriteString("\tif err := tx.Insert(&r); err != nil {\n")
+	// Insert parent with RETURNING
+	sb.WriteString(fmt.Sprintf("\tvar r %s\n", e.RowStruct))
+	sb.WriteString(fmt.Sprintf("\terr = tx.QueryRowContext(ctx,\n"))
+	sb.WriteString(fmt.Sprintf("\t\t`INSERT INTO %s (%s) VALUES (%s) RETURNING %s`,\n",
+		table, insertCols(e.Fields), insertPlaceholders(e.Fields), allCols(e.Fields)))
+	sb.WriteString(fmt.Sprintf("\t\t%s,\n", insertArgs(e.Fields, "input")))
+	sb.WriteString(fmt.Sprintf("\t).Scan(%s)\n", allScan(e.Fields, "r")))
+	sb.WriteString("\tif err != nil {\n")
 	sb.WriteString(fmt.Sprintf("\t\treturn %s{}, err\n\t}\n\n", e.ResponseStruct))
 
 	// Insert child lines
+	childDF := dataFields(ch.Fields)
+	// remove parent FK from dataFields for child insert since we set it manually
+	var childInsertFields []Field
+	for _, f := range childDF {
+		if f.Go == ch.ParentFKGo {
+			continue
+		}
+		childInsertFields = append(childInsertFields, f)
+	}
+
+	// Build child INSERT columns: parentFK + childInsertFields + timestamps
+	var childCols []string
+	childCols = append(childCols, sqlQ(ch.ParentFK))
+	for _, f := range childInsertFields {
+		childCols = append(childCols, sqlQ(f.DB))
+	}
+	childCols = append(childCols, "created_at", "updated_at")
+	childColStr := strings.Join(childCols, ", ")
+
+	nChild := len(childCols)
+	var childPH []string
+	for i := 1; i <= nChild; i++ {
+		childPH = append(childPH, fmt.Sprintf("$%d", i))
+	}
+	childPHStr := strings.Join(childPH, ", ")
+
 	sb.WriteString(fmt.Sprintf("\tfor _, l := range input.%s {\n", ch.LinesField))
-	sb.WriteString(fmt.Sprintf("\t\tline := %s{\n", ch.Struct))
-	sb.WriteString(fmt.Sprintf("\t\t\t%s: r.Id,\n", ch.ParentFKGo))
-	for _, cf := range ch.InputFields {
-		if cf.Nullable {
-			sb.WriteString(fmt.Sprintf("\t\t\t%s: toNullString(l.%s),\n", cf.Go, cf.Go))
-		} else {
-			sb.WriteString(fmt.Sprintf("\t\t\t%s: l.%s,\n", cf.Go, cf.Go))
+	sb.WriteString(fmt.Sprintf("\t\t_, err = tx.ExecContext(ctx,\n"))
+	sb.WriteString(fmt.Sprintf("\t\t\t`INSERT INTO %s (%s) VALUES (%s)`,\n", childTable, childColStr, childPHStr))
+
+	// Build child args
+	var childArgs []string
+	childArgs = append(childArgs, "r.Id")
+	for _, cf := range childInsertFields {
+		// Map from input fields
+		matched := false
+		for _, ci := range ch.InputFields {
+			if ci.Go == cf.Go {
+				if ci.Nullable {
+					childArgs = append(childArgs, fmt.Sprintf("toNullString(l.%s)", cf.Go))
+				} else {
+					childArgs = append(childArgs, fmt.Sprintf("l.%s", cf.Go))
+				}
+				matched = true
+				break
+			}
+		}
+		if !matched {
+			childArgs = append(childArgs, fmt.Sprintf("l.%s", cf.Go))
 		}
 	}
-	sb.WriteString("\t\t\tCreatedAt: now,\n")
-	sb.WriteString("\t\t\tUpdatedAt: now,\n")
-	sb.WriteString("\t\t}\n")
-	sb.WriteString("\t\tif err := tx.Insert(&line); err != nil {\n")
+	childArgs = append(childArgs, "now", "now")
+	sb.WriteString(fmt.Sprintf("\t\t\t%s)\n", strings.Join(childArgs, ", ")))
+
+	sb.WriteString("\t\tif err != nil {\n")
 	sb.WriteString(fmt.Sprintf("\t\t\treturn %s{}, err\n\t\t}\n", e.ResponseStruct))
 	sb.WriteString("\t}\n\n")
 
@@ -415,61 +497,88 @@ func genCreateWithLines(sb *strings.Builder, e Entity) {
 func genUpdateWithLines(sb *strings.Builder, e Entity) {
 	JP := e.Name
 	ch := e.Child
+	table := sqlQ(e.Table)
 	childTable := sqlQ(ch.Table)
 	childFK := sqlQ(ch.ParentFK)
+	idIdx := updateArgCount(e.Fields) + 1
 
-	sb.WriteString(fmt.Sprintf("func Execute更新SQL%s(ctx context.Context, dbmap *gorp.DbMap, input %s) (%s, error) {\n", JP, e.UpdateWithLines, e.ResponseStruct))
+	sb.WriteString(fmt.Sprintf("func Execute更新SQL%s(ctx context.Context, db *sql.DB, input %s) (%s, error) {\n", JP, e.UpdateWithLines, e.ResponseStruct))
 	sb.WriteString("\tnow := time.Now()\n")
-	sb.WriteString("\ttx, err := dbmap.Begin()\n")
+	sb.WriteString("\ttx, err := db.BeginTx(ctx, nil)\n")
 	sb.WriteString("\tif err != nil {\n")
 	sb.WriteString(fmt.Sprintf("\t\treturn %s{}, err\n\t}\n", e.ResponseStruct))
 	sb.WriteString("\tdefer tx.Rollback()\n\n")
 
-	// Fetch and update parent
-	sb.WriteString(fmt.Sprintf("\tobj, err := tx.Get(%s{}, input.ID)\n", e.RowStruct))
+	// Update parent
+	sb.WriteString(fmt.Sprintf("\t_, err = tx.ExecContext(ctx,\n"))
+	sb.WriteString(fmt.Sprintf("\t\t`UPDATE %s SET %s WHERE id=$%d`,\n", table, updateSetClauses(e.Fields), idIdx))
+	sb.WriteString(fmt.Sprintf("\t\t%s, input.ID)\n", updateArgs(e.Fields, "input")))
 	sb.WriteString("\tif err != nil {\n")
-	sb.WriteString(fmt.Sprintf("\t\treturn %s{}, err\n\t}\n", e.ResponseStruct))
-	sb.WriteString("\tif obj == nil {\n")
-	sb.WriteString(fmt.Sprintf("\t\treturn %s{}, fmt.Errorf(\"record not found: %%d\", input.ID)\n\t}\n", e.ResponseStruct))
-	sb.WriteString(fmt.Sprintf("\tr := obj.(*%s)\n", e.RowStruct))
-	for _, f := range e.Fields {
-		if f.PK || f.Timestamp {
+	sb.WriteString(fmt.Sprintf("\t\treturn %s{}, err\n\t}\n\n", e.ResponseStruct))
+
+	// Delete old child lines
+	sb.WriteString(fmt.Sprintf("\t_, err = tx.ExecContext(ctx, `DELETE FROM %s WHERE %s=$1`, input.ID)\n", childTable, childFK))
+	sb.WriteString("\tif err != nil {\n")
+	sb.WriteString(fmt.Sprintf("\t\treturn %s{}, err\n\t}\n\n", e.ResponseStruct))
+
+	// Re-insert child lines (same logic as create)
+	childDF := dataFields(ch.Fields)
+	var childInsertFields []Field
+	for _, f := range childDF {
+		if f.Go == ch.ParentFKGo {
 			continue
 		}
-		if f.Nullable {
-			sb.WriteString(fmt.Sprintf("\tr.%s = toNullString(input.%s)\n", f.Go, f.Go))
-		} else {
-			sb.WriteString(fmt.Sprintf("\tr.%s = input.%s\n", f.Go, f.Go))
-		}
+		childInsertFields = append(childInsertFields, f)
 	}
-	sb.WriteString("\tr.UpdatedAt = now\n")
-	sb.WriteString("\tif _, err := tx.Update(r); err != nil {\n")
-	sb.WriteString(fmt.Sprintf("\t\treturn %s{}, err\n\t}\n\n", e.ResponseStruct))
 
-	// Delete old lines and re-insert
-	sb.WriteString(fmt.Sprintf("\tif _, err := tx.Exec(`DELETE FROM %s WHERE %s=$1`, input.ID); err != nil {\n", childTable, childFK))
-	sb.WriteString(fmt.Sprintf("\t\treturn %s{}, err\n\t}\n\n", e.ResponseStruct))
+	var childCols []string
+	childCols = append(childCols, sqlQ(ch.ParentFK))
+	for _, f := range childInsertFields {
+		childCols = append(childCols, sqlQ(f.DB))
+	}
+	childCols = append(childCols, "created_at", "updated_at")
+	childColStr := strings.Join(childCols, ", ")
+
+	nChild := len(childCols)
+	var childPH []string
+	for i := 1; i <= nChild; i++ {
+		childPH = append(childPH, fmt.Sprintf("$%d", i))
+	}
+	childPHStr := strings.Join(childPH, ", ")
 
 	sb.WriteString(fmt.Sprintf("\tfor _, l := range input.%s {\n", ch.LinesField))
-	sb.WriteString(fmt.Sprintf("\t\tline := %s{\n", ch.Struct))
-	sb.WriteString(fmt.Sprintf("\t\t\t%s: input.ID,\n", ch.ParentFKGo))
-	for _, cf := range ch.InputFields {
-		if cf.Nullable {
-			sb.WriteString(fmt.Sprintf("\t\t\t%s: toNullString(l.%s),\n", cf.Go, cf.Go))
-		} else {
-			sb.WriteString(fmt.Sprintf("\t\t\t%s: l.%s,\n", cf.Go, cf.Go))
+	sb.WriteString(fmt.Sprintf("\t\t_, err = tx.ExecContext(ctx,\n"))
+	sb.WriteString(fmt.Sprintf("\t\t\t`INSERT INTO %s (%s) VALUES (%s)`,\n", childTable, childColStr, childPHStr))
+
+	var childArgs []string
+	childArgs = append(childArgs, "input.ID")
+	for _, cf := range childInsertFields {
+		matched := false
+		for _, ci := range ch.InputFields {
+			if ci.Go == cf.Go {
+				if ci.Nullable {
+					childArgs = append(childArgs, fmt.Sprintf("toNullString(l.%s)", cf.Go))
+				} else {
+					childArgs = append(childArgs, fmt.Sprintf("l.%s", cf.Go))
+				}
+				matched = true
+				break
+			}
+		}
+		if !matched {
+			childArgs = append(childArgs, fmt.Sprintf("l.%s", cf.Go))
 		}
 	}
-	sb.WriteString("\t\t\tCreatedAt: now,\n")
-	sb.WriteString("\t\t\tUpdatedAt: now,\n")
-	sb.WriteString("\t\t}\n")
-	sb.WriteString("\t\tif err := tx.Insert(&line); err != nil {\n")
+	childArgs = append(childArgs, "now", "now")
+	sb.WriteString(fmt.Sprintf("\t\t\t%s)\n", strings.Join(childArgs, ", ")))
+
+	sb.WriteString("\t\tif err != nil {\n")
 	sb.WriteString(fmt.Sprintf("\t\t\treturn %s{}, err\n\t\t}\n", e.ResponseStruct))
 	sb.WriteString("\t}\n\n")
 
 	sb.WriteString("\tif err := tx.Commit(); err != nil {\n")
 	sb.WriteString(fmt.Sprintf("\t\treturn %s{}, err\n\t}\n", e.ResponseStruct))
-	sb.WriteString(fmt.Sprintf("\treturn GetByIDSQL%s(ctx, dbmap, input.ID)\n", JP))
+	sb.WriteString(fmt.Sprintf("\treturn GetByIDSQL%s(ctx, db, input.ID)\n", JP))
 	sb.WriteString("}\n\n")
 }
 
@@ -477,8 +586,9 @@ func genUpdateWithLines(sb *strings.Builder, e Entity) {
 
 func genDelete(sb *strings.Builder, e Entity) {
 	JP := e.Name
-	sb.WriteString(fmt.Sprintf("func Execute削除SQL%s(ctx context.Context, dbmap *gorp.DbMap, input %s) error {\n", JP, e.DeleteInput))
-	sb.WriteString(fmt.Sprintf("\t_, err := dbmap.WithContext(ctx).Delete(&%s{Id: input.ID})\n", e.RowStruct))
+	table := sqlQ(e.Table)
+	sb.WriteString(fmt.Sprintf("func Execute削除SQL%s(ctx context.Context, db *sql.DB, input %s) error {\n", JP, e.DeleteInput))
+	sb.WriteString(fmt.Sprintf("\t_, err := db.ExecContext(ctx, `DELETE FROM %s WHERE id=$1`, input.ID)\n", table))
 	sb.WriteString("\treturn err\n")
 	sb.WriteString("}\n\n")
 }
@@ -489,7 +599,7 @@ func genBatchDelete(sb *strings.Builder, e Entity) {
 	JP := e.Name
 	table := sqlQ(e.Table)
 
-	sb.WriteString(fmt.Sprintf("func Execute一括削除SQL%s(ctx context.Context, dbmap *gorp.DbMap, input %s) error {\n", JP, e.BatchDeleteInput))
+	sb.WriteString(fmt.Sprintf("func Execute一括削除SQL%s(ctx context.Context, db *sql.DB, input %s) error {\n", JP, e.BatchDeleteInput))
 	sb.WriteString("\tif len(input.IDs) == 0 {\n\t\treturn nil\n\t}\n")
 	sb.WriteString("\tph := make([]string, len(input.IDs))\n")
 	sb.WriteString("\targs := make([]any, len(input.IDs))\n")
@@ -497,7 +607,7 @@ func genBatchDelete(sb *strings.Builder, e Entity) {
 	sb.WriteString("\t\tph[i] = fmt.Sprintf(\"$%d\", i+1)\n")
 	sb.WriteString("\t\targs[i] = id\n")
 	sb.WriteString("\t}\n")
-	sb.WriteString(fmt.Sprintf("\t_, err := dbmap.Db.ExecContext(ctx, fmt.Sprintf(`DELETE FROM %s WHERE id IN (%%s)`, strings.Join(ph, \",\")), args...)\n", table))
+	sb.WriteString(fmt.Sprintf("\t_, err := db.ExecContext(ctx, fmt.Sprintf(`DELETE FROM %s WHERE id IN (%%s)`, strings.Join(ph, \",\")), args...)\n", table))
 	sb.WriteString("\treturn err\n")
 	sb.WriteString("}\n\n")
 }
@@ -506,15 +616,16 @@ func genBatchDelete(sb *strings.Builder, e Entity) {
 
 func genGetByID(sb *strings.Builder, e Entity) {
 	JP := e.Name
+	table := sqlQ(e.Table)
 
-	sb.WriteString(fmt.Sprintf("func GetByIDSQL%s(ctx context.Context, dbmap *gorp.DbMap, id int) (%s, error) {\n", JP, e.ResponseStruct))
-	sb.WriteString(fmt.Sprintf("\tobj, err := dbmap.WithContext(ctx).Get(%s{}, id)\n", e.RowStruct))
+	sb.WriteString(fmt.Sprintf("func GetByIDSQL%s(ctx context.Context, db *sql.DB, id int) (%s, error) {\n", JP, e.ResponseStruct))
+	sb.WriteString(fmt.Sprintf("\tvar r %s\n", e.RowStruct))
+	sb.WriteString(fmt.Sprintf("\terr := db.QueryRowContext(ctx,\n"))
+	sb.WriteString(fmt.Sprintf("\t\t`SELECT %s FROM %s WHERE id=$1`, id,\n", allCols(e.Fields), table))
+	sb.WriteString(fmt.Sprintf("\t).Scan(%s)\n", allScan(e.Fields, "r")))
 	sb.WriteString("\tif err != nil {\n")
 	sb.WriteString(fmt.Sprintf("\t\treturn %s{}, err\n\t}\n", e.ResponseStruct))
-	sb.WriteString("\tif obj == nil {\n")
-	sb.WriteString(fmt.Sprintf("\t\treturn %s{}, fmt.Errorf(\"record not found: %%d\", id)\n\t}\n", e.ResponseStruct))
-	sb.WriteString(fmt.Sprintf("\tr := obj.(*%s)\n", e.RowStruct))
-	sb.WriteString(fmt.Sprintf("\treturn %s{%s: *r}, nil\n", e.ResponseStruct, e.RowStruct))
+	sb.WriteString(fmt.Sprintf("\treturn %s{%s: r}, nil\n", e.ResponseStruct, e.RowStruct))
 	sb.WriteString("}\n\n")
 }
 
@@ -525,13 +636,11 @@ func genDetail(sb *strings.Builder, e Entity) {
 	d := e.Detail
 	ch := e.Child
 
-	sb.WriteString(fmt.Sprintf("func GetByID%s詳細SQL(ctx context.Context, dbmap *gorp.DbMap, id int) (%s, error) {\n", JP, d.ResponseStruct))
-	sb.WriteString(fmt.Sprintf("\tbom, err := GetByIDSQL%s(ctx, dbmap, id)\n", JP))
+	sb.WriteString(fmt.Sprintf("func GetByID%s詳細SQL(ctx context.Context, db *sql.DB, id int) (%s, error) {\n", JP, d.ResponseStruct))
+	sb.WriteString(fmt.Sprintf("\tbom, err := GetByIDSQL%s(ctx, db, id)\n", JP))
 	sb.WriteString("\tif err != nil {\n")
 	sb.WriteString(fmt.Sprintf("\t\treturn %s{}, err\n\t}\n\n", d.ResponseStruct))
 
-	// Build JOIN query
-	// SELECT child columns + join columns
 	var selCols []string
 	for _, f := range ch.Fields {
 		selCols = append(selCols, "bl."+sqlQ(f.DB))
@@ -543,7 +652,6 @@ func genDetail(sb *strings.Builder, e Entity) {
 	}
 	selectList := strings.Join(selCols, ", ")
 
-	// JOIN clause
 	var joinClauses []string
 	for _, j := range d.Joins {
 		joinClauses = append(joinClauses,
@@ -555,14 +663,13 @@ func genDetail(sb *strings.Builder, e Entity) {
 	childTable := sqlQ(ch.Table)
 	childFK := sqlQ(ch.ParentFK)
 
-	sb.WriteString(fmt.Sprintf("\trows, err := dbmap.Db.QueryContext(ctx,\n"))
+	sb.WriteString("\trows, err := db.QueryContext(ctx,\n")
 	sb.WriteString(fmt.Sprintf("\t\t`SELECT %s FROM %s bl %s WHERE bl.%s=$1 ORDER BY bl.id`, id)\n",
 		selectList, childTable, joinSQL, childFK))
 	sb.WriteString("\tif err != nil {\n")
 	sb.WriteString(fmt.Sprintf("\t\treturn %s{}, err\n\t}\n", d.ResponseStruct))
 	sb.WriteString("\tdefer rows.Close()\n\n")
 
-	// Scan columns
 	var scanArgs []string
 	for _, f := range ch.Fields {
 		scanArgs = append(scanArgs, "&l."+f.Go)
@@ -574,7 +681,6 @@ func genDetail(sb *strings.Builder, e Entity) {
 	}
 	scanList := strings.Join(scanArgs, ", ")
 
-	// Declare group slices
 	for _, g := range d.Discriminator.Groups {
 		sb.WriteString(fmt.Sprintf("\tvar %s []%s\n", g.ResponseField, ch.Struct))
 	}
@@ -583,8 +689,6 @@ func genDetail(sb *strings.Builder, e Entity) {
 	sb.WriteString(fmt.Sprintf("\t\tvar l %s\n", ch.Struct))
 	sb.WriteString(fmt.Sprintf("\t\tif err := rows.Scan(%s); err != nil {\n", scanList))
 	sb.WriteString(fmt.Sprintf("\t\t\treturn %s{}, err\n\t\t}\n", d.ResponseStruct))
-
-	// Discriminator switch
 	sb.WriteString(fmt.Sprintf("\t\tswitch l.%s {\n", d.Discriminator.Field))
 	for _, g := range d.Discriminator.Groups {
 		sb.WriteString(fmt.Sprintf("\t\tcase %d:\n", g.Value))
@@ -593,7 +697,6 @@ func genDetail(sb *strings.Builder, e Entity) {
 	sb.WriteString("\t\t}\n")
 	sb.WriteString("\t}\n\n")
 
-	// Return
 	sb.WriteString(fmt.Sprintf("\treturn %s{\n", d.ResponseStruct))
 	sb.WriteString(fmt.Sprintf("\t\t%s: bom.%s,\n", e.RowStruct, e.RowStruct))
 	for _, g := range d.Discriminator.Groups {
@@ -601,33 +704,4 @@ func genDetail(sb *strings.Builder, e Entity) {
 	}
 	sb.WriteString("\t}, nil\n")
 	sb.WriteString("}\n\n")
-}
-
-// ── dbmap_gen.go ──
-
-func genDbMap(cfg Config) {
-	var sb strings.Builder
-	sb.WriteString("// Code generated by gen-dao. DO NOT EDIT.\n")
-	sb.WriteString("package features\n\n")
-	sb.WriteString("import (\n")
-	sb.WriteString("\t\"database/sql\"\n\n")
-	sb.WriteString("\t\"github.com/go-gorp/gorp/v3\"\n")
-	sb.WriteString(")\n\n")
-	sb.WriteString("// InitDbMap は gorp.DbMap を初期化し、全テーブルを登録する\n")
-	sb.WriteString("func InitDbMap(db *sql.DB) *gorp.DbMap {\n")
-	sb.WriteString("\tdbmap := &gorp.DbMap{Db: db, Dialect: gorp.PostgresDialect{}}\n\n")
-
-	for _, e := range cfg.Entities {
-		sb.WriteString(fmt.Sprintf("\tdbmap.AddTableWithName(%s{}, %q).SetKeys(true, \"Id\")\n", e.RowStruct, e.Table))
-		if e.Child != nil {
-			sb.WriteString(fmt.Sprintf("\tdbmap.AddTableWithName(%s{}, %q).SetKeys(true, \"Id\")\n", e.Child.Struct, e.Child.Table))
-		}
-	}
-
-	sb.WriteString("\n\treturn dbmap\n")
-	sb.WriteString("}\n")
-
-	if err := os.WriteFile("internal/features/dbmap_gen.go", []byte(sb.String()), 0644); err != nil {
-		log.Fatalf("dbmap_gen.go 書き込み失敗: %v", err)
-	}
 }

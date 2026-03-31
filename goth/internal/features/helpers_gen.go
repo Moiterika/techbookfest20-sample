@@ -3,11 +3,16 @@ package features
 
 import (
 	"database/sql"
+	"fmt"
 	"io"
 	"net/http"
 	"net/url"
 	"strconv"
+
+	"github.com/xuri/excelize/v2"
 )
+
+var _ = fmt.Sprintf
 
 // ParseDeleteForm は DELETE リクエストのボディをパースする。
 // Go の ParseForm は DELETE メソッドのボディを読まないため手動でパースする。
@@ -45,4 +50,24 @@ func toNullString(s *string) sql.NullString {
 		return sql.NullString{}
 	}
 	return sql.NullString{String: *s, Valid: true}
+}
+
+// WriteXLSX はヘッダーと行データからXLSXを生成し、ResponseWriter に書き出す
+func WriteXLSX(w http.ResponseWriter, filename string, headers []string, rows [][]string) error {
+	f := excelize.NewFile()
+	defer f.Close()
+	sheet := "Sheet1"
+	for i, h := range headers {
+		cell, _ := excelize.CoordinatesToCellName(i+1, 1)
+		f.SetCellValue(sheet, cell, h)
+	}
+	for r, row := range rows {
+		for c, val := range row {
+			cell, _ := excelize.CoordinatesToCellName(c+1, r+2)
+			f.SetCellValue(sheet, cell, val)
+		}
+	}
+	w.Header().Set("Content-Type", "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet")
+	w.Header().Set("Content-Disposition", fmt.Sprintf("attachment; filename=\"%s\"", filename))
+	return f.Write(w)
 }

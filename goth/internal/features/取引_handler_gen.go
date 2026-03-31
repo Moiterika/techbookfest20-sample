@@ -138,10 +138,6 @@ func (h *Handler取引) HandleExport取引(w http.ResponseWriter, r *http.Reques
 	if format == "" {
 		format = "csv"
 	}
-	if format == "xlsx" {
-		http.Error(w, "XLSX export is not yet supported. Please use CSV or TSV.", http.StatusNotImplemented)
-		return
-	}
 	開始日Param := r.URL.Query().Get("開始日")
 	終了日Param := r.URL.Query().Get("終了日")
 	records, err := h.GetExport取引(r.Context(), 一覧Input取引{開始日: 開始日Param, 終了日: 終了日Param})
@@ -149,7 +145,16 @@ func (h *Handler取引) HandleExport取引(w http.ResponseWriter, r *http.Reques
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
+	headers := []string{"日付", "取引区分", "単価", "数量", "金額"}
+	rows := make([][]string, 0, len(records))
+	for _, item := range records {
+		rows = append(rows, []string{item.日付, fmt.Sprintf("%d", item.取引区分ID), fmt.Sprintf("%d", item.単価), fmt.Sprintf("%d", item.数量), fmt.Sprintf("%d", item.金額)})
+	}
 	suffix := time.Now().Format("20060102")
+	if format == "xlsx" {
+		WriteXLSX(w, "取引_"+suffix+".xlsx", headers, rows)
+		return
+	}
 	filename := "取引_" + suffix
 	mime := "text/csv;charset=utf-8"
 	if format == "tsv" {
@@ -165,9 +170,9 @@ func (h *Handler取引) HandleExport取引(w http.ResponseWriter, r *http.Reques
 	if format == "tsv" {
 		cw.Comma = '\t'
 	}
-	cw.Write([]string{"日付", "取引区分", "単価", "数量", "金額"})
-	for _, item := range records {
-		cw.Write([]string{item.日付, fmt.Sprintf("%d", item.取引区分ID), fmt.Sprintf("%d", item.単価), fmt.Sprintf("%d", item.数量), fmt.Sprintf("%d", item.金額)})
+	cw.Write(headers)
+	for _, row := range rows {
+		cw.Write(row)
 	}
 	cw.Flush()
 }

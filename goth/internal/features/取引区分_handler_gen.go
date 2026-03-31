@@ -137,17 +137,22 @@ func (h *Handler取引区分) HandleExport取引区分(w http.ResponseWriter, r 
 	if format == "" {
 		format = "csv"
 	}
-	if format == "xlsx" {
-		http.Error(w, "XLSX export is not yet supported. Please use CSV or TSV.", http.StatusNotImplemented)
-		return
-	}
 	qParam := r.URL.Query().Get("q")
 	records, err := h.GetExport取引区分(r.Context(), 一覧Input取引区分{Q: qParam})
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
+	headers := []string{"取引区分コード", "取引区分名称", "受払係数"}
+	rows := make([][]string, 0, len(records))
+	for _, item := range records {
+		rows = append(rows, []string{item.コード, item.名称, fmt.Sprintf("%d", item.係数)})
+	}
 	suffix := time.Now().Format("20060102")
+	if format == "xlsx" {
+		WriteXLSX(w, "取引区分_"+suffix+".xlsx", headers, rows)
+		return
+	}
 	filename := "取引区分_" + suffix
 	mime := "text/csv;charset=utf-8"
 	if format == "tsv" {
@@ -163,9 +168,9 @@ func (h *Handler取引区分) HandleExport取引区分(w http.ResponseWriter, r 
 	if format == "tsv" {
 		cw.Comma = '\t'
 	}
-	cw.Write([]string{"取引区分コード", "取引区分名称", "受払係数"})
-	for _, item := range records {
-		cw.Write([]string{item.コード, item.名称, fmt.Sprintf("%d", item.係数)})
+	cw.Write(headers)
+	for _, row := range rows {
+		cw.Write(row)
 	}
 	cw.Flush()
 }

@@ -834,6 +834,69 @@ function genHandler(fm: FeatureMapping, config: EntityConfigDef | null, columns:
   lines.push("}");
   lines.push("");
 
+  // HandleExport
+  const exportCols = columns.filter((c) => c.type !== "actions" && c.type !== "itemCode" && c.type !== "readonlyLookup" && entity?.fields.some((f) => f.goName === toPascalCase(c.key)));
+  if (exportCols.length > 0 && entity) {
+    lines.push(`func (h *Handler${JP}) HandleExport${JP}(w http.ResponseWriter, r *http.Request) {`);
+    lines.push(`\tformat := r.URL.Query().Get("format")`);
+    lines.push(`\tif format == "" { format = "csv" }`);
+    const searchFields = config?.searchFields ?? [];
+    if (searchFields.length === 0) {
+      lines.push(`\tqParam := r.URL.Query().Get("q")`);
+      lines.push(`\trecords, err := h.GetExport${JP}(r.Context(), 一覧Input${JP}{Q: qParam})`);
+    } else {
+      for (const sf of searchFields) {
+        lines.push(`\t${sf.param}Param := r.URL.Query().Get("${sf.param}")`);
+      }
+      const fieldInits = searchFields.map((sf) => `${toPascalCase(sf.param)}: ${sf.param}Param`).join(", ");
+      lines.push(`\trecords, err := h.GetExport${JP}(r.Context(), 一覧Input${JP}{${fieldInits}})`);
+    }
+    lines.push("\tif err != nil {");
+    lines.push("\t\thttp.Error(w, err.Error(), http.StatusInternalServerError)");
+    lines.push("\t\treturn");
+    lines.push("\t}");
+    const csvHeaders = exportCols.map((c) => `"${c.label}"`).join(", ");
+    const rowFields = exportCols.map((col) => {
+      const goField = toPascalCase(col.key);
+      const field = entity.fields.find((f) => f.goName === goField);
+      if (!field) return `fmt.Sprintf("%v", item.${goField})`;
+      if (field.goType === "sql.NullString") return `NullStrOr(item.${goField}, "")`;
+      if (field.goType === "int" || field.goType === "int64") return `fmt.Sprintf("%d", item.${goField})`;
+      if (field.goType === "float64") return `fmt.Sprintf("%f", item.${goField})`;
+      return `item.${goField}`;
+    });
+    lines.push(`\theaders := []string{${csvHeaders}}`);
+    lines.push(`\trows := make([][]string, 0, len(records))`);
+    lines.push(`\tfor _, item := range records {`);
+    lines.push(`\t\trows = append(rows, []string{${rowFields.join(", ")}})`);
+    lines.push(`\t}`);
+    lines.push(`\tsuffix := time.Now().Format("20060102")`);
+    lines.push(`\tif format == "xlsx" {`);
+    lines.push(`\t\tWriteXLSX(w, "${JP}_"+suffix+".xlsx", headers, rows)`);
+    lines.push(`\t\treturn`);
+    lines.push(`\t}`);
+    lines.push(`\tfilename := "${JP}_" + suffix`);
+    lines.push(`\tmime := "text/csv;charset=utf-8"`);
+    lines.push(`\tif format == "tsv" {`);
+    lines.push(`\t\tmime = "text/tab-separated-values;charset=utf-8"`);
+    lines.push(`\t\tfilename += ".tsv"`);
+    lines.push(`\t} else {`);
+    lines.push(`\t\tfilename += ".csv"`);
+    lines.push(`\t}`);
+    lines.push(`\tw.Header().Set("Content-Type", mime)`);
+    lines.push(`\tw.Header().Set("Content-Disposition", "attachment; filename=\\""+filename+"\\"" )`);
+    lines.push(`\tw.Write([]byte{0xEF, 0xBB, 0xBF})`);
+    lines.push(`\tcw := csv.NewWriter(w)`);
+    lines.push(`\tif format == "tsv" { cw.Comma = '\\t' }`);
+    lines.push(`\tcw.Write(headers)`);
+    lines.push(`\tfor _, row := range rows {`);
+    lines.push(`\t\tcw.Write(row)`);
+    lines.push(`\t}`);
+    lines.push(`\tcw.Flush()`);
+    lines.push("}");
+    lines.push("");
+  }
+
   return lines.join("\n");
 }
 

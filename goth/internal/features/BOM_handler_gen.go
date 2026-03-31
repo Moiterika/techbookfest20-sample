@@ -145,17 +145,22 @@ func (h *HandlerBOM) HandleExportBOM(w http.ResponseWriter, r *http.Request) {
 	if format == "" {
 		format = "csv"
 	}
-	if format == "xlsx" {
-		http.Error(w, "XLSX export is not yet supported. Please use CSV or TSV.", http.StatusNotImplemented)
-		return
-	}
 	search := r.URL.Query().Get("q")
 	records, err := h.GetExportBOM(r.Context(), 一覧InputBOM{Search: search})
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
+	headers := []string{"BOMコード", "版", "名称"}
+	rows := make([][]string, 0, len(records))
+	for _, item := range records {
+		rows = append(rows, []string{item.コード, item.版, item.名称})
+	}
 	suffix := time.Now().Format("20060102")
+	if format == "xlsx" {
+		WriteXLSX(w, "BOM_"+suffix+".xlsx", headers, rows)
+		return
+	}
 	filename := "BOM_" + suffix
 	mime := "text/csv;charset=utf-8"
 	if format == "tsv" {
@@ -171,9 +176,9 @@ func (h *HandlerBOM) HandleExportBOM(w http.ResponseWriter, r *http.Request) {
 	if format == "tsv" {
 		cw.Comma = '\t'
 	}
-	cw.Write([]string{"BOMコード", "版", "名称"})
-	for _, item := range records {
-		cw.Write([]string{item.コード, item.版, item.名称})
+	cw.Write(headers)
+	for _, row := range rows {
+		cw.Write(row)
 	}
 	cw.Flush()
 }

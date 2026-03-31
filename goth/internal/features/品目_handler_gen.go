@@ -138,10 +138,6 @@ func (h *Handler品目) HandleExport品目(w http.ResponseWriter, r *http.Reques
 	if format == "" {
 		format = "csv"
 	}
-	if format == "xlsx" {
-		http.Error(w, "XLSX export is not yet supported. Please use CSV or TSV.", http.StatusNotImplemented)
-		return
-	}
 	qParam := r.URL.Query().Get("q")
 	カテゴリParam := r.URL.Query().Get("カテゴリ")
 	records, err := h.GetExport品目(r.Context(), 一覧Input品目{Q: qParam, カテゴリ: カテゴリParam})
@@ -149,7 +145,16 @@ func (h *Handler品目) HandleExport品目(w http.ResponseWriter, r *http.Reques
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
+	headers := []string{"品目コード", "品目名", "カテゴリ", "単価", "バーコード"}
+	rows := make([][]string, 0, len(records))
+	for _, item := range records {
+		rows = append(rows, []string{item.コード, item.名称, NullStrOr(item.カテゴリ, ""), fmt.Sprintf("%d", item.単価), NullStrOr(item.バーコード, "")})
+	}
 	suffix := time.Now().Format("20060102")
+	if format == "xlsx" {
+		WriteXLSX(w, "品目_"+suffix+".xlsx", headers, rows)
+		return
+	}
 	filename := "品目_" + suffix
 	mime := "text/csv;charset=utf-8"
 	if format == "tsv" {
@@ -165,9 +170,9 @@ func (h *Handler品目) HandleExport品目(w http.ResponseWriter, r *http.Reques
 	if format == "tsv" {
 		cw.Comma = '\t'
 	}
-	cw.Write([]string{"品目コード", "品目名", "カテゴリ", "単価", "バーコード"})
-	for _, item := range records {
-		cw.Write([]string{item.コード, item.名称, NullStrOr(item.カテゴリ, ""), fmt.Sprintf("%d", item.単価), NullStrOr(item.バーコード, "")})
+	cw.Write(headers)
+	for _, row := range rows {
+		cw.Write(row)
 	}
 	cw.Flush()
 }

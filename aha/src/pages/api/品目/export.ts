@@ -1,6 +1,6 @@
 import type { APIRoute } from "astro";
 import { db } from "../../../db";
-import { items } from "../../../db/schema";
+import { 品目テーブル } from "../../../db/schema";
 import { and, desc, ilike, or } from "drizzle-orm";
 import * as XLSX from "xlsx";
 
@@ -10,33 +10,36 @@ const HEADERS = ["品目コード", "品目名", "カテゴリ", "単価", "バ�
 export const GET: APIRoute = async ({ url }) => {
   const format = url.searchParams.get("format") || "csv";
   const query = (url.searchParams.get("q") || "").trim();
-  const category = (url.searchParams.get("category") || "").trim();
+  const カテゴリ = (url.searchParams.get("カテゴリ") || "").trim();
 
   const conditions = [];
   if (query) {
     conditions.push(
-      or(ilike(items.code, `%${query}%`), ilike(items.name, `%${query}%`)),
+      or(
+        ilike(品目テーブル.コード, `%${query}%`),
+        ilike(品目テーブル.名称, `%${query}%`),
+      ),
     );
   }
-  if (category) {
-    conditions.push(ilike(items.category, `%${category}%`));
+  if (カテゴリ) {
+    conditions.push(ilike(品目テーブル.カテゴリ, `%${カテゴリ}%`));
   }
   const searchFilter = conditions.length > 0 ? and(...conditions) : undefined;
 
   const rows = await db
     .select()
-    .from(items)
+    .from(品目テーブル)
     .where(searchFilter)
-    .orderBy(desc(items.id));
+    .orderBy(desc(品目テーブル.ID));
 
   const data: (string | number)[][] = [
     HEADERS,
     ...rows.map((r) => [
-      r.code,
-      r.name,
-      r.category ?? "",
-      r.price,
-      r.barcode ?? "",
+      r.コード,
+      r.名称,
+      r.カテゴリ ?? "",
+      r.単価,
+      r.バーコード ?? "",
     ]),
   ];
 

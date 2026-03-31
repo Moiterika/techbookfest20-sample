@@ -4,7 +4,7 @@ import type { 品目登録Args } from "./品目登録Args";
 import { 品目登録Validate } from "./品目登録Validate";
 import { 品目作成Mapper } from "./品目作成Mapper";
 import { db } from "../../../db";
-import { items } from "../../../db/schema";
+import { 品目テーブル } from "../../../db/schema";
 
 export const 品目登録Command = new GenericCommand<
   品目作成入力,
@@ -15,6 +15,6 @@ export const 品目登録Command = new GenericCommand<
   validate: 品目登録Validate,
   mapper: 品目作成Mapper,
   command: async (args) => {
-    await db.insert(items).values(args);
+    await db.insert(品目テーブル).values(args);
   },
 });

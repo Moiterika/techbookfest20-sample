@@ -8,19 +8,19 @@ export const 係数オプション = [
 
 export const 取引区分カラム: Column[] = [
   {
-    key: "code",
+    key: "コード",
     label: "取引区分コード",
     required: true,
     placeholder: "例: IN-001",
   },
   {
-    key: "name",
+    key: "名称",
     label: "取引区分名称",
     required: true,
     placeholder: "例: 仕入",
   },
   {
-    key: "coefficient",
+    key: "係数",
     label: "受払係数",
     type: "select",
     options: 係数オプション,
@@ -38,16 +38,16 @@ export const 取引区分エンティティ: EntityConfig = {
       label: "検索",
       placeholder: "コード・名称で検索…",
       flexClass: "flex-1 min-w-[12.5rem]",
-      dbColumns: ["code", "name"],
+      dbColumns: ["コード", "名称"],
     },
   ],
-  tableName: "transaction_types",
+  tableName: "取引区分",
   idPrefix: "txtype",
   baseUrl: "/api/取引区分",
   bodyTargetId: "txtypes-body",
   paginationId: "txtypes-pagination",
-  displayNameKey: "name",
-  deleteConfirmTemplate: "「{name}」を削除しますか？",
+  displayNameKey: "名称",
+  deleteConfirmTemplate: "「{名称}」を削除しますか？",
   formTitle: "新規取引区分登録",
   formAfterRequest:
     "if($event.detail.successful && $event.detail.elt === $el) { $el.reset(); open = false }",

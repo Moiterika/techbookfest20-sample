@@ -1,5 +1,5 @@
 export type 取引区分登録Args = {
-  code: string;
-  name: string;
-  coefficient: number;
+  コード: string;
+  名称: string;
+  係数: number;
 };

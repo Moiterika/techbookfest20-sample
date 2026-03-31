@@ -7,7 +7,7 @@ import type { 取引区分更新Args } from "./取引区分更新Args";
 import { 取引区分更新Validate } from "./取引区分更新Validate";
 import { 取引区分更新Mapper } from "./取引区分更新Mapper";
 import { db } from "../../../db";
-import { transactionTypes } from "../../../db/schema";
+import { 取引区分テーブル } from "../../../db/schema";
 import { eq } from "drizzle-orm";
 import type { 取引区分Response } from "../取引区分Response";
 
@@ -21,19 +21,19 @@ export const 取引区分更新Command = new GenericCommand<
   mapper: 取引区分更新Mapper,
   command: async (args) => {
     await db
-      .update(transactionTypes)
+      .update(取引区分テーブル)
       .set({
-        code: args.code,
-        name: args.name,
-        coefficient: args.coefficient,
-        updatedAt: new Date(),
+        コード: args.コード,
+        名称: args.名称,
+        係数: args.係数,
+        更新日時: new Date(),
       })
-      .where(eq(transactionTypes.id, args.id));
+      .where(eq(取引区分テーブル.ID, args.ID));
 
     const [row] = await db
       .select()
-      .from(transactionTypes)
-      .where(eq(transactionTypes.id, args.id));
+      .from(取引区分テーブル)
+      .where(eq(取引区分テーブル.ID, args.ID));
     return row;
   },
 });

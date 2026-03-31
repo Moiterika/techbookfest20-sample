@@ -1,7 +1,7 @@
 import type { APIRoute } from "astro";
 import { experimental_AstroContainer as AstroContainer } from "astro/container";
 import { db } from "../../../db";
-import { items } from "../../../db/schema";
+import { 品目テーブル } from "../../../db/schema";
 import { eq } from "drizzle-orm";
 import TypeaheadSearch from "../../../components/crud/TypeaheadSearch.astro";
 import TypeaheadBadge from "../../../components/crud/TypeaheadBadge.astro";
@@ -26,13 +26,13 @@ export const GET: APIRoute = async ({ url }) => {
 
     const [item] = await db
       .select({
-        id: items.id,
-        code: items.code,
-        name: items.name,
-        price: items.price,
+        ID: 品目テーブル.ID,
+        コード: 品目テーブル.コード,
+        名称: 品目テーブル.名称,
+        単価: 品目テーブル.単価,
       })
-      .from(items)
-      .where(eq(items.id, itemId))
+      .from(品目テーブル)
+      .where(eq(品目テーブル.ID, itemId))
       .limit(1);
 
     if (!item) {
@@ -43,17 +43,17 @@ export const GET: APIRoute = async ({ url }) => {
       props: {
         config: 品目Typeahead,
         name: taName,
-        selectedId: item.id,
-        selectedCode: item.code,
-        selectedName: item.name,
-        selectedExtra: { price: String(item.price) },
+        selectedId: item.ID,
+        selectedCode: item.コード,
+        selectedName: item.名称,
+        selectedExtra: { price: String(item.単価) },
         formId: taFormId || undefined,
         hideNameLabel: taHideNameLabel,
       },
     });
 
     if (taLookupId) {
-      html += `<span id="${taLookupId}" hx-swap-oob="true">${escapeHtml(item.name)}</span>`;
+      html += `<span id="${taLookupId}" hx-swap-oob="true">${escapeHtml(item.名称)}</span>`;
     }
 
     return new Response(html, {

@@ -19,8 +19,8 @@ export const GET: APIRoute = async ({ url }) => {
   const result = await 取引一覧Query.execute({
     page: Number(url.searchParams.get("page")) || 1,
     size: Number(url.searchParams.get("size")) || 20,
-    dateFrom: url.searchParams.get("dateFrom") || undefined,
-    dateTo: url.searchParams.get("dateTo") || undefined,
+    開始日: url.searchParams.get("開始日") || undefined,
+    終了日: url.searchParams.get("終了日") || undefined,
   });
 
   const txTypeOptions = await fetch取引区分オプション();
@@ -46,11 +46,11 @@ export const POST: APIRoute = async ({ request }) => {
 
   try {
     await 取引登録Command.execute({
-      date: form.get("date") as string,
-      transactionTypeId: Number(form.get("transactionTypeId")) || 0,
-      itemId: Number(form.get("itemId")) || 0,
-      unitPrice: Number(form.get("unitPrice")) || 0,
-      quantity: Number(form.get("quantity")) || 1,
+      日付: form.get("日付") as string,
+      取引区分ID: Number(form.get("取引区分ID")) || 0,
+      品目ID: Number(form.get("品目ID")) || 0,
+      単価: Number(form.get("単価")) || 0,
+      数量: Number(form.get("数量")) || 1,
     });
   } catch (e: any) {
     return new Response(`<p class="${errorText}">${e.message}</p>`, {

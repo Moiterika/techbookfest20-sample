@@ -13,12 +13,12 @@ function parseLines(form: FormData) {
   const refBomVersions = form.getAll("lineRefBomVersion") as string[];
 
   return types.map((t, i) => ({
-    type: Number(t),
-    itemId: Number(itemIds[i]),
-    quantity: (quantities[i] || "").trim(),
-    unit: (units[i] || "").trim(),
-    refBomCode: (refBomCodes[i] || "").trim() || null,
-    refBomVersion: (refBomVersions[i] || "").trim() || null,
+    区分: Number(t),
+    品目ID: Number(itemIds[i]),
+    数量: (quantities[i] || "").trim(),
+    単位: (units[i] || "").trim(),
+    参照BOMコード: (refBomCodes[i] || "").trim() || null,
+    参照BOM版: (refBomVersions[i] || "").trim() || null,
   }));
 }
 
@@ -28,13 +28,13 @@ export const PUT: APIRoute = async ({ params, request }) => {
   if (!id) return new Response("", { status: 400 });
 
   const form = await request.formData();
-  const code = ((form.get("code") as string) || "").trim();
-  const version = ((form.get("version") as string) || "").trim();
-  const name = ((form.get("name") as string) || "").trim();
-  const lines = parseLines(form);
+  const コード = ((form.get("code") as string) || "").trim();
+  const 版 = ((form.get("version") as string) || "").trim();
+  const 名称 = ((form.get("name") as string) || "").trim();
+  const 明細 = parseLines(form);
 
   try {
-    await BOM更新Command.execute({ id, code, version, name, lines });
+    await BOM更新Command.execute({ ID: id, コード, 版, 名称, 明細 });
   } catch (e: any) {
     return new Response(`<p class="${errorText}">${e.message}</p>`, {
       status: 422,
@@ -53,7 +53,7 @@ export const DELETE: APIRoute = async ({ params }) => {
   const id = Number(params.id);
   if (!id) return new Response("", { status: 400 });
 
-  await BOM削除Command.execute({ id });
+  await BOM削除Command.execute({ ID: id });
 
   return new Response("", {
     status: 204,

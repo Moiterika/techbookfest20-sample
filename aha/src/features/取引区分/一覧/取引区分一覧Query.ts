@@ -4,7 +4,7 @@ import {
   type 取引区分一覧入力,
 } from "../../../lib/validation";
 import { db } from "../../../db";
-import { transactionTypes } from "../../../db/schema";
+import { 取引区分テーブル } from "../../../db/schema";
 import { count, desc } from "drizzle-orm";
 import type { 取引区分Response } from "../取引区分Response";
 
@@ -30,14 +30,14 @@ export const 取引区分一覧Query = new GenericQuery<
 
     const [{ total }] = await db
       .select({ total: count() })
-      .from(transactionTypes);
+      .from(取引区分テーブル);
     const totalPages = Math.max(1, Math.ceil(total / size));
     const currentPage = Math.min(Math.max(1, input.page), totalPages);
 
     const records = await db
       .select()
-      .from(transactionTypes)
-      .orderBy(desc(transactionTypes.id))
+      .from(取引区分テーブル)
+      .orderBy(desc(取引区分テーブル.ID))
       .limit(size)
       .offset((currentPage - 1) * size);
 

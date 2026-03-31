@@ -1,7 +1,7 @@
 import type { APIRoute } from "astro";
 import { experimental_AstroContainer as AstroContainer } from "astro/container";
 import { db } from "../../../../db";
-import { items } from "../../../../db/schema";
+import { 品目テーブル } from "../../../../db/schema";
 import { eq } from "drizzle-orm";
 import { 品目カラム, 品目エンティティ } from "../../../../features/品目";
 // @ts-ignore
@@ -12,7 +12,10 @@ const container = await AstroContainer.create();
 /** GET /api/品目/:id/edit — インライン編集フォームを HTML 断片で返す */
 export const GET: APIRoute = async ({ params }) => {
   const id = Number(params.id);
-  const [row] = await db.select().from(items).where(eq(items.id, id));
+  const [row] = await db
+    .select()
+    .from(品目テーブル)
+    .where(eq(品目テーブル.ID, id));
 
   if (!row) {
     return new Response("", { status: 404 });

@@ -1,7 +1,7 @@
 import { GenericQuery } from "../../core/generic-query";
 import { BOM一覧Schema, type BOM一覧入力 } from "../../../lib/validation";
 import { db } from "../../../db";
-import { boms } from "../../../db/schema";
+import { BOMテーブル } from "../../../db/schema";
 import { count, desc, ilike, or } from "drizzle-orm";
 import type { BOMResponse } from "../BOMResponse";
 
@@ -24,21 +24,24 @@ export const BOM一覧Query = new GenericQuery<BOM一覧入力, BOM一覧Result>
       : DEFAULT_PAGE_SIZE;
 
     const searchFilter = input.q
-      ? or(ilike(boms.code, `%${input.q}%`), ilike(boms.name, `%${input.q}%`))
+      ? or(
+          ilike(BOMテーブル.コード, `%${input.q}%`),
+          ilike(BOMテーブル.名称, `%${input.q}%`),
+        )
       : undefined;
 
     const [{ total }] = await db
       .select({ total: count() })
-      .from(boms)
+      .from(BOMテーブル)
       .where(searchFilter);
     const totalPages = Math.max(1, Math.ceil(total / size));
     const currentPage = Math.min(Math.max(1, input.page), totalPages);
 
     const records = await db
       .select()
-      .from(boms)
+      .from(BOMテーブル)
       .where(searchFilter)
-      .orderBy(desc(boms.id))
+      .orderBy(desc(BOMテーブル.ID))
       .limit(size)
       .offset((currentPage - 1) * size);
 

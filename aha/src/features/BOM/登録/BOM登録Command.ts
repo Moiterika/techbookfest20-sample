@@ -4,7 +4,7 @@ import type { BOM登録Args } from "./BOM登録Args";
 import { BOM登録Validate } from "./BOM登録Validate";
 import { BOM作成Mapper } from "./BOM作成Mapper";
 import { db } from "../../../db";
-import { boms, bomLines } from "../../../db/schema";
+import { BOMテーブル, BOM明細テーブル } from "../../../db/schema";
 
 export const BOM登録Command = new GenericCommand<
   BOM作成入力,
@@ -17,20 +17,24 @@ export const BOM登録Command = new GenericCommand<
   command: async (args) => {
     const [newBom] = await db.transaction(async (tx) => {
       const [inserted] = await tx
-        .insert(boms)
-        .values({ code: args.code, version: args.version, name: args.name })
-        .returning({ id: boms.id });
+        .insert(BOMテーブル)
+        .values({
+          コード: args.コード,
+          版: args.版,
+          名称: args.名称,
+        })
+        .returning({ id: BOMテーブル.ID });
 
-      if (args.lines.length > 0) {
-        await tx.insert(bomLines).values(
-          args.lines.map((l) => ({
-            bomId: inserted.id,
-            type: l.type,
-            itemId: l.itemId,
-            quantity: l.quantity,
-            unit: l.unit,
-            refBomCode: l.refBomCode,
-            refBomVersion: l.refBomVersion,
+      if (args.明細.length > 0) {
+        await tx.insert(BOM明細テーブル).values(
+          args.明細.map((l) => ({
+            BOM_ID: inserted.id,
+            区分: l.区分,
+            品目ID: l.品目ID,
+            数量: l.数量,
+            単位: l.単位,
+            参照BOMコード: l.参照BOMコード,
+            参照BOM版: l.参照BOM版,
           })),
         );
       }

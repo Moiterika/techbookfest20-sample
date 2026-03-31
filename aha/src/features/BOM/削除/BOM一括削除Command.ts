@@ -1,7 +1,7 @@
 import { GenericCommand } from "../../core/generic-command";
 import { 一括削除Schema, type 一括削除入力 } from "../../../lib/validation";
 import { db } from "../../../db";
-import { boms } from "../../../db/schema";
+import { BOMテーブル } from "../../../db/schema";
 import { inArray } from "drizzle-orm";
 
 export const BOM一括削除Command = new GenericCommand<
@@ -13,7 +13,7 @@ export const BOM一括削除Command = new GenericCommand<
   mapper: (input) => ({ ids: input.ids }),
   command: async (args) => {
     if (args.ids.length > 0) {
-      await db.delete(boms).where(inArray(boms.id, args.ids));
+      await db.delete(BOMテーブル).where(inArray(BOMテーブル.ID, args.ids));
     }
   },
 });

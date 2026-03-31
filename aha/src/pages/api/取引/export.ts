@@ -1,45 +1,45 @@
 import type { APIRoute } from "astro";
 import { db } from "../../../db";
-import { transactions, items } from "../../../db/schema";
+import { 取引テーブル, 品目テーブル } from "../../../db/schema";
 import { and, desc, eq, gte, lte } from "drizzle-orm";
 import * as XLSX from "xlsx";
 
 const HEADERS = ["日付", "品目コード", "品目名", "単価", "数量", "金額"];
 
-/** GET /api/取引/export?format=csv|tsv|xlsx&dateFrom=...&dateTo=... */
+/** GET /api/取引/export?format=csv|tsv|xlsx&開始日=...&終了日=... */
 export const GET: APIRoute = async ({ url }) => {
   const format = url.searchParams.get("format") || "csv";
-  const dateFrom = url.searchParams.get("dateFrom") || "";
-  const dateTo = url.searchParams.get("dateTo") || "";
+  const 開始日 = url.searchParams.get("開始日") || "";
+  const 終了日 = url.searchParams.get("終了日") || "";
 
   const conditions = [];
-  if (dateFrom) conditions.push(gte(transactions.date, dateFrom));
-  if (dateTo) conditions.push(lte(transactions.date, dateTo));
+  if (開始日) conditions.push(gte(取引テーブル.日付, 開始日));
+  if (終了日) conditions.push(lte(取引テーブル.日付, 終了日));
   const dateFilter = conditions.length > 0 ? and(...conditions) : undefined;
 
   const rows = await db
     .select({
-      date: transactions.date,
-      itemCode: items.code,
-      itemName: items.name,
-      unitPrice: transactions.unitPrice,
-      quantity: transactions.quantity,
-      amount: transactions.amount,
+      日付: 取引テーブル.日付,
+      品目コード: 品目テーブル.コード,
+      品目名: 品目テーブル.名称,
+      単価: 取引テーブル.単価,
+      数量: 取引テーブル.数量,
+      金額: 取引テーブル.金額,
     })
-    .from(transactions)
-    .leftJoin(items, eq(transactions.itemId, items.id))
+    .from(取引テーブル)
+    .leftJoin(品目テーブル, eq(取引テーブル.品目ID, 品目テーブル.ID))
     .where(dateFilter)
-    .orderBy(desc(transactions.id));
+    .orderBy(desc(取引テーブル.ID));
 
   const data: (string | number)[][] = [
     HEADERS,
     ...rows.map((r) => [
-      r.date,
-      r.itemCode ?? "",
-      r.itemName ?? "",
-      r.unitPrice,
-      r.quantity,
-      r.amount,
+      r.日付,
+      r.品目コード ?? "",
+      r.品目名 ?? "",
+      r.単価,
+      r.数量,
+      r.金額,
     ]),
   ];
 

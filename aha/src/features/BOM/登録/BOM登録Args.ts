@@ -1,15 +1,15 @@
 export type BOM明細Args = {
-  type: number;
-  itemId: number;
-  quantity: string;
-  unit: string;
-  refBomCode: string | null;
-  refBomVersion: string | null;
+  区分: number;
+  品目ID: number;
+  数量: string;
+  単位: string;
+  参照BOMコード: string | null;
+  参照BOM版: string | null;
 };
 
 export type BOM登録Args = {
-  code: string;
-  version: string;
-  name: string;
-  lines: BOM明細Args[];
+  コード: string;
+  版: string;
+  名称: string;
+  明細: BOM明細Args[];
 };

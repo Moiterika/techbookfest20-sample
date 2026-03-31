@@ -42,7 +42,10 @@ const hxVals = JSON.stringify({
 
 // extraDataKeys からイベント detail を構築する after-swap ハンドラ
 const extraParts = (config.extraDataKeys ?? [])
-  .map((k) => `${k}: Number(el.dataset.selected${k.charAt(0).toUpperCase() + k.slice(1)} || 0)`)
+  .map(
+    (k) =>
+      `${k}: Number(el.dataset.selected${k.charAt(0).toUpperCase() + k.slice(1)} || 0)`,
+  )
   .join(", ");
 const detailObj = extraParts
   ? `{ name: el.dataset.selectedName, ${extraParts} }`
@@ -81,7 +84,12 @@ const afterSwapHandler = [
         hideNameLabel={hideNameLabel}
       />
     ) : (
-      <TypeaheadSearch config={config} name={name} formId={formId} compact={compact} />
+      <TypeaheadSearch
+        config={config}
+        name={name}
+        formId={formId}
+        compact={compact}
+      />
     )
   }
 </div>

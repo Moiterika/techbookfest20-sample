@@ -4,7 +4,7 @@ import type { 取引更新Args } from "./取引更新Args";
 import { 取引更新Validate } from "./取引更新Validate";
 import { 取引更新Mapper } from "./取引更新Mapper";
 import { db } from "../../../db";
-import { transactions, items } from "../../../db/schema";
+import { 取引テーブル, 品目テーブル } from "../../../db/schema";
 import { eq } from "drizzle-orm";
 import type { 取引Response } from "../取引Response";
 
@@ -18,35 +18,35 @@ export const 取引更新Command = new GenericCommand<
   mapper: 取引更新Mapper,
   command: async (args) => {
     await db
-      .update(transactions)
+      .update(取引テーブル)
       .set({
-        date: args.date,
-        transactionTypeId: args.transactionTypeId,
-        itemId: args.itemId,
-        unitPrice: args.unitPrice,
-        quantity: args.quantity,
-        amount: args.amount,
-        updatedAt: new Date(),
+        日付: args.日付,
+        取引区分ID: args.取引区分ID,
+        品目ID: args.品目ID,
+        単価: args.単価,
+        数量: args.数量,
+        金額: args.金額,
+        更新日時: new Date(),
       })
-      .where(eq(transactions.id, args.id));
+      .where(eq(取引テーブル.ID, args.ID));
 
     const [row] = await db
       .select({
-        id: transactions.id,
-        date: transactions.date,
-        transactionTypeId: transactions.transactionTypeId,
-        itemId: transactions.itemId,
-        unitPrice: transactions.unitPrice,
-        quantity: transactions.quantity,
-        amount: transactions.amount,
-        createdAt: transactions.createdAt,
-        updatedAt: transactions.updatedAt,
-        itemCode: items.code,
-        itemName: items.name,
+        ID: 取引テーブル.ID,
+        日付: 取引テーブル.日付,
+        取引区分ID: 取引テーブル.取引区分ID,
+        品目ID: 取引テーブル.品目ID,
+        単価: 取引テーブル.単価,
+        数量: 取引テーブル.数量,
+        金額: 取引テーブル.金額,
+        作成日時: 取引テーブル.作成日時,
+        更新日時: 取引テーブル.更新日時,
+        品目コード: 品目テーブル.コード,
+        品目名: 品目テーブル.名称,
       })
-      .from(transactions)
-      .leftJoin(items, eq(transactions.itemId, items.id))
-      .where(eq(transactions.id, args.id));
+      .from(取引テーブル)
+      .leftJoin(品目テーブル, eq(取引テーブル.品目ID, 品目テーブル.ID))
+      .where(eq(取引テーブル.ID, args.ID));
     return row;
   },
 });

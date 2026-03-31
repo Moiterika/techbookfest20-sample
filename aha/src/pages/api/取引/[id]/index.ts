@@ -21,12 +21,12 @@ export const PUT: APIRoute = async ({ params, request }) => {
   let row;
   try {
     row = await 取引更新Command.execute({
-      id,
-      date: form.get("date") as string,
-      transactionTypeId: Number(form.get("transactionTypeId")) || 0,
-      itemId: Number(form.get("itemId")) || 0,
-      unitPrice: Number(form.get("unitPrice")) || 0,
-      quantity: Number(form.get("quantity")) || 1,
+      ID: id,
+      日付: form.get("日付") as string,
+      取引区分ID: Number(form.get("取引区分ID")) || 0,
+      品目ID: Number(form.get("品目ID")) || 0,
+      単価: Number(form.get("単価")) || 0,
+      数量: Number(form.get("数量")) || 1,
     });
   } catch (e: any) {
     return new Response(`<p class="${errorText}">${e.message}</p>`, {
@@ -54,6 +54,6 @@ export const PUT: APIRoute = async ({ params, request }) => {
 /** DELETE /api/取引/:id — 取引を削除 */
 export const DELETE: APIRoute = async ({ params }) => {
   const id = Number(params.id);
-  await 取引削除Command.execute({ id });
+  await 取引削除Command.execute({ ID: id });
   return new Response("", { headers: { "Content-Type": "text/html" } });
 };

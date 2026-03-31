@@ -4,7 +4,7 @@ import type { 取引登録Args } from "./取引登録Args";
 import { 取引登録Validate } from "./取引登録Validate";
 import { 取引作成Mapper } from "./取引作成Mapper";
 import { db } from "../../../db";
-import { transactions } from "../../../db/schema";
+import { 取引テーブル } from "../../../db/schema";
 
 export const 取引登録Command = new GenericCommand<
   取引作成入力,
@@ -15,6 +15,6 @@ export const 取引登録Command = new GenericCommand<
   validate: 取引登録Validate,
   mapper: 取引作成Mapper,
   command: async (args) => {
-    await db.insert(transactions).values(args);
+    await db.insert(取引テーブル).values(args);
   },
 });

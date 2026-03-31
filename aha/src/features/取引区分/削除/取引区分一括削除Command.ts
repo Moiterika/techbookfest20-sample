@@ -1,7 +1,7 @@
 import { GenericCommand } from "../../core/generic-command";
 import { 一括削除Schema, type 一括削除入力 } from "../../../lib/validation";
 import { db } from "../../../db";
-import { transactionTypes } from "../../../db/schema";
+import { 取引区分テーブル } from "../../../db/schema";
 import { inArray } from "drizzle-orm";
 
 export const 取引区分一括削除Command = new GenericCommand<
@@ -14,8 +14,8 @@ export const 取引区分一括削除Command = new GenericCommand<
   command: async (args) => {
     if (args.ids.length > 0) {
       await db
-        .delete(transactionTypes)
-        .where(inArray(transactionTypes.id, args.ids));
+        .delete(取引区分テーブル)
+        .where(inArray(取引区分テーブル.ID, args.ids));
     }
   },
 });

@@ -18,7 +18,7 @@ export const GET: APIRoute = async ({ url }) => {
     page: Number(url.searchParams.get("page")) || 1,
     size: Number(url.searchParams.get("size")) || 20,
     q: url.searchParams.get("q") || undefined,
-    category: url.searchParams.get("category") || undefined,
+    カテゴリ: url.searchParams.get("カテゴリ") || undefined,
   });
 
   const html = await container.renderToString(CrudRows, {
@@ -41,11 +41,11 @@ export const POST: APIRoute = async ({ request }) => {
 
   try {
     await 品目登録Command.execute({
-      code: form.get("code") as string,
-      name: form.get("name") as string,
-      category: (form.get("category") as string) || undefined,
-      price: Number(form.get("price")) || 0,
-      barcode: (form.get("barcode") as string) || undefined,
+      コード: form.get("コード") as string,
+      名称: form.get("名称") as string,
+      カテゴリ: (form.get("カテゴリ") as string) || undefined,
+      単価: Number(form.get("単価")) || 0,
+      バーコード: (form.get("バーコード") as string) || undefined,
     });
   } catch (e: any) {
     return new Response(`<p class="${errorText}">${e.message}</p>`, {

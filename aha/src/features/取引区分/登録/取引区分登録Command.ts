@@ -7,7 +7,7 @@ import type { 取引区分登録Args } from "./取引区分登録Args";
 import { 取引区分登録Validate } from "./取引区分登録Validate";
 import { 取引区分作成Mapper } from "./取引区分作成Mapper";
 import { db } from "../../../db";
-import { transactionTypes } from "../../../db/schema";
+import { 取引区分テーブル } from "../../../db/schema";
 
 export const 取引区分登録Command = new GenericCommand<
   取引区分作成入力,
@@ -18,6 +18,6 @@ export const 取引区分登録Command = new GenericCommand<
   validate: 取引区分登録Validate,
   mapper: 取引区分作成Mapper,
   command: async (args) => {
-    await db.insert(transactionTypes).values(args);
+    await db.insert(取引区分テーブル).values(args);
   },
 });

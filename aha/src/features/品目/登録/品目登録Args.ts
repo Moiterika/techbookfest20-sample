@@ -1,7 +1,7 @@
 export type 品目登録Args = {
-  code: string;
-  name: string;
-  category: string | null;
-  price: number;
-  barcode: string | null;
+  コード: string;
+  名称: string;
+  カテゴリ: string | null;
+  単価: number;
+  バーコード: string | null;
 };

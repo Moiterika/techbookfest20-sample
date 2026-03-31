@@ -4,7 +4,7 @@ import { Icon } from "astro-icon/components";
 import CrudPagination from "../crud/CrudPagination.astro";
 
 interface Props {
-  records: { id: number; code: string; version: string; name: string }[];
+  records: { ID: number; コード: string; 版: string; 名称: string }[];
   currentPage?: number;
   totalPages?: number;
   pageSize?: number;
@@ -41,13 +41,13 @@ const kebabItem =
     </tr>
   ) : (
     records.map((r) => (
-      <tr id={`bom-${r.id}`} class={row}>
-        <td class={tdCell}>{r.code}</td>
-        <td class={tdCell}>{r.version}</td>
-        <td class={tdCell}>{r.name}</td>
+      <tr id={`bom-${r.ID}`} class={row}>
+        <td class={tdCell}>{r.コード}</td>
+        <td class={tdCell}>{r.版}</td>
+        <td class={tdCell}>{r.名称}</td>
         <td class={actionsCell}>
           <div class={actionsRow}>
-            <a href={`/boms/${r.id}`} class={editBtn}>
+            <a href={`/boms/${r.ID}`} class={editBtn}>
               <Icon name="heroicons:pencil-square" class="w-3.5 h-3.5" />
               編集
             </a>
@@ -69,10 +69,10 @@ const kebabItem =
               <div class={kebabMenu} x-show="menuOpen" x-transition x-cloak>
                 <button
                   class={kebabItem}
-                  hx-delete={`/api/boms/${r.id}`}
-                  hx-target={`#bom-${r.id}`}
+                  hx-delete={`/api/boms/${r.ID}`}
+                  hx-target={`#bom-${r.ID}`}
                   hx-swap="outerHTML swap:0.3s"
-                  hx-confirm={`「${r.name}」を削除しますか？`}
+                  hx-confirm={`「${r.名称}」を削除しますか？`}
                   @click="menuOpen = false"
                 >
                   <Icon name="heroicons:trash" class="w-4 h-4" />

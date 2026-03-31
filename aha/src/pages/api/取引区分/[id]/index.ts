@@ -20,10 +20,10 @@ export const PUT: APIRoute = async ({ params, request }) => {
   let row;
   try {
     row = await 取引区分更新Command.execute({
-      id,
-      code: form.get("code") as string,
-      name: form.get("name") as string,
-      coefficient: Number(form.get("coefficient")) || 0,
+      ID: id,
+      コード: form.get("コード") as string,
+      名称: form.get("名称") as string,
+      係数: Number(form.get("係数")) || 0,
     });
   } catch (e: any) {
     return new Response(`<p class="${errorText}">${e.message}</p>`, {
@@ -52,6 +52,6 @@ export const PUT: APIRoute = async ({ params, request }) => {
 /** DELETE /api/取引区分/:id — 取引区分を削除 */
 export const DELETE: APIRoute = async ({ params }) => {
   const id = Number(params.id);
-  await 取引区分削除Command.execute({ id });
+  await 取引区分削除Command.execute({ ID: id });
   return new Response("", { headers: { "Content-Type": "text/html" } });
 };

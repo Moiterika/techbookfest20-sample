@@ -1,6 +1,6 @@
 import type { APIRoute } from "astro";
 import { db } from "../../../db";
-import { items } from "../../../db/schema";
+import { 品目テーブル } from "../../../db/schema";
 import { ilike, or, asc } from "drizzle-orm";
 const dropdownItem =
   "px-3 py-2 text-sm cursor-pointer hover:bg-surface-container-low";
@@ -20,14 +20,19 @@ export const GET: APIRoute = async ({ url }) => {
 
   const rows = await db
     .select({
-      id: items.id,
-      code: items.code,
-      name: items.name,
-      price: items.price,
+      ID: 品目テーブル.ID,
+      コード: 品目テーブル.コード,
+      名称: 品目テーブル.名称,
+      単価: 品目テーブル.単価,
     })
-    .from(items)
-    .where(or(ilike(items.code, `%${q}%`), ilike(items.name, `%${q}%`)))
-    .orderBy(asc(items.code))
+    .from(品目テーブル)
+    .where(
+      or(
+        ilike(品目テーブル.コード, `%${q}%`),
+        ilike(品目テーブル.名称, `%${q}%`),
+      ),
+    )
+    .orderBy(asc(品目テーブル.コード))
     .limit(10);
 
   if (rows.length === 0) {
@@ -41,13 +46,13 @@ export const GET: APIRoute = async ({ url }) => {
     .map(
       (r) =>
         `<li class="${dropdownItem}" ` +
-        `data-item-id="${r.id}" ` +
-        `data-item-code="${escapeHtml(r.code)}" ` +
-        `data-item-name="${escapeHtml(r.name)}" ` +
-        `hx-get="/api/品目/typeahead?action=select&amp;itemId=${r.id}" ` +
+        `data-item-id="${r.ID}" ` +
+        `data-item-code="${escapeHtml(r.コード)}" ` +
+        `data-item-name="${escapeHtml(r.名称)}" ` +
+        `hx-get="/api/品目/typeahead?action=select&amp;itemId=${r.ID}" ` +
         `hx-target="closest [data-typeahead]" ` +
         `hx-swap="innerHTML">` +
-        `<strong>${escapeHtml(r.code)}</strong> ${escapeHtml(r.name)}</li>`,
+        `<strong>${escapeHtml(r.コード)}</strong> ${escapeHtml(r.名称)}</li>`,
     )
     .join("");
 

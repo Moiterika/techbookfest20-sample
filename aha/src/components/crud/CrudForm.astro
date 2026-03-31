@@ -82,13 +82,14 @@ const formLayout = "flex flex-col gap-4";
         }
 
         if (type === "itemCode" || type === "typeahead") {
+          const valueName = (col as any).valueName ?? "itemId";
           return (
             <label class={labelStyle}>
               <span>
                 {col.label}{" "}
                 {col.required && <span class={requiredStar}>*</span>}
               </span>
-              <Typeahead config={品目Typeahead} />
+              <Typeahead config={品目Typeahead} name={valueName} />
             </label>
           );
         }

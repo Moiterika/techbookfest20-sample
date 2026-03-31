@@ -5,7 +5,7 @@ import HeaderBodyForm from "../../components/header-body/HeaderBodyForm.astro";
 import { BOMヘッダーボディ } from "../../features/BOM/gen-go.config";
 import { pageContainer, pageTitle } from "../../styles/common";
 import { db } from "../../db";
-import { boms, bomLines, items } from "../../db/schema";
+import { BOMテーブル, BOM明細テーブル, 品目テーブル } from "../../db/schema";
 import { eq } from "drizzle-orm";
 
 const config = BOMヘッダーボディ;
@@ -14,24 +14,28 @@ if (!id) return Astro.redirect("/BOM");
 
 const showSavedToast = Astro.url.searchParams.has("saved");
 
-const [bom] = await db.select().from(boms).where(eq(boms.id, id)).limit(1);
+const [bom] = await db
+  .select()
+  .from(BOMテーブル)
+  .where(eq(BOMテーブル.ID, id))
+  .limit(1);
 if (!bom) return Astro.redirect("/BOM");
 
 const lines = await db
   .select({
-    id: bomLines.id,
-    type: bomLines.type,
-    itemId: bomLines.itemId,
-    quantity: bomLines.quantity,
-    unit: bomLines.unit,
-    refBomCode: bomLines.refBomCode,
-    refBomVersion: bomLines.refBomVersion,
-    itemCode: items.code,
-    itemName: items.name,
+    id: BOM明細テーブル.ID,
+    区分: BOM明細テーブル.区分,
+    itemId: BOM明細テーブル.品目ID,
+    quantity: BOM明細テーブル.数量,
+    unit: BOM明細テーブル.単位,
+    refBomCode: BOM明細テーブル.参照BOMコード,
+    refBomVersion: BOM明細テーブル.参照BOM版,
+    itemCode: 品目テーブル.コード,
+    itemName: 品目テーブル.名称,
   })
-  .from(bomLines)
-  .leftJoin(items, eq(bomLines.itemId, items.id))
-  .where(eq(bomLines.bomId, id));
+  .from(BOM明細テーブル)
+  .leftJoin(品目テーブル, eq(BOM明細テーブル.品目ID, 品目テーブル.ID))
+  .where(eq(BOM明細テーブル.BOM_ID, id));
 
 // Build childrenData from config.children discriminator definitions
 const childrenData = config.children.map((child) => {
@@ -53,9 +57,9 @@ const childrenData = config.children.map((child) => {
 });
 
 const headerValues = {
-  code: bom.code,
-  version: bom.version,
-  name: bom.name,
+  コード: bom.コード,
+  版: bom.版,
+  名称: bom.名称,
 };
 ---
 
@@ -66,7 +70,7 @@ const headerValues = {
     <HeaderBodyForm
       config={config}
       mode="edit"
-      recordId={bom.id}
+      recordId={bom.ID}
       headerValues={headerValues}
       childrenData={childrenData}
     />

@@ -1,7 +1,7 @@
 import { GenericQuery } from "../../core/generic-query";
 import { 品目一覧Schema, type 品目一覧入力 } from "../../../lib/validation";
 import { db } from "../../../db";
-import { items } from "../../../db/schema";
+import { 品目テーブル } from "../../../db/schema";
 import { and, count, desc, ilike, or } from "drizzle-orm";
 import type { 品目Response } from "../品目Response";
 
@@ -27,34 +27,34 @@ export const 品目一覧Query = new GenericQuery<品目一覧入力, 品目一�
     if (input.q) {
       conditions.push(
         or(
-          ilike(items.code, `%${input.q}%`),
-          ilike(items.name, `%${input.q}%`),
+          ilike(品目テーブル.コード, `%${input.q}%`),
+          ilike(品目テーブル.名称, `%${input.q}%`),
         ),
       );
     }
-    if (input.category) {
-      conditions.push(ilike(items.category, `%${input.category}%`));
+    if (input.カテゴリ) {
+      conditions.push(ilike(品目テーブル.カテゴリ, `%${input.カテゴリ}%`));
     }
     const searchFilter = conditions.length > 0 ? and(...conditions) : undefined;
 
     const [{ total }] = await db
       .select({ total: count() })
-      .from(items)
+      .from(品目テーブル)
       .where(searchFilter);
     const totalPages = Math.max(1, Math.ceil(total / size));
     const currentPage = Math.min(Math.max(1, input.page), totalPages);
 
     const records = await db
       .select()
-      .from(items)
+      .from(品目テーブル)
       .where(searchFilter)
-      .orderBy(desc(items.id))
+      .orderBy(desc(品目テーブル.ID))
       .limit(size)
       .offset((currentPage - 1) * size);
 
     const extraParams: Record<string, string> = {};
     if (input.q) extraParams.q = input.q;
-    if (input.category) extraParams.category = input.category;
+    if (input.カテゴリ) extraParams.カテゴリ = input.カテゴリ;
 
     return { records, currentPage, totalPages, pageSize: size, extraParams };
   },

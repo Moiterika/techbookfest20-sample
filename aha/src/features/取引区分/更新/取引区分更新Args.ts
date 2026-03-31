@@ -1,6 +1,6 @@
 export type 取引区分更新Args = {
-  id: number;
-  code: string;
-  name: string;
-  coefficient: number;
+  ID: number;
+  コード: string;
+  名称: string;
+  係数: number;
 };

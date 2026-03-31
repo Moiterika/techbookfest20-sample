@@ -1,9 +1,9 @@
 export type 取引更新Args = {
-  id: number;
-  date: string;
-  transactionTypeId: number;
-  itemId: number;
-  unitPrice: number;
-  quantity: number;
-  amount: number;
+  ID: number;
+  日付: string;
+  取引区分ID: number;
+  品目ID: number;
+  単価: number;
+  数量: number;
+  金額: number;
 };

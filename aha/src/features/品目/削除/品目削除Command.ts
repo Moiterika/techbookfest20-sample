@@ -1,7 +1,7 @@
 import { GenericCommand } from "../../core/generic-command";
 import { 単一削除Schema, type 単一削除入力 } from "../../../lib/validation";
 import { db } from "../../../db";
-import { items } from "../../../db/schema";
+import { 品目テーブル } from "../../../db/schema";
 import { eq } from "drizzle-orm";
 
 export const 品目削除Command = new GenericCommand<
@@ -10,8 +10,8 @@ export const 品目削除Command = new GenericCommand<
   void
 >({
   schema: 単一削除Schema,
-  mapper: (input) => ({ id: input.id }),
+  mapper: (input) => ({ id: input.ID }),
   command: async (args) => {
-    await db.delete(items).where(eq(items.id, args.id));
+    await db.delete(品目テーブル).where(eq(品目テーブル.ID, args.id));
   },
 });

@@ -42,9 +42,9 @@ export const POST: APIRoute = async ({ request }) => {
 
   try {
     await 取引区分登録Command.execute({
-      code: form.get("code") as string,
-      name: form.get("name") as string,
-      coefficient: Number(form.get("coefficient")) || 0,
+      コード: form.get("コード") as string,
+      名称: form.get("名称") as string,
+      係数: Number(form.get("係数")) || 0,
     });
   } catch (e: any) {
     return new Response(`<p class="${errorText}">${e.message}</p>`, {

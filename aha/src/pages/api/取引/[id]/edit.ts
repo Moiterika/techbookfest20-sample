@@ -1,7 +1,7 @@
 import type { APIRoute } from "astro";
 import { experimental_AstroContainer as AstroContainer } from "astro/container";
 import { db } from "../../../../db";
-import { transactions, items } from "../../../../db/schema";
+import { 取引テーブル, 品目テーブル } from "../../../../db/schema";
 import { eq } from "drizzle-orm";
 import {
   fetch取引区分オプション,
@@ -19,21 +19,21 @@ export const GET: APIRoute = async ({ params }) => {
 
   const [row] = await db
     .select({
-      id: transactions.id,
-      date: transactions.date,
-      transactionTypeId: transactions.transactionTypeId,
-      itemId: transactions.itemId,
-      unitPrice: transactions.unitPrice,
-      quantity: transactions.quantity,
-      amount: transactions.amount,
-      createdAt: transactions.createdAt,
-      updatedAt: transactions.updatedAt,
-      itemCode: items.code,
-      itemName: items.name,
+      ID: 取引テーブル.ID,
+      日付: 取引テーブル.日付,
+      取引区分ID: 取引テーブル.取引区分ID,
+      品目ID: 取引テーブル.品目ID,
+      単価: 取引テーブル.単価,
+      数量: 取引テーブル.数量,
+      金額: 取引テーブル.金額,
+      作成日時: 取引テーブル.作成日時,
+      更新日時: 取引テーブル.更新日時,
+      品目コード: 品目テーブル.コード,
+      品目名: 品目テーブル.名称,
     })
-    .from(transactions)
-    .leftJoin(items, eq(transactions.itemId, items.id))
-    .where(eq(transactions.id, id));
+    .from(取引テーブル)
+    .leftJoin(品目テーブル, eq(取引テーブル.品目ID, 品目テーブル.ID))
+    .where(eq(取引テーブル.ID, id));
 
   if (!row) {
     return new Response("Not found", { status: 404 });

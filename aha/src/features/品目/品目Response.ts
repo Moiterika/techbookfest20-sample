@@ -1,3 +1,3 @@
-import type { Item } from "../../db/schema";
+import type { 品目 } from "../../db/schema";
 
-export type 品目Response = Item;
+export type 品目Response = 品目;

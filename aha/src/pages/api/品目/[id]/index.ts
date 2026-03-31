@@ -17,12 +17,12 @@ export const PUT: APIRoute = async ({ params, request }) => {
   let row;
   try {
     row = await 品目更新Command.execute({
-      id,
-      code: form.get("code") as string,
-      name: form.get("name") as string,
-      category: (form.get("category") as string) || undefined,
-      price: Number(form.get("price")) || 0,
-      barcode: (form.get("barcode") as string) || undefined,
+      ID: id,
+      コード: form.get("コード") as string,
+      名称: form.get("名称") as string,
+      カテゴリ: (form.get("カテゴリ") as string) || undefined,
+      単価: Number(form.get("単価")) || 0,
+      バーコード: (form.get("バーコード") as string) || undefined,
     });
   } catch (e: any) {
     return new Response(`<p class="${errorText}">${e.message}</p>`, {
@@ -47,6 +47,6 @@ export const PUT: APIRoute = async ({ params, request }) => {
 /** DELETE /api/品目/:id — 品目を削除 */
 export const DELETE: APIRoute = async ({ params }) => {
   const id = Number(params.id);
-  await 品目削除Command.execute({ id });
+  await 品目削除Command.execute({ ID: id });
   return new Response("", { headers: { "Content-Type": "text/html" } });
 };

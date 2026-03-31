@@ -17,8 +17,8 @@ interface Props {
 }
 
 const { record, columns, entity } = Astro.props;
-const rowId = `${entity.idPrefix}-${record.id}`;
-const formId = `edit-${entity.idPrefix}-${record.id}`;
+const rowId = `${entity.idPrefix}-${record.ID}`;
+const formId = `edit-${entity.idPrefix}-${record.ID}`;
 
 // 編集行レベルの Alpine x-data
 const alpineData = entity.alpineInitEditRow
@@ -32,10 +32,13 @@ function cellStyle(col: Column): string | undefined {
 
 // itemCode/typeahead 列のバリデーション式
 function buildBeforeRequest(): string | undefined {
-  const hasItemCode = columns.some((c) => c.type === "itemCode" || c.type === "typeahead");
-  if (!hasItemCode) return undefined;
+  const itemCol = columns.find(
+    (c) => c.type === "itemCode" || c.type === "typeahead",
+  );
+  if (!itemCol) return undefined;
+  const valueName = (itemCol as any).valueName ?? "itemId";
   return `
-    const itemId = document.querySelector('[form=${formId}][name=itemId]');
+    const itemId = document.querySelector('[form=${formId}][name=${valueName}]');
     if (!itemId || !itemId.value) {
       event.preventDefault();
       alert('品目を選択してください');
@@ -57,7 +60,7 @@ function buildBeforeRequest(): string | undefined {
             <div class={flexRow}>
               <form
                 id={formId}
-                hx-put={`${entity.baseUrl}/${record.id}`}
+                hx-put={`${entity.baseUrl}/${record.ID}`}
                 hx-target={`#${rowId}`}
                 hx-swap="outerHTML"
                 {...(buildBeforeRequest()

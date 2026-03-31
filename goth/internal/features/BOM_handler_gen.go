@@ -47,9 +47,13 @@ func (h *HandlerBOM) HandleEditBOM(w http.ResponseWriter, r *http.Request) {
 
 func (h *HandlerBOM) Handle一覧BOM(w http.ResponseWriter, r *http.Request) {
 	page, _ := strconv.Atoi(r.URL.Query().Get("page"))
-	if page < 1 { page = 1 }
+	if page < 1 {
+		page = 1
+	}
 	size, _ := strconv.Atoi(r.URL.Query().Get("size"))
-	if size < 1 { size = 20 }
+	if size < 1 {
+		size = 20
+	}
 	search := r.URL.Query().Get("q")
 	result, err := h.Get一覧BOM(r.Context(), 一覧InputBOM{Page: page, Size: size, Search: search})
 	if err != nil {

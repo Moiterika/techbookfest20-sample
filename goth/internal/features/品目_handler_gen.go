@@ -23,9 +23,13 @@ func (h *Handler品目) HandlePage品目(w http.ResponseWriter, r *http.Request)
 
 func (h *Handler品目) Handle一覧品目(w http.ResponseWriter, r *http.Request) {
 	page, _ := strconv.Atoi(r.URL.Query().Get("page"))
-	if page < 1 { page = 1 }
+	if page < 1 {
+		page = 1
+	}
 	size, _ := strconv.Atoi(r.URL.Query().Get("size"))
-	if size < 1 { size = 20 }
+	if size < 1 {
+		size = 20
+	}
 	qParam := r.URL.Query().Get("q")
 	カテゴリParam := r.URL.Query().Get("カテゴリ")
 	result, err := h.Get一覧品目(r.Context(), 一覧Input品目{Page: page, Size: size, Q: qParam, カテゴリ: カテゴリParam})

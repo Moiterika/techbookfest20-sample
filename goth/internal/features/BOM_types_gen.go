@@ -8,44 +8,44 @@ import (
 
 // RowBOM は BOM テーブルの行
 type RowBOM struct {
-	Id int `db:"id"`
-	コード string `db:"コード"`
-	版 string `db:"版"`
-	名称 string `db:"名称"`
+	Id        int       `db:"id"`
+	コード       string    `db:"コード"`
+	版         string    `db:"版"`
+	名称        string    `db:"名称"`
 	CreatedAt time.Time `db:"created_at"`
 	UpdatedAt time.Time `db:"updated_at"`
 }
 
 // BOM明細 は BOM明細 テーブルの行
 type BOM明細 struct {
-	Id int `db:"id"`
-	BOMID int `db:"BOM_ID"`
-	区分 int `db:"区分"`
-	品目ID int `db:"品目ID"`
-	数量 string `db:"数量"`
-	単位 string `db:"単位"`
-	参照BOMコード sql.NullString `db:"参照BOMコード"`
-	参照BOM版 sql.NullString `db:"参照BOM版"`
-	CreatedAt time.Time `db:"created_at"`
-	UpdatedAt time.Time `db:"updated_at"`
+	Id        int            `db:"id"`
+	BOMID     int            `db:"BOM_ID"`
+	区分        int            `db:"区分"`
+	品目ID      int            `db:"品目ID"`
+	数量        string         `db:"数量"`
+	単位        string         `db:"単位"`
+	参照BOMコード  sql.NullString `db:"参照BOMコード"`
+	参照BOM版    sql.NullString `db:"参照BOM版"`
+	CreatedAt time.Time      `db:"created_at"`
+	UpdatedAt time.Time      `db:"updated_at"`
 	// JOIN 結果
 	品目コード string
-	品目名 string
+	品目名   string
 }
 
 type 作成InputBOM struct {
 	コード string
-	版 string
-	名称 string
+	版   string
+	名称  string
 }
 
 type 作成InputBOM明細 struct {
-	区分 int
-	品目ID int
-	数量 string
-	単位 string
+	区分       int
+	品目ID     int
+	数量       string
+	単位       string
 	参照BOMコード *string
-	参照BOM版 *string
+	参照BOM版   *string
 }
 
 type 作成InputBOMWithLines struct {
@@ -54,10 +54,10 @@ type 作成InputBOMWithLines struct {
 }
 
 type 更新InputBOM struct {
-	ID int
+	ID  int
 	コード string
-	版 string
-	名称 string
+	版   string
+	名称  string
 }
 
 type 更新InputBOMWithLines struct {
@@ -65,16 +65,20 @@ type 更新InputBOMWithLines struct {
 	LinesBOM明細 []作成InputBOM明細
 }
 
-type 削除InputBOM struct { ID int }
-type 一括削除InputBOM struct { IDs []int }
-type 一覧InputBOM struct { Page int; Size int; Search string }
+type 削除InputBOM struct{ ID int }
+type 一括削除InputBOM struct{ IDs []int }
+type 一覧InputBOM struct {
+	Page   int
+	Size   int
+	Search string
+}
 
-type ResponseBOM struct { RowBOM }
+type ResponseBOM struct{ RowBOM }
 
 type ResponseBOM詳細 struct {
 	RowBOM
 	製造品目アウトプット []BOM明細
-	投入品目インプット []BOM明細
+	投入品目インプット  []BOM明細
 }
 
 type ListResultBOM struct {

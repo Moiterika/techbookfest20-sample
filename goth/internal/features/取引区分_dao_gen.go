@@ -3,11 +3,11 @@ package features
 
 import (
 	"context"
+	"database/sql"
 	"fmt"
 	"math"
 	"strings"
 	"time"
-	"github.com/go-gorp/gorp/v3"
 )
 
 var (
@@ -15,9 +15,10 @@ var (
 	_ = strings.Join
 	_ = time.Now
 	_ = math.Max
+	_ sql.NullString
 )
 
-func Execute一覧SQL取引区分(ctx context.Context, dbmap *gorp.DbMap, input 一覧Input取引区分) (ListResult取引区分, error) {
+func Execute一覧SQL取引区分(ctx context.Context, db *sql.DB, input 一覧Input取引区分) (ListResult取引区分, error) {
 	size := input.Size
 	if size != 20 && size != 50 && size != 100 {
 		size = 20
@@ -32,17 +33,21 @@ func Execute一覧SQL取引区分(ctx context.Context, dbmap *gorp.DbMap, input 
 	}
 
 	var total int
-	if err := dbmap.SelectOne(&total, `SELECT COUNT(*) FROM "取引区分" `+where, args...); err != nil {
+	if err := db.QueryRowContext(ctx, `SELECT COUNT(*) FROM "取引区分" `+where, args...).Scan(&total); err != nil {
 		return ListResult取引区分{}, err
 	}
 
 	totalPages := int(math.Max(1, math.Ceil(float64(total)/float64(size))))
 	page := input.Page
-	if page < 1 { page = 1 }
-	if page > totalPages { page = totalPages }
+	if page < 1 {
+		page = 1
+	}
+	if page > totalPages {
+		page = totalPages
+	}
 
 	offset := len(args)
-	rows, err := dbmap.Db.QueryContext(ctx,
+	rows, err := db.QueryContext(ctx,
 		fmt.Sprintf(`SELECT id, "コード", "名称", "係数", created_at, updated_at FROM "取引区分" %s ORDER BY id DESC LIMIT $%d OFFSET $%d`, where, offset+1, offset+2),
 		append(args, size, (page-1)*size)...)
 	if err != nil {
@@ -58,51 +63,43 @@ func Execute一覧SQL取引区分(ctx context.Context, dbmap *gorp.DbMap, input 
 		}
 		records = append(records, Response取引区分{Row取引区分: r})
 	}
-	if records == nil { records = []Response取引区分{} }
+	if records == nil {
+		records = []Response取引区分{}
+	}
 
 	return ListResult取引区分{Records: records, CurrentPage: page, TotalPages: totalPages, PageSize: size}, nil
 }
 
-func Execute登録SQL取引区分(ctx context.Context, dbmap *gorp.DbMap, input 作成Input取引区分) (Response取引区分, error) {
+func Execute登録SQL取引区分(ctx context.Context, db *sql.DB, input 作成Input取引区分) (Response取引区分, error) {
 	now := time.Now()
-	r := Row取引区分{
-		コード: input.コード,
-		名称: input.名称,
-		係数: input.係数,
-		CreatedAt: now,
-		UpdatedAt: now,
-	}
-	if err := dbmap.WithContext(ctx).Insert(&r); err != nil {
+	var r Row取引区分
+	err := db.QueryRowContext(ctx,
+		`INSERT INTO "取引区分" ("コード", "名称", "係数", created_at, updated_at) VALUES ($1, $2, $3, $4, $5) RETURNING id, "コード", "名称", "係数", created_at, updated_at`,
+		input.コード, input.名称, input.係数, now, now,
+	).Scan(&r.Id, &r.コード, &r.名称, &r.係数, &r.CreatedAt, &r.UpdatedAt)
+	if err != nil {
 		return Response取引区分{}, err
 	}
 	return Response取引区分{Row取引区分: r}, nil
 }
 
-func Execute更新SQL取引区分(ctx context.Context, dbmap *gorp.DbMap, input 更新Input取引区分) (Response取引区分, error) {
-	obj, err := dbmap.WithContext(ctx).Get(Row取引区分{}, input.ID)
+func Execute更新SQL取引区分(ctx context.Context, db *sql.DB, input 更新Input取引区分) (Response取引区分, error) {
+	now := time.Now()
+	_, err := db.ExecContext(ctx,
+		`UPDATE "取引区分" SET "コード"=$1, "名称"=$2, "係数"=$3, updated_at=$4 WHERE id=$5`,
+		input.コード, input.名称, input.係数, now, input.ID)
 	if err != nil {
 		return Response取引区分{}, err
 	}
-	if obj == nil {
-		return Response取引区分{}, fmt.Errorf("record not found: %d", input.ID)
-	}
-	r := obj.(*Row取引区分)
-	r.コード = input.コード
-	r.名称 = input.名称
-	r.係数 = input.係数
-	r.UpdatedAt = time.Now()
-	if _, err := dbmap.WithContext(ctx).Update(r); err != nil {
-		return Response取引区分{}, err
-	}
-	return Response取引区分{Row取引区分: *r}, nil
+	return GetByIDSQL取引区分(ctx, db, input.ID)
 }
 
-func Execute削除SQL取引区分(ctx context.Context, dbmap *gorp.DbMap, input 削除Input取引区分) error {
-	_, err := dbmap.WithContext(ctx).Delete(&Row取引区分{Id: input.ID})
+func Execute削除SQL取引区分(ctx context.Context, db *sql.DB, input 削除Input取引区分) error {
+	_, err := db.ExecContext(ctx, `DELETE FROM "取引区分" WHERE id=$1`, input.ID)
 	return err
 }
 
-func Execute一括削除SQL取引区分(ctx context.Context, dbmap *gorp.DbMap, input 一括削除Input取引区分) error {
+func Execute一括削除SQL取引区分(ctx context.Context, db *sql.DB, input 一括削除Input取引区分) error {
 	if len(input.IDs) == 0 {
 		return nil
 	}
@@ -112,19 +109,17 @@ func Execute一括削除SQL取引区分(ctx context.Context, dbmap *gorp.DbMap, 
 		ph[i] = fmt.Sprintf("$%d", i+1)
 		args[i] = id
 	}
-	_, err := dbmap.Db.ExecContext(ctx, fmt.Sprintf(`DELETE FROM "取引区分" WHERE id IN (%s)`, strings.Join(ph, ",")), args...)
+	_, err := db.ExecContext(ctx, fmt.Sprintf(`DELETE FROM "取引区分" WHERE id IN (%s)`, strings.Join(ph, ",")), args...)
 	return err
 }
 
-func GetByIDSQL取引区分(ctx context.Context, dbmap *gorp.DbMap, id int) (Response取引区分, error) {
-	obj, err := dbmap.WithContext(ctx).Get(Row取引区分{}, id)
+func GetByIDSQL取引区分(ctx context.Context, db *sql.DB, id int) (Response取引区分, error) {
+	var r Row取引区分
+	err := db.QueryRowContext(ctx,
+		`SELECT id, "コード", "名称", "係数", created_at, updated_at FROM "取引区分" WHERE id=$1`, id,
+	).Scan(&r.Id, &r.コード, &r.名称, &r.係数, &r.CreatedAt, &r.UpdatedAt)
 	if err != nil {
 		return Response取引区分{}, err
 	}
-	if obj == nil {
-		return Response取引区分{}, fmt.Errorf("record not found: %d", id)
-	}
-	r := obj.(*Row取引区分)
-	return Response取引区分{Row取引区分: *r}, nil
+	return Response取引区分{Row取引区分: r}, nil
 }
-

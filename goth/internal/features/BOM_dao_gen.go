@@ -3,11 +3,11 @@ package features
 
 import (
 	"context"
+	"database/sql"
 	"fmt"
 	"math"
 	"strings"
 	"time"
-	"github.com/go-gorp/gorp/v3"
 )
 
 var (
@@ -15,9 +15,10 @@ var (
 	_ = strings.Join
 	_ = time.Now
 	_ = math.Max
+	_ sql.NullString
 )
 
-func Execute一覧SQLBOM(ctx context.Context, dbmap *gorp.DbMap, input 一覧InputBOM) (ListResultBOM, error) {
+func Execute一覧SQLBOM(ctx context.Context, db *sql.DB, input 一覧InputBOM) (ListResultBOM, error) {
 	size := input.Size
 	if size != 20 && size != 50 && size != 100 {
 		size = 20
@@ -32,17 +33,21 @@ func Execute一覧SQLBOM(ctx context.Context, dbmap *gorp.DbMap, input 一覧Inp
 	}
 
 	var total int
-	if err := dbmap.SelectOne(&total, `SELECT COUNT(*) FROM "BOM" `+where, args...); err != nil {
+	if err := db.QueryRowContext(ctx, `SELECT COUNT(*) FROM "BOM" `+where, args...).Scan(&total); err != nil {
 		return ListResultBOM{}, err
 	}
 
 	totalPages := int(math.Max(1, math.Ceil(float64(total)/float64(size))))
 	page := input.Page
-	if page < 1 { page = 1 }
-	if page > totalPages { page = totalPages }
+	if page < 1 {
+		page = 1
+	}
+	if page > totalPages {
+		page = totalPages
+	}
 
 	offset := len(args)
-	rows, err := dbmap.Db.QueryContext(ctx,
+	rows, err := db.QueryContext(ctx,
 		fmt.Sprintf(`SELECT id, "コード", "版", "名称", created_at, updated_at FROM "BOM" %s ORDER BY id DESC LIMIT $%d OFFSET $%d`, where, offset+1, offset+2),
 		append(args, size, (page-1)*size)...)
 	if err != nil {
@@ -58,43 +63,35 @@ func Execute一覧SQLBOM(ctx context.Context, dbmap *gorp.DbMap, input 一覧Inp
 		}
 		records = append(records, ResponseBOM{RowBOM: r})
 	}
-	if records == nil { records = []ResponseBOM{} }
+	if records == nil {
+		records = []ResponseBOM{}
+	}
 
 	return ListResultBOM{Records: records, CurrentPage: page, TotalPages: totalPages, PageSize: size}, nil
 }
 
-func Execute登録SQLBOM(ctx context.Context, dbmap *gorp.DbMap, input 作成InputBOMWithLines) (ResponseBOM, error) {
+func Execute登録SQLBOM(ctx context.Context, db *sql.DB, input 作成InputBOMWithLines) (ResponseBOM, error) {
 	now := time.Now()
-	tx, err := dbmap.Begin()
+	tx, err := db.BeginTx(ctx, nil)
 	if err != nil {
 		return ResponseBOM{}, err
 	}
 	defer tx.Rollback()
 
-	r := RowBOM{
-		コード: input.コード,
-		版: input.版,
-		名称: input.名称,
-		CreatedAt: now,
-		UpdatedAt: now,
-	}
-	if err := tx.Insert(&r); err != nil {
+	var r RowBOM
+	err = tx.QueryRowContext(ctx,
+		`INSERT INTO "BOM" ("コード", "版", "名称", created_at, updated_at) VALUES ($1, $2, $3, $4, $5) RETURNING id, "コード", "版", "名称", created_at, updated_at`,
+		input.コード, input.版, input.名称, now, now,
+	).Scan(&r.Id, &r.コード, &r.版, &r.名称, &r.CreatedAt, &r.UpdatedAt)
+	if err != nil {
 		return ResponseBOM{}, err
 	}
 
 	for _, l := range input.LinesBOM明細 {
-		line := BOM明細{
-			BOMID: r.Id,
-			区分: l.区分,
-			品目ID: l.品目ID,
-			数量: l.数量,
-			単位: l.単位,
-			参照BOMコード: toNullString(l.参照BOMコード),
-			参照BOM版: toNullString(l.参照BOM版),
-			CreatedAt: now,
-			UpdatedAt: now,
-		}
-		if err := tx.Insert(&line); err != nil {
+		_, err = tx.ExecContext(ctx,
+			`INSERT INTO "BOM明細" ("BOM_ID", "区分", "品目ID", "数量", "単位", "参照BOMコード", "参照BOM版", created_at, updated_at) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9)`,
+			r.Id, l.区分, l.品目ID, l.数量, l.単位, toNullString(l.参照BOMコード), toNullString(l.参照BOM版), now, now)
+		if err != nil {
 			return ResponseBOM{}, err
 		}
 	}
@@ -105,47 +102,31 @@ func Execute登録SQLBOM(ctx context.Context, dbmap *gorp.DbMap, input 作成Inp
 	return ResponseBOM{RowBOM: r}, nil
 }
 
-func Execute更新SQLBOM(ctx context.Context, dbmap *gorp.DbMap, input 更新InputBOMWithLines) (ResponseBOM, error) {
+func Execute更新SQLBOM(ctx context.Context, db *sql.DB, input 更新InputBOMWithLines) (ResponseBOM, error) {
 	now := time.Now()
-	tx, err := dbmap.Begin()
+	tx, err := db.BeginTx(ctx, nil)
 	if err != nil {
 		return ResponseBOM{}, err
 	}
 	defer tx.Rollback()
 
-	obj, err := tx.Get(RowBOM{}, input.ID)
+	_, err = tx.ExecContext(ctx,
+		`UPDATE "BOM" SET "コード"=$1, "版"=$2, "名称"=$3, updated_at=$4 WHERE id=$5`,
+		input.コード, input.版, input.名称, now, input.ID)
 	if err != nil {
 		return ResponseBOM{}, err
 	}
-	if obj == nil {
-		return ResponseBOM{}, fmt.Errorf("record not found: %d", input.ID)
-	}
-	r := obj.(*RowBOM)
-	r.コード = input.コード
-	r.版 = input.版
-	r.名称 = input.名称
-	r.UpdatedAt = now
-	if _, err := tx.Update(r); err != nil {
-		return ResponseBOM{}, err
-	}
 
-	if _, err := tx.Exec(`DELETE FROM "BOM明細" WHERE "BOM_ID"=$1`, input.ID); err != nil {
+	_, err = tx.ExecContext(ctx, `DELETE FROM "BOM明細" WHERE "BOM_ID"=$1`, input.ID)
+	if err != nil {
 		return ResponseBOM{}, err
 	}
 
 	for _, l := range input.LinesBOM明細 {
-		line := BOM明細{
-			BOMID: input.ID,
-			区分: l.区分,
-			品目ID: l.品目ID,
-			数量: l.数量,
-			単位: l.単位,
-			参照BOMコード: toNullString(l.参照BOMコード),
-			参照BOM版: toNullString(l.参照BOM版),
-			CreatedAt: now,
-			UpdatedAt: now,
-		}
-		if err := tx.Insert(&line); err != nil {
+		_, err = tx.ExecContext(ctx,
+			`INSERT INTO "BOM明細" ("BOM_ID", "区分", "品目ID", "数量", "単位", "参照BOMコード", "参照BOM版", created_at, updated_at) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9)`,
+			input.ID, l.区分, l.品目ID, l.数量, l.単位, toNullString(l.参照BOMコード), toNullString(l.参照BOM版), now, now)
+		if err != nil {
 			return ResponseBOM{}, err
 		}
 	}
@@ -153,15 +134,15 @@ func Execute更新SQLBOM(ctx context.Context, dbmap *gorp.DbMap, input 更新Inp
 	if err := tx.Commit(); err != nil {
 		return ResponseBOM{}, err
 	}
-	return GetByIDSQLBOM(ctx, dbmap, input.ID)
+	return GetByIDSQLBOM(ctx, db, input.ID)
 }
 
-func Execute削除SQLBOM(ctx context.Context, dbmap *gorp.DbMap, input 削除InputBOM) error {
-	_, err := dbmap.WithContext(ctx).Delete(&RowBOM{Id: input.ID})
+func Execute削除SQLBOM(ctx context.Context, db *sql.DB, input 削除InputBOM) error {
+	_, err := db.ExecContext(ctx, `DELETE FROM "BOM" WHERE id=$1`, input.ID)
 	return err
 }
 
-func Execute一括削除SQLBOM(ctx context.Context, dbmap *gorp.DbMap, input 一括削除InputBOM) error {
+func Execute一括削除SQLBOM(ctx context.Context, db *sql.DB, input 一括削除InputBOM) error {
 	if len(input.IDs) == 0 {
 		return nil
 	}
@@ -171,29 +152,28 @@ func Execute一括削除SQLBOM(ctx context.Context, dbmap *gorp.DbMap, input 一
 		ph[i] = fmt.Sprintf("$%d", i+1)
 		args[i] = id
 	}
-	_, err := dbmap.Db.ExecContext(ctx, fmt.Sprintf(`DELETE FROM "BOM" WHERE id IN (%s)`, strings.Join(ph, ",")), args...)
+	_, err := db.ExecContext(ctx, fmt.Sprintf(`DELETE FROM "BOM" WHERE id IN (%s)`, strings.Join(ph, ",")), args...)
 	return err
 }
 
-func GetByIDSQLBOM(ctx context.Context, dbmap *gorp.DbMap, id int) (ResponseBOM, error) {
-	obj, err := dbmap.WithContext(ctx).Get(RowBOM{}, id)
+func GetByIDSQLBOM(ctx context.Context, db *sql.DB, id int) (ResponseBOM, error) {
+	var r RowBOM
+	err := db.QueryRowContext(ctx,
+		`SELECT id, "コード", "版", "名称", created_at, updated_at FROM "BOM" WHERE id=$1`, id,
+	).Scan(&r.Id, &r.コード, &r.版, &r.名称, &r.CreatedAt, &r.UpdatedAt)
 	if err != nil {
 		return ResponseBOM{}, err
 	}
-	if obj == nil {
-		return ResponseBOM{}, fmt.Errorf("record not found: %d", id)
-	}
-	r := obj.(*RowBOM)
-	return ResponseBOM{RowBOM: *r}, nil
+	return ResponseBOM{RowBOM: r}, nil
 }
 
-func GetByIDBOM詳細SQL(ctx context.Context, dbmap *gorp.DbMap, id int) (ResponseBOM詳細, error) {
-	bom, err := GetByIDSQLBOM(ctx, dbmap, id)
+func GetByIDBOM詳細SQL(ctx context.Context, db *sql.DB, id int) (ResponseBOM詳細, error) {
+	bom, err := GetByIDSQLBOM(ctx, db, id)
 	if err != nil {
 		return ResponseBOM詳細{}, err
 	}
 
-	rows, err := dbmap.Db.QueryContext(ctx,
+	rows, err := db.QueryContext(ctx,
 		`SELECT bl.id, bl."BOM_ID", bl."区分", bl."品目ID", bl."数量", bl."単位", bl."参照BOMコード", bl."参照BOM版", bl.created_at, bl.updated_at, COALESCE(i."コード",''), COALESCE(i."名称",'') FROM "BOM明細" bl LEFT JOIN "品目" i ON bl."品目ID" = i.id WHERE bl."BOM_ID"=$1 ORDER BY bl.id`, id)
 	if err != nil {
 		return ResponseBOM詳細{}, err
@@ -216,9 +196,8 @@ func GetByIDBOM詳細SQL(ctx context.Context, dbmap *gorp.DbMap, id int) (Respon
 	}
 
 	return ResponseBOM詳細{
-		RowBOM: bom.RowBOM,
+		RowBOM:     bom.RowBOM,
 		製造品目アウトプット: 製造品目アウトプット,
-		投入品目インプット: 投入品目インプット,
+		投入品目インプット:  投入品目インプット,
 	}, nil
 }
-

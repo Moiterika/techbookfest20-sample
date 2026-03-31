@@ -7,36 +7,36 @@ import (
 
 // Row取引区分 は 取引区分 テーブルの行
 type Row取引区分 struct {
-	Id int `db:"id"`
-	コード string `db:"コード"`
-	名称 string `db:"名称"`
-	係数 int `db:"係数"`
+	Id        int       `db:"id"`
+	コード       string    `db:"コード"`
+	名称        string    `db:"名称"`
+	係数        int       `db:"係数"`
 	CreatedAt time.Time `db:"created_at"`
 	UpdatedAt time.Time `db:"updated_at"`
 }
 
 type 作成Input取引区分 struct {
 	コード string
-	名称 string
-	係数 int
+	名称  string
+	係数  int
 }
 
 type 更新Input取引区分 struct {
-	ID int
+	ID  int
 	コード string
-	名称 string
-	係数 int
+	名称  string
+	係数  int
 }
 
-type 削除Input取引区分 struct { ID int }
-type 一括削除Input取引区分 struct { IDs []int }
+type 削除Input取引区分 struct{ ID int }
+type 一括削除Input取引区分 struct{ IDs []int }
 type 一覧Input取引区分 struct {
 	Page int
 	Size int
-	Q string
+	Q    string
 }
 
-type Response取引区分 struct { Row取引区分 }
+type Response取引区分 struct{ Row取引区分 }
 
 type ListResult取引区分 struct {
 	Records     []Response取引区分

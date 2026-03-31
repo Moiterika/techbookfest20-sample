@@ -3,11 +3,11 @@ package features
 
 import (
 	"context"
+	"database/sql"
 	"fmt"
 	"math"
 	"strings"
 	"time"
-	"github.com/go-gorp/gorp/v3"
 )
 
 var (
@@ -15,9 +15,10 @@ var (
 	_ = strings.Join
 	_ = time.Now
 	_ = math.Max
+	_ sql.NullString
 )
 
-func Execute一覧SQL品目(ctx context.Context, dbmap *gorp.DbMap, input 一覧Input品目) (ListResult品目, error) {
+func Execute一覧SQL品目(ctx context.Context, db *sql.DB, input 一覧Input品目) (ListResult品目, error) {
 	size := input.Size
 	if size != 20 && size != 50 && size != 100 {
 		size = 20
@@ -36,17 +37,21 @@ func Execute一覧SQL品目(ctx context.Context, dbmap *gorp.DbMap, input 一覧
 	}
 
 	var total int
-	if err := dbmap.SelectOne(&total, `SELECT COUNT(*) FROM "品目" `+where, args...); err != nil {
+	if err := db.QueryRowContext(ctx, `SELECT COUNT(*) FROM "品目" `+where, args...).Scan(&total); err != nil {
 		return ListResult品目{}, err
 	}
 
 	totalPages := int(math.Max(1, math.Ceil(float64(total)/float64(size))))
 	page := input.Page
-	if page < 1 { page = 1 }
-	if page > totalPages { page = totalPages }
+	if page < 1 {
+		page = 1
+	}
+	if page > totalPages {
+		page = totalPages
+	}
 
 	offset := len(args)
-	rows, err := dbmap.Db.QueryContext(ctx,
+	rows, err := db.QueryContext(ctx,
 		fmt.Sprintf(`SELECT id, "コード", "名称", "カテゴリ", "単価", "バーコード", created_at, updated_at FROM "品目" %s ORDER BY id DESC LIMIT $%d OFFSET $%d`, where, offset+1, offset+2),
 		append(args, size, (page-1)*size)...)
 	if err != nil {
@@ -62,55 +67,43 @@ func Execute一覧SQL品目(ctx context.Context, dbmap *gorp.DbMap, input 一覧
 		}
 		records = append(records, Response品目{Row品目: r})
 	}
-	if records == nil { records = []Response品目{} }
+	if records == nil {
+		records = []Response品目{}
+	}
 
 	return ListResult品目{Records: records, CurrentPage: page, TotalPages: totalPages, PageSize: size}, nil
 }
 
-func Execute登録SQL品目(ctx context.Context, dbmap *gorp.DbMap, input 作成Input品目) (Response品目, error) {
+func Execute登録SQL品目(ctx context.Context, db *sql.DB, input 作成Input品目) (Response品目, error) {
 	now := time.Now()
-	r := Row品目{
-		コード: input.コード,
-		名称: input.名称,
-		カテゴリ: toNullString(input.カテゴリ),
-		単価: input.単価,
-		バーコード: toNullString(input.バーコード),
-		CreatedAt: now,
-		UpdatedAt: now,
-	}
-	if err := dbmap.WithContext(ctx).Insert(&r); err != nil {
+	var r Row品目
+	err := db.QueryRowContext(ctx,
+		`INSERT INTO "品目" ("コード", "名称", "カテゴリ", "単価", "バーコード", created_at, updated_at) VALUES ($1, $2, $3, $4, $5, $6, $7) RETURNING id, "コード", "名称", "カテゴリ", "単価", "バーコード", created_at, updated_at`,
+		input.コード, input.名称, toNullString(input.カテゴリ), input.単価, toNullString(input.バーコード), now, now,
+	).Scan(&r.Id, &r.コード, &r.名称, &r.カテゴリ, &r.単価, &r.バーコード, &r.CreatedAt, &r.UpdatedAt)
+	if err != nil {
 		return Response品目{}, err
 	}
 	return Response品目{Row品目: r}, nil
 }
 
-func Execute更新SQL品目(ctx context.Context, dbmap *gorp.DbMap, input 更新Input品目) (Response品目, error) {
-	obj, err := dbmap.WithContext(ctx).Get(Row品目{}, input.ID)
+func Execute更新SQL品目(ctx context.Context, db *sql.DB, input 更新Input品目) (Response品目, error) {
+	now := time.Now()
+	_, err := db.ExecContext(ctx,
+		`UPDATE "品目" SET "コード"=$1, "名称"=$2, "カテゴリ"=$3, "単価"=$4, "バーコード"=$5, updated_at=$6 WHERE id=$7`,
+		input.コード, input.名称, toNullString(input.カテゴリ), input.単価, toNullString(input.バーコード), now, input.ID)
 	if err != nil {
 		return Response品目{}, err
 	}
-	if obj == nil {
-		return Response品目{}, fmt.Errorf("record not found: %d", input.ID)
-	}
-	r := obj.(*Row品目)
-	r.コード = input.コード
-	r.名称 = input.名称
-	r.カテゴリ = toNullString(input.カテゴリ)
-	r.単価 = input.単価
-	r.バーコード = toNullString(input.バーコード)
-	r.UpdatedAt = time.Now()
-	if _, err := dbmap.WithContext(ctx).Update(r); err != nil {
-		return Response品目{}, err
-	}
-	return Response品目{Row品目: *r}, nil
+	return GetByIDSQL品目(ctx, db, input.ID)
 }
 
-func Execute削除SQL品目(ctx context.Context, dbmap *gorp.DbMap, input 削除Input品目) error {
-	_, err := dbmap.WithContext(ctx).Delete(&Row品目{Id: input.ID})
+func Execute削除SQL品目(ctx context.Context, db *sql.DB, input 削除Input品目) error {
+	_, err := db.ExecContext(ctx, `DELETE FROM "品目" WHERE id=$1`, input.ID)
 	return err
 }
 
-func Execute一括削除SQL品目(ctx context.Context, dbmap *gorp.DbMap, input 一括削除Input品目) error {
+func Execute一括削除SQL品目(ctx context.Context, db *sql.DB, input 一括削除Input品目) error {
 	if len(input.IDs) == 0 {
 		return nil
 	}
@@ -120,19 +113,17 @@ func Execute一括削除SQL品目(ctx context.Context, dbmap *gorp.DbMap, input 
 		ph[i] = fmt.Sprintf("$%d", i+1)
 		args[i] = id
 	}
-	_, err := dbmap.Db.ExecContext(ctx, fmt.Sprintf(`DELETE FROM "品目" WHERE id IN (%s)`, strings.Join(ph, ",")), args...)
+	_, err := db.ExecContext(ctx, fmt.Sprintf(`DELETE FROM "品目" WHERE id IN (%s)`, strings.Join(ph, ",")), args...)
 	return err
 }
 
-func GetByIDSQL品目(ctx context.Context, dbmap *gorp.DbMap, id int) (Response品目, error) {
-	obj, err := dbmap.WithContext(ctx).Get(Row品目{}, id)
+func GetByIDSQL品目(ctx context.Context, db *sql.DB, id int) (Response品目, error) {
+	var r Row品目
+	err := db.QueryRowContext(ctx,
+		`SELECT id, "コード", "名称", "カテゴリ", "単価", "バーコード", created_at, updated_at FROM "品目" WHERE id=$1`, id,
+	).Scan(&r.Id, &r.コード, &r.名称, &r.カテゴリ, &r.単価, &r.バーコード, &r.CreatedAt, &r.UpdatedAt)
 	if err != nil {
 		return Response品目{}, err
 	}
-	if obj == nil {
-		return Response品目{}, fmt.Errorf("record not found: %d", id)
-	}
-	r := obj.(*Row品目)
-	return Response品目{Row品目: *r}, nil
+	return Response品目{Row品目: r}, nil
 }
-

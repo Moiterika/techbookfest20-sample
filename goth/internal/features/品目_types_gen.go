@@ -8,43 +8,43 @@ import (
 
 // Row品目 は 品目 テーブルの行
 type Row品目 struct {
-	Id int `db:"id"`
-	コード string `db:"コード"`
-	名称 string `db:"名称"`
-	カテゴリ sql.NullString `db:"カテゴリ"`
-	単価 int `db:"単価"`
-	バーコード sql.NullString `db:"バーコード"`
-	CreatedAt time.Time `db:"created_at"`
-	UpdatedAt time.Time `db:"updated_at"`
+	Id        int            `db:"id"`
+	コード       string         `db:"コード"`
+	名称        string         `db:"名称"`
+	カテゴリ      sql.NullString `db:"カテゴリ"`
+	単価        int            `db:"単価"`
+	バーコード     sql.NullString `db:"バーコード"`
+	CreatedAt time.Time      `db:"created_at"`
+	UpdatedAt time.Time      `db:"updated_at"`
 }
 
 type 作成Input品目 struct {
-	コード string
-	名称 string
-	カテゴリ *string
-	単価 int
+	コード   string
+	名称    string
+	カテゴリ  *string
+	単価    int
 	バーコード *string
 }
 
 type 更新Input品目 struct {
-	ID int
-	コード string
-	名称 string
-	カテゴリ *string
-	単価 int
+	ID    int
+	コード   string
+	名称    string
+	カテゴリ  *string
+	単価    int
 	バーコード *string
 }
 
-type 削除Input品目 struct { ID int }
-type 一括削除Input品目 struct { IDs []int }
+type 削除Input品目 struct{ ID int }
+type 一括削除Input品目 struct{ IDs []int }
 type 一覧Input品目 struct {
 	Page int
 	Size int
-	Q string
+	Q    string
 	カテゴリ string
 }
 
-type Response品目 struct { Row品目 }
+type Response品目 struct{ Row品目 }
 
 type ListResult品目 struct {
 	Records     []Response品目

@@ -23,9 +23,13 @@ func (h *Handler取引区分) HandlePage取引区分(w http.ResponseWriter, r *h
 
 func (h *Handler取引区分) Handle一覧取引区分(w http.ResponseWriter, r *http.Request) {
 	page, _ := strconv.Atoi(r.URL.Query().Get("page"))
-	if page < 1 { page = 1 }
+	if page < 1 {
+		page = 1
+	}
 	size, _ := strconv.Atoi(r.URL.Query().Get("size"))
-	if size < 1 { size = 20 }
+	if size < 1 {
+		size = 20
+	}
 	qParam := r.URL.Query().Get("q")
 	result, err := h.Get一覧取引区分(r.Context(), 一覧Input取引区分{Page: page, Size: size, Q: qParam})
 	if err != nil {

@@ -2,7 +2,9 @@
  * crud.js — CRUD テーブル共通クライアントサイドロジック
  *
  * - select-all チェックボックス制御
+ * - 選択コピー (bulk copy)
  * - 選択削除 (bulk delete)
+ * - ダウンロード (export)
  * - htmx swap 後の select-all リセット
  */
 
@@ -31,6 +33,61 @@ document.addEventListener("htmx:afterSwap", function (e) {
   if (selectAll) selectAll.checked = false;
 });
 
+// ── 選択コピー ──
+document.addEventListener("click", function (e) {
+  var btn = e.target.closest ? e.target.closest("[data-bulk-copy]") : null;
+  if (!btn) return;
+
+  var bodyTargetId = btn.dataset.bodyTarget;
+  var tbody = document.getElementById(bodyTargetId);
+  if (!tbody) return;
+
+  var table = tbody.closest("table");
+  if (!table) return;
+
+  // 操作列のインデックスを特定（除外用）
+  var thCells = Array.from(table.querySelectorAll("thead th"));
+  var actionIdx = -1;
+  for (var i = 0; i < thCells.length; i++) {
+    if ((thCells[i].textContent || "").trim() === "操作") {
+      actionIdx = i;
+      break;
+    }
+  }
+  // チェックボックス列（先頭）も除外
+  var skipIndices = {};
+  skipIndices[0] = true;
+  if (actionIdx >= 0) skipIndices[actionIdx] = true;
+
+  var headers = [];
+  for (var i = 0; i < thCells.length; i++) {
+    if (!skipIndices[i]) headers.push((thCells[i].textContent || "").trim());
+  }
+
+  var checked = tbody.querySelectorAll('input[name="rowSelect"]:checked');
+  if (checked.length === 0) return;
+
+  if (!confirm(checked.length + " 件の行をクリップボードにコピーしますか？")) return;
+
+  var rows = [];
+  for (var j = 0; j < checked.length; j++) {
+    var tr = checked[j].closest("tr");
+    if (!tr) continue;
+    var cells = tr.querySelectorAll("td");
+    var row = [];
+    for (var k = 0; k < cells.length; k++) {
+      if (!skipIndices[k]) row.push((cells[k].textContent || "").trim());
+    }
+    rows.push(row);
+  }
+
+  var lines = [headers.join("\t")];
+  for (var r = 0; r < rows.length; r++) {
+    lines.push(rows[r].join("\t"));
+  }
+  navigator.clipboard.writeText(lines.join("\n"));
+});
+
 // ── 選択削除 ──
 document.addEventListener("click", function (e) {
   var btn = e.target.closest ? e.target.closest("[data-bulk-delete]") : null;
@@ -53,10 +110,16 @@ document.addEventListener("click", function (e) {
   }
   if (!confirm(ids.length + " 件の項目を削除しますか？")) return;
 
+  // Go ハンドラは r.Form["ids[]"] を期待するので FormData で送信
+  var formData = new URLSearchParams();
+  for (var i = 0; i < ids.length; i++) {
+    formData.append("ids[]", ids[i]);
+  }
+
   fetch(baseUrl, {
     method: "DELETE",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({ ids: ids }),
+    headers: { "Content-Type": "application/x-www-form-urlencoded" },
+    body: formData.toString(),
   }).then(function (res) {
     if (res.ok) {
       for (var i = 0; i < checked.length; i++) {
@@ -69,3 +132,18 @@ document.addEventListener("click", function (e) {
     }
   });
 });
+
+// ── ダウンロード (export) ──
+window.__crudExport = function (baseUrl, format, searchContainerId) {
+  var params = new URLSearchParams({ format: format });
+  if (searchContainerId) {
+    var container = document.getElementById(searchContainerId);
+    if (container) {
+      var inputs = container.querySelectorAll("input[name], select[name]");
+      for (var i = 0; i < inputs.length; i++) {
+        if (inputs[i].value) params.set(inputs[i].name, inputs[i].value);
+      }
+    }
+  }
+  window.location.href = baseUrl + "/export?" + params.toString();
+};

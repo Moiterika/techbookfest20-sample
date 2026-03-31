@@ -2,13 +2,17 @@
 package features
 
 import (
+	"encoding/csv"
+	"fmt"
 	"net/http"
 	"strconv"
+	"time"
 )
 
 func (h *Handler品目) RegisterRoutes品目(mux *http.ServeMux) {
 	mux.HandleFunc("GET /品目", h.HandlePage品目)
 	mux.HandleFunc("GET /api/品目", h.Handle一覧品目)
+	mux.HandleFunc("GET /api/品目/export", h.HandleExport品目)
 	mux.HandleFunc("POST /api/品目", h.Handle登録品目)
 	mux.HandleFunc("DELETE /api/品目", h.Handle一括削除品目)
 	mux.HandleFunc("PUT /api/品目/{id}", h.Handle更新品目)
@@ -101,11 +105,12 @@ func (h *Handler品目) Handle削除品目(w http.ResponseWriter, r *http.Reques
 }
 
 func (h *Handler品目) Handle一括削除品目(w http.ResponseWriter, r *http.Request) {
-	if err := r.ParseForm(); err != nil {
+	form, err := ParseDeleteForm(r)
+	if err != nil {
 		http.Error(w, "Bad request", http.StatusBadRequest)
 		return
 	}
-	ids := ParseIntSlice(r.Form["ids[]"])
+	ids := ParseIntSlice(form["ids[]"])
 	if err := h.Execute一括削除品目(r.Context(), 一括削除Input品目{IDs: ids}); err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
@@ -126,4 +131,43 @@ func (h *Handler品目) HandleEdit品目(w http.ResponseWriter, r *http.Request)
 	}
 	w.Header().Set("Content-Type", "text/html; charset=utf-8")
 	RenderEditRow品目(item).Render(r.Context(), w)
+}
+
+func (h *Handler品目) HandleExport品目(w http.ResponseWriter, r *http.Request) {
+	format := r.URL.Query().Get("format")
+	if format == "" {
+		format = "csv"
+	}
+	if format == "xlsx" {
+		http.Error(w, "XLSX export is not yet supported. Please use CSV or TSV.", http.StatusNotImplemented)
+		return
+	}
+	qParam := r.URL.Query().Get("q")
+	カテゴリParam := r.URL.Query().Get("カテゴリ")
+	records, err := h.GetExport品目(r.Context(), 一覧Input品目{Q: qParam, カテゴリ: カテゴリParam})
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+	suffix := time.Now().Format("20060102")
+	filename := "品目_" + suffix
+	mime := "text/csv;charset=utf-8"
+	if format == "tsv" {
+		mime = "text/tab-separated-values;charset=utf-8"
+		filename += ".tsv"
+	} else {
+		filename += ".csv"
+	}
+	w.Header().Set("Content-Type", mime)
+	w.Header().Set("Content-Disposition", "attachment; filename=\""+filename+"\"")
+	w.Write([]byte{0xEF, 0xBB, 0xBF})
+	cw := csv.NewWriter(w)
+	if format == "tsv" {
+		cw.Comma = '\t'
+	}
+	cw.Write([]string{"品目コード", "品目名", "カテゴリ", "単価", "バーコード"})
+	for _, item := range records {
+		cw.Write([]string{item.コード, item.名称, NullStrOr(item.カテゴリ, ""), fmt.Sprintf("%d", item.単価), NullStrOr(item.バーコード, "")})
+	}
+	cw.Flush()
 }

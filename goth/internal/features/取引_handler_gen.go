@@ -2,13 +2,17 @@
 package features
 
 import (
+	"encoding/csv"
+	"fmt"
 	"net/http"
 	"strconv"
+	"time"
 )
 
 func (h *Handler取引) RegisterRoutes取引(mux *http.ServeMux) {
 	mux.HandleFunc("GET /取引", h.HandlePage取引)
 	mux.HandleFunc("GET /api/取引", h.Handle一覧取引)
+	mux.HandleFunc("GET /api/取引/export", h.HandleExport取引)
 	mux.HandleFunc("POST /api/取引", h.Handle登録取引)
 	mux.HandleFunc("DELETE /api/取引", h.Handle一括削除取引)
 	mux.HandleFunc("PUT /api/取引/{id}", h.Handle更新取引)
@@ -101,11 +105,12 @@ func (h *Handler取引) Handle削除取引(w http.ResponseWriter, r *http.Reques
 }
 
 func (h *Handler取引) Handle一括削除取引(w http.ResponseWriter, r *http.Request) {
-	if err := r.ParseForm(); err != nil {
+	form, err := ParseDeleteForm(r)
+	if err != nil {
 		http.Error(w, "Bad request", http.StatusBadRequest)
 		return
 	}
-	ids := ParseIntSlice(r.Form["ids[]"])
+	ids := ParseIntSlice(form["ids[]"])
 	if err := h.Execute一括削除取引(r.Context(), 一括削除Input取引{IDs: ids}); err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
@@ -126,4 +131,43 @@ func (h *Handler取引) HandleEdit取引(w http.ResponseWriter, r *http.Request)
 	}
 	w.Header().Set("Content-Type", "text/html; charset=utf-8")
 	RenderEditRow取引(item).Render(r.Context(), w)
+}
+
+func (h *Handler取引) HandleExport取引(w http.ResponseWriter, r *http.Request) {
+	format := r.URL.Query().Get("format")
+	if format == "" {
+		format = "csv"
+	}
+	if format == "xlsx" {
+		http.Error(w, "XLSX export is not yet supported. Please use CSV or TSV.", http.StatusNotImplemented)
+		return
+	}
+	開始日Param := r.URL.Query().Get("開始日")
+	終了日Param := r.URL.Query().Get("終了日")
+	records, err := h.GetExport取引(r.Context(), 一覧Input取引{開始日: 開始日Param, 終了日: 終了日Param})
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+	suffix := time.Now().Format("20060102")
+	filename := "取引_" + suffix
+	mime := "text/csv;charset=utf-8"
+	if format == "tsv" {
+		mime = "text/tab-separated-values;charset=utf-8"
+		filename += ".tsv"
+	} else {
+		filename += ".csv"
+	}
+	w.Header().Set("Content-Type", mime)
+	w.Header().Set("Content-Disposition", "attachment; filename=\""+filename+"\"")
+	w.Write([]byte{0xEF, 0xBB, 0xBF})
+	cw := csv.NewWriter(w)
+	if format == "tsv" {
+		cw.Comma = '\t'
+	}
+	cw.Write([]string{"日付", "取引区分", "単価", "数量", "金額"})
+	for _, item := range records {
+		cw.Write([]string{item.日付, fmt.Sprintf("%d", item.取引区分ID), fmt.Sprintf("%d", item.単価), fmt.Sprintf("%d", item.数量), fmt.Sprintf("%d", item.金額)})
+	}
+	cw.Flush()
 }

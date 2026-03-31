@@ -41,3 +41,7 @@ func (h *Handler取引) Execute一括削除取引(ctx context.Context, input 一
 func (h *Handler取引) GetByID取引(ctx context.Context, id int) (Response取引, error) {
 	return GetByIDSQL取引(ctx, h.DB, id)
 }
+
+func (h *Handler取引) GetExport取引(ctx context.Context, input 一覧Input取引) ([]Response取引, error) {
+	return ExecuteExportSQL取引(ctx, h.DB, input)
+}

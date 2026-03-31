@@ -255,6 +255,7 @@ func main() {
 		genDelete(&sb, e)
 		genBatchDelete(&sb, e)
 		genGetByID(&sb, e)
+		genExport(&sb, e)
 		if e.Detail != nil {
 			genDetail(&sb, e)
 		}
@@ -626,6 +627,68 @@ func genGetByID(sb *strings.Builder, e Entity) {
 	sb.WriteString("\tif err != nil {\n")
 	sb.WriteString(fmt.Sprintf("\t\treturn %s{}, err\n\t}\n", e.ResponseStruct))
 	sb.WriteString(fmt.Sprintf("\treturn %s{%s: r}, nil\n", e.ResponseStruct, e.RowStruct))
+	sb.WriteString("}\n\n")
+}
+
+// ── Export (全件取得、ページネーションなし) ──
+
+func genExport(sb *strings.Builder, e Entity) {
+	JP := e.Name
+	table := sqlQ(e.Table)
+	selectList := allCols(e.Fields)
+	scanList := allScan(e.Fields, "r")
+
+	sb.WriteString(fmt.Sprintf("func ExecuteExportSQL%s(ctx context.Context, db *sql.DB, input %s) ([]%s, error) {\n", JP, e.ListInput, e.ResponseStruct))
+	sb.WriteString("\twhere := \"WHERE 1=1\"\n")
+	sb.WriteString("\targs := []any{}\n")
+
+	if e.Search != nil && len(e.Search.Columns) > 0 {
+		sb.WriteString(fmt.Sprintf("\tif input.%s != \"\" {\n", e.Search.InputField))
+		sb.WriteString(fmt.Sprintf("\t\targs = append(args, \"%%\"+input.%s+\"%%\")\n", e.Search.InputField))
+		var clauses []string
+		for _, col := range e.Search.Columns {
+			clauses = append(clauses, fmt.Sprintf(`%s ILIKE $%%d`, sqlQ(col)))
+		}
+		sb.WriteString("\t\tidx := len(args)\n")
+		joined := strings.Join(clauses, " OR ")
+		sb.WriteString(fmt.Sprintf("\t\twhere += fmt.Sprintf(` AND (%s)`, %s)\n", joined, repeatIdx(len(e.Search.Columns))))
+		sb.WriteString("\t}\n")
+	}
+
+	for _, f := range e.Filters {
+		sb.WriteString(fmt.Sprintf("\tif input.%s != \"\" {\n", f.InputField))
+		switch f.Op {
+		case "ilike":
+			sb.WriteString(fmt.Sprintf("\t\targs = append(args, \"%%\"+input.%s+\"%%\")\n", f.InputField))
+			sb.WriteString(fmt.Sprintf("\t\twhere += fmt.Sprintf(` AND %s ILIKE $%%d`, len(args))\n", sqlQ(f.Column)))
+		case "eq":
+			sb.WriteString(fmt.Sprintf("\t\targs = append(args, input.%s)\n", f.InputField))
+			sb.WriteString(fmt.Sprintf("\t\twhere += fmt.Sprintf(` AND %s = $%%d`, len(args))\n", sqlQ(f.Column)))
+		case "gte":
+			sb.WriteString(fmt.Sprintf("\t\targs = append(args, input.%s)\n", f.InputField))
+			sb.WriteString(fmt.Sprintf("\t\twhere += fmt.Sprintf(` AND %s >= $%%d`, len(args))\n", sqlQ(f.Column)))
+		case "lte":
+			sb.WriteString(fmt.Sprintf("\t\targs = append(args, input.%s)\n", f.InputField))
+			sb.WriteString(fmt.Sprintf("\t\twhere += fmt.Sprintf(` AND %s <= $%%d`, len(args))\n", sqlQ(f.Column)))
+		}
+		sb.WriteString("\t}\n")
+	}
+
+	sb.WriteString("\n\trows, err := db.QueryContext(ctx,\n")
+	sb.WriteString(fmt.Sprintf("\t\tfmt.Sprintf(`SELECT %s FROM %s %%s ORDER BY id DESC`, where),\n", selectList, table))
+	sb.WriteString("\t\targs...)\n")
+	sb.WriteString("\tif err != nil {\n")
+	sb.WriteString(fmt.Sprintf("\t\treturn nil, err\n\t}\n"))
+	sb.WriteString("\tdefer rows.Close()\n\n")
+
+	sb.WriteString(fmt.Sprintf("\tvar records []%s\n", e.ResponseStruct))
+	sb.WriteString("\tfor rows.Next() {\n")
+	sb.WriteString(fmt.Sprintf("\t\tvar r %s\n", e.RowStruct))
+	sb.WriteString(fmt.Sprintf("\t\tif err := rows.Scan(%s); err != nil {\n", scanList))
+	sb.WriteString("\t\t\treturn nil, err\n\t\t}\n")
+	sb.WriteString(fmt.Sprintf("\t\trecords = append(records, %s{%s: r})\n", e.ResponseStruct, e.RowStruct))
+	sb.WriteString("\t}\n")
+	sb.WriteString("\treturn records, nil\n")
 	sb.WriteString("}\n\n")
 }
 

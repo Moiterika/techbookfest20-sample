@@ -41,3 +41,7 @@ func (h *HandlerBOM) Execute削除BOM(ctx context.Context, input 削除InputBOM)
 func (h *HandlerBOM) Execute一括削除BOM(ctx context.Context, input 一括削除InputBOM) error {
 	return Execute一括削除SQLBOM(ctx, h.DB, input)
 }
+
+func (h *HandlerBOM) GetExportBOM(ctx context.Context, input 一覧InputBOM) ([]ResponseBOM, error) {
+	return ExecuteExportSQLBOM(ctx, h.DB, input)
+}

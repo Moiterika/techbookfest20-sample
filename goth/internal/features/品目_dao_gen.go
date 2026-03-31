@@ -127,3 +127,35 @@ func GetByIDSQL品目(ctx context.Context, db *sql.DB, id int) (Response品目, 
 	}
 	return Response品目{Row品目: r}, nil
 }
+
+func ExecuteExportSQL品目(ctx context.Context, db *sql.DB, input 一覧Input品目) ([]Response品目, error) {
+	where := "WHERE 1=1"
+	args := []any{}
+	if input.Q != "" {
+		args = append(args, "%"+input.Q+"%")
+		idx := len(args)
+		where += fmt.Sprintf(` AND ("コード" ILIKE $%d OR "名称" ILIKE $%d)`, idx, idx)
+	}
+	if input.カテゴリ != "" {
+		args = append(args, "%"+input.カテゴリ+"%")
+		where += fmt.Sprintf(` AND "カテゴリ" ILIKE $%d`, len(args))
+	}
+
+	rows, err := db.QueryContext(ctx,
+		fmt.Sprintf(`SELECT id, "コード", "名称", "カテゴリ", "単価", "バーコード", created_at, updated_at FROM "品目" %s ORDER BY id DESC`, where),
+		args...)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+
+	var records []Response品目
+	for rows.Next() {
+		var r Row品目
+		if err := rows.Scan(&r.Id, &r.コード, &r.名称, &r.カテゴリ, &r.単価, &r.バーコード, &r.CreatedAt, &r.UpdatedAt); err != nil {
+			return nil, err
+		}
+		records = append(records, Response品目{Row品目: r})
+	}
+	return records, nil
+}

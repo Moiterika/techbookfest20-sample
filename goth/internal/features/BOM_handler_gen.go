@@ -2,6 +2,7 @@
 package features
 
 import (
+	"encoding/csv"
 	"fmt"
 	"net/http"
 	"strconv"
@@ -13,6 +14,7 @@ func (h *HandlerBOM) RegisterRoutesBOM(mux *http.ServeMux) {
 	mux.HandleFunc("GET /BOM/new", h.HandleNewBOM)
 	mux.HandleFunc("GET /BOM/{id}", h.HandleEditBOM)
 	mux.HandleFunc("GET /api/BOM", h.Handle一覧BOM)
+	mux.HandleFunc("GET /api/BOM/export", h.HandleExportBOM)
 	mux.HandleFunc("POST /api/BOM", h.Handle登録BOM)
 	mux.HandleFunc("DELETE /api/BOM", h.Handle一括削除BOM)
 	mux.HandleFunc("PUT /api/BOM/{id}", h.Handle更新BOM)
@@ -118,11 +120,12 @@ func (h *HandlerBOM) Handle削除BOM(w http.ResponseWriter, r *http.Request) {
 }
 
 func (h *HandlerBOM) Handle一括削除BOM(w http.ResponseWriter, r *http.Request) {
-	if err := r.ParseForm(); err != nil {
+	form, err := ParseDeleteForm(r)
+	if err != nil {
 		http.Error(w, "Bad request", http.StatusBadRequest)
 		return
 	}
-	ids := ParseIntSlice(r.Form["ids[]"])
+	ids := ParseIntSlice(form["ids[]"])
 	if err := h.Execute一括削除BOM(r.Context(), 一括削除InputBOM{IDs: ids}); err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
@@ -135,4 +138,42 @@ func (h *HandlerBOM) HandleLineRowBOM(w http.ResponseWriter, r *http.Request) {
 	rowKey := fmt.Sprintf("new-%d-%s", time.Now().UnixMilli(), r.URL.Query().Get("section"))
 	w.Header().Set("Content-Type", "text/html; charset=utf-8")
 	RenderLineRowBOM(section, rowKey).Render(r.Context(), w)
+}
+
+func (h *HandlerBOM) HandleExportBOM(w http.ResponseWriter, r *http.Request) {
+	format := r.URL.Query().Get("format")
+	if format == "" {
+		format = "csv"
+	}
+	if format == "xlsx" {
+		http.Error(w, "XLSX export is not yet supported. Please use CSV or TSV.", http.StatusNotImplemented)
+		return
+	}
+	search := r.URL.Query().Get("q")
+	records, err := h.GetExportBOM(r.Context(), 一覧InputBOM{Search: search})
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+	suffix := time.Now().Format("20060102")
+	filename := "BOM_" + suffix
+	mime := "text/csv;charset=utf-8"
+	if format == "tsv" {
+		mime = "text/tab-separated-values;charset=utf-8"
+		filename += ".tsv"
+	} else {
+		filename += ".csv"
+	}
+	w.Header().Set("Content-Type", mime)
+	w.Header().Set("Content-Disposition", "attachment; filename=\""+filename+"\"")
+	w.Write([]byte{0xEF, 0xBB, 0xBF})
+	cw := csv.NewWriter(w)
+	if format == "tsv" {
+		cw.Comma = '\t'
+	}
+	cw.Write([]string{"BOMコード", "版", "名称"})
+	for _, item := range records {
+		cw.Write([]string{item.コード, item.版, item.名称})
+	}
+	cw.Flush()
 }

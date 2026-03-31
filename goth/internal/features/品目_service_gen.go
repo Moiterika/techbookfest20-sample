@@ -41,3 +41,7 @@ func (h *Handler品目) Execute一括削除品目(ctx context.Context, input 一
 func (h *Handler品目) GetByID品目(ctx context.Context, id int) (Response品目, error) {
 	return GetByIDSQL品目(ctx, h.DB, id)
 }
+
+func (h *Handler品目) GetExport品目(ctx context.Context, input 一覧Input品目) ([]Response品目, error) {
+	return ExecuteExportSQL品目(ctx, h.DB, input)
+}

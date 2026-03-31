@@ -3,8 +3,22 @@ package features
 
 import (
 	"database/sql"
+	"io"
+	"net/http"
+	"net/url"
 	"strconv"
 )
+
+// ParseDeleteForm は DELETE リクエストのボディをパースする。
+// Go の ParseForm は DELETE メソッドのボディを読まないため手動でパースする。
+func ParseDeleteForm(r *http.Request) (url.Values, error) {
+	body, err := io.ReadAll(r.Body)
+	if err != nil {
+		return nil, err
+	}
+	defer r.Body.Close()
+	return url.ParseQuery(string(body))
+}
 
 // ParseIntSlice は文字列スライスを int スライスに変換する
 func ParseIntSlice(ss []string) []int {

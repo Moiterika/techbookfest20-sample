@@ -41,3 +41,7 @@ func (h *Handler取引区分) Execute一括削除取引区分(ctx context.Contex
 func (h *Handler取引区分) GetByID取引区分(ctx context.Context, id int) (Response取引区分, error) {
 	return GetByIDSQL取引区分(ctx, h.DB, id)
 }
+
+func (h *Handler取引区分) GetExport取引区分(ctx context.Context, input 一覧Input取引区分) ([]Response取引区分, error) {
+	return ExecuteExportSQL取引区分(ctx, h.DB, input)
+}

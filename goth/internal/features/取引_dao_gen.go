@@ -126,3 +126,34 @@ func GetByIDSQL取引(ctx context.Context, db *sql.DB, id int) (Response取引, 
 	}
 	return Response取引{Row取引: r}, nil
 }
+
+func ExecuteExportSQL取引(ctx context.Context, db *sql.DB, input 一覧Input取引) ([]Response取引, error) {
+	where := "WHERE 1=1"
+	args := []any{}
+	if input.開始日 != "" {
+		args = append(args, input.開始日)
+		where += fmt.Sprintf(` AND "日付" >= $%d`, len(args))
+	}
+	if input.終了日 != "" {
+		args = append(args, input.終了日)
+		where += fmt.Sprintf(` AND "日付" <= $%d`, len(args))
+	}
+
+	rows, err := db.QueryContext(ctx,
+		fmt.Sprintf(`SELECT id, "日付", "取引区分ID", "品目ID", "単価", "数量", "金額", created_at, updated_at FROM "取引" %s ORDER BY id DESC`, where),
+		args...)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+
+	var records []Response取引
+	for rows.Next() {
+		var r Row取引
+		if err := rows.Scan(&r.Id, &r.日付, &r.取引区分ID, &r.品目ID, &r.単価, &r.数量, &r.金額, &r.CreatedAt, &r.UpdatedAt); err != nil {
+			return nil, err
+		}
+		records = append(records, Response取引{Row取引: r})
+	}
+	return records, nil
+}

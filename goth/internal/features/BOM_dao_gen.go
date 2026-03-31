@@ -167,6 +167,34 @@ func GetByIDSQLBOM(ctx context.Context, db *sql.DB, id int) (ResponseBOM, error)
 	return ResponseBOM{RowBOM: r}, nil
 }
 
+func ExecuteExportSQLBOM(ctx context.Context, db *sql.DB, input 一覧InputBOM) ([]ResponseBOM, error) {
+	where := "WHERE 1=1"
+	args := []any{}
+	if input.Search != "" {
+		args = append(args, "%"+input.Search+"%")
+		idx := len(args)
+		where += fmt.Sprintf(` AND ("コード" ILIKE $%d OR "名称" ILIKE $%d)`, idx, idx)
+	}
+
+	rows, err := db.QueryContext(ctx,
+		fmt.Sprintf(`SELECT id, "コード", "版", "名称", created_at, updated_at FROM "BOM" %s ORDER BY id DESC`, where),
+		args...)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+
+	var records []ResponseBOM
+	for rows.Next() {
+		var r RowBOM
+		if err := rows.Scan(&r.Id, &r.コード, &r.版, &r.名称, &r.CreatedAt, &r.UpdatedAt); err != nil {
+			return nil, err
+		}
+		records = append(records, ResponseBOM{RowBOM: r})
+	}
+	return records, nil
+}
+
 func GetByIDBOM詳細SQL(ctx context.Context, db *sql.DB, id int) (ResponseBOM詳細, error) {
 	bom, err := GetByIDSQLBOM(ctx, db, id)
 	if err != nil {

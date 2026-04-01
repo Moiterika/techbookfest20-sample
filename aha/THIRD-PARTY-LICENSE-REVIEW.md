@@ -129,17 +129,8 @@ Main file: THIRD-PARTY-LICENSE.md
 - Status: Present in node_modules
 - Notes:
 
-## @esbuild/linux-x64@0.27.4 (astro/node_modules/esbuild/node_modules/@esbuild/linux-x64)
-- Main: THIRD-PARTY-LICENSE.md#pkg-esbuild-linux-x64-0-27-4-astro-node-modules-esbuild-node-modules-esbuild-linux-x64
-- Source: git+https://github.com/evanw/esbuild.git
-- License: MIT
-- Files:
-  - (none)
-- Status: Present in node_modules / Missing LICENSE/NOTICE/COPYRIGHT/THIRD-PARTY-NOTICES/THIRD-PARTY-LICENSES/ThirdPartyNoticeText/ThirdPartyText/COPYING files
-- Notes:
-
-## @esbuild/linux-x64@0.27.4 (vite/node_modules/esbuild/node_modules/@esbuild/linux-x64)
-- Main: THIRD-PARTY-LICENSE.md#pkg-esbuild-linux-x64-0-27-4-vite-node-modules-esbuild-node-modules-esbuild-linux-x64
+## @esbuild/linux-x64@0.27.4
+- Main: THIRD-PARTY-LICENSE.md#pkg-esbuild-linux-x64-0-27-4
 - Source: git+https://github.com/evanw/esbuild.git
 - License: MIT
 - Files:
@@ -509,15 +500,6 @@ Main file: THIRD-PARTY-LICENSE.md
 - Status: Present in node_modules
 - Notes:
 
-## adler-32@1.3.1
-- Main: THIRD-PARTY-LICENSE.md#pkg-adler-32-1-3-1
-- Source: git://github.com/SheetJS/js-adler32.git
-- License: Apache-2.0
-- Files:
-  - LICENSE
-- Status: Present in node_modules
-- Notes:
-
 ## alpinejs@3.15.8
 - Main: THIRD-PARTY-LICENSE.md#pkg-alpinejs-3-15-8
 - Source: https://github.com/alpinejs/alpine.git
@@ -644,15 +626,6 @@ Main file: THIRD-PARTY-LICENSE.md
 - Status: Present in node_modules
 - Notes:
 
-## cfb@1.2.2
-- Main: THIRD-PARTY-LICENSE.md#pkg-cfb-1-2-2
-- Source: git://github.com/SheetJS/js-cfb.git
-- License: Apache-2.0
-- Files:
-  - LICENSE
-- Status: Present in node_modules
-- Notes:
-
 ## character-entities-html4@2.1.0
 - Main: THIRD-PARTY-LICENSE.md#pkg-character-entities-html4-2-1-0
 - Source: wooorm/character-entities-html4
@@ -734,15 +707,6 @@ Main file: THIRD-PARTY-LICENSE.md
 - Status: Present in node_modules
 - Notes:
 
-## codepage@1.15.0
-- Main: THIRD-PARTY-LICENSE.md#pkg-codepage-1-15-0
-- Source: git://github.com/SheetJS/js-codepage.git
-- License: Apache-2.0
-- Files:
-  - LICENSE
-- Status: Present in node_modules
-- Notes:
-
 ## comma-separated-tokens@2.0.3
 - Main: THIRD-PARTY-LICENSE.md#pkg-comma-separated-tokens-2-0-3
 - Source: wooorm/comma-separated-tokens
@@ -810,15 +774,6 @@ Main file: THIRD-PARTY-LICENSE.md
 - Main: THIRD-PARTY-LICENSE.md#pkg-cookie-1-1-1
 - Source: jshttp/cookie
 - License: MIT
-- Files:
-  - LICENSE
-- Status: Present in node_modules
-- Notes:
-
-## crc-32@1.2.2
-- Main: THIRD-PARTY-LICENSE.md#pkg-crc-32-1-2-2
-- Source: git://github.com/SheetJS/js-crc32.git
-- License: Apache-2.0
 - Files:
   - LICENSE
 - Status: Present in node_modules
@@ -1094,17 +1049,8 @@ Main file: THIRD-PARTY-LICENSE.md
 - Status: Present in node_modules
 - Notes:
 
-## esbuild@0.27.4 (astro/node_modules/esbuild)
-- Main: THIRD-PARTY-LICENSE.md#pkg-esbuild-0-27-4-astro-node-modules-esbuild
-- Source: git+https://github.com/evanw/esbuild.git
-- License: MIT
-- Files:
-  - LICENSE.md
-- Status: Present in node_modules
-- Notes:
-
-## esbuild@0.27.4 (vite/node_modules/esbuild)
-- Main: THIRD-PARTY-LICENSE.md#pkg-esbuild-0-27-4-vite-node-modules-esbuild
+## esbuild@0.27.4
+- Main: THIRD-PARTY-LICENSE.md#pkg-esbuild-0-27-4
 - Source: git+https://github.com/evanw/esbuild.git
 - License: MIT
 - Files:
@@ -1215,15 +1161,6 @@ Main file: THIRD-PARTY-LICENSE.md
 - Main: THIRD-PARTY-LICENSE.md#pkg-fontkitten-1-0-3
 - Source: git+https://github.com/delucis/fontkitten.git
 - License: MIT
-- Files:
-  - LICENSE
-- Status: Present in node_modules
-- Notes:
-
-## frac@1.1.2
-- Main: THIRD-PARTY-LICENSE.md#pkg-frac-1-1-2
-- Source: git://github.com/SheetJS/frac.git
-- License: Apache-2.0
 - Files:
   - LICENSE
 - Status: Present in node_modules
@@ -2678,15 +2615,6 @@ Main file: THIRD-PARTY-LICENSE.md
 - Status: Present in node_modules
 - Notes:
 
-## ssf@0.11.2
-- Main: THIRD-PARTY-LICENSE.md#pkg-ssf-0-11-2
-- Source: git://github.com/SheetJS/ssf.git
-- License: Apache-2.0
-- Files:
-  - LICENSE
-- Status: Present in node_modules
-- Notes:
-
 ## stringify-entities@4.0.4
 - Main: THIRD-PARTY-LICENSE.md#pkg-stringify-entities-4-0-4
 - Source: wooorm/stringify-entities
@@ -2708,6 +2636,24 @@ Main file: THIRD-PARTY-LICENSE.md
 ## svgo@4.0.1
 - Main: THIRD-PARTY-LICENSE.md#pkg-svgo-4-0-1
 - Source: git://github.com/svg/svgo.git
+- License: MIT
+- Files:
+  - LICENSE
+- Status: Present in node_modules
+- Notes:
+
+## tailwind-merge@3.5.0
+- Main: THIRD-PARTY-LICENSE.md#pkg-tailwind-merge-3-5-0
+- Source: https://github.com/dcastil/tailwind-merge.git
+- License: MIT
+- Files:
+  - LICENSE.md
+- Status: Present in node_modules
+- Notes:
+
+## tailwind-variants@3.2.2
+- Main: THIRD-PARTY-LICENSE.md#pkg-tailwind-variants-3-2-2
+- Source: https://github.com/heroui-inc/tailwind-variants
 - License: MIT
 - Files:
   - LICENSE
@@ -3038,24 +2984,6 @@ Main file: THIRD-PARTY-LICENSE.md
 - Status: Present in node_modules
 - Notes:
 
-## wmf@1.0.2
-- Main: THIRD-PARTY-LICENSE.md#pkg-wmf-1-0-2
-- Source: git://github.com/SheetJS/js-wmf.git
-- License: Apache-2.0
-- Files:
-  - LICENSE
-- Status: Present in node_modules
-- Notes:
-
-## word@0.3.0
-- Main: THIRD-PARTY-LICENSE.md#pkg-word-0-3-0
-- Source: git://github.com/SheetJS/js-word.git
-- License: Apache-2.0
-- Files:
-  - LICENSE
-- Status: Present in node_modules
-- Notes:
-
 ## wrappy@1.0.2
 - Main: THIRD-PARTY-LICENSE.md#pkg-wrappy-1-0-2
 - Source: https://github.com/npm/wrappy
@@ -3065,9 +2993,9 @@ Main file: THIRD-PARTY-LICENSE.md
 - Status: Present in node_modules
 - Notes:
 
-## xlsx@0.18.5
-- Main: THIRD-PARTY-LICENSE.md#pkg-xlsx-0-18-5
-- Source: git://github.com/SheetJS/sheetjs.git
+## xlsx@0.20.3
+- Main: THIRD-PARTY-LICENSE.md#pkg-xlsx-0-20-3
+- Source: https://git.sheetjs.com/SheetJS/sheetjs
 - License: Apache-2.0
 - Files:
   - LICENSE
@@ -3153,8 +3081,7 @@ Main file: THIRD-PARTY-LICENSE.md
 
 ### Missing LICENSE/NOTICE/COPYRIGHT/THIRD-PARTY-NOTICES/THIRD-PARTY-LICENSES/ThirdPartyNoticeText/ThirdPartyText/COPYING files
 
-- @esbuild/linux-x64@0.27.4 (astro/node_modules/esbuild/node_modules/@esbuild/linux-x64)
-- @esbuild/linux-x64@0.27.4 (vite/node_modules/esbuild/node_modules/@esbuild/linux-x64)
+- @esbuild/linux-x64@0.27.4
 - @iconify-json/heroicons@1.2.3
 - @img/sharp-libvips-linux-x64@1.2.4
 - @img/sharp-libvips-linuxmusl-x64@1.2.4

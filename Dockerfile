@@ -51,9 +51,8 @@ RUN mkdir -p /go/pkg/mod && chown -R $USER_UID:$USER_GID /go
 # コンテナ起動時のデフォルトユーザーを指定
 USER $USERNAME
 
-# Bunでclaude-codeをグローバルインストールし、PATHを通す
-RUN bun install -g @anthropic-ai/claude-code
-ENV PATH="/home/${USERNAME}/.bun/bin:${PATH}"
+# claude　codeをネイティブインストールする
+RUN curl -fsSL https://claude.ai/install.sh | bash
 
 # ワークスペースディレクトリ（マウントポイント）を指定
 WORKDIR /workspace

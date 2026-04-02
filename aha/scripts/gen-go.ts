@@ -26,6 +26,17 @@ import * as fs from "fs";
 import * as tsParser from "./ts-parser";
 import { toPascalCase } from "./ts-parser";
 
+/** hx-confirm 属性の templ 式を生成する。
+ *  displayNameKey があれば fmt.Sprintf で item.Field を埋め込む。 */
+function genHxConfirm(config: tsParser.EntityConfigDef): string {
+  if (config.displayNameKey && config.deleteConfirmTemplate.includes("{name}")) {
+    const fmtStr = config.deleteConfirmTemplate.replace("{name}", "%s");
+    return `hx-confirm={ fmt.Sprintf("${fmtStr}", item.${config.displayNameKey}) }`;
+  }
+  return `hx-confirm="${config.deleteConfirmTemplate}"`;
+
+}
+
 // ─── CLI ──────────────────────────────────
 
 const args = process.argv.slice(2);
@@ -820,7 +831,7 @@ function genViewsTempl(entity: EntityDef, fm: FeatureMapping, columns: ColumnDef
   lines.push(`\t\t\t\t\t\t@ui.Icon("ellipsis-vertical-solid", "w-5 h-5")`);
   lines.push(`\t\t\t\t\t</button>`);
   lines.push(`\t\t\t\t\t<div class="${TW.kebabMenu}" x-show="menuOpen" x-transition x-cloak>`);
-  lines.push(`\t\t\t\t\t\t<button class="${TW.kebabItem}" hx-delete={ fmt.Sprintf("${apiPath}/%d", item.Id) } hx-target={ fmt.Sprintf("#${config.idPrefix}-%d", item.Id) } hx-swap="outerHTML swap:0.3s" hx-confirm="${config.deleteConfirmTemplate}" @click="menuOpen = false">`);
+  lines.push(`\t\t\t\t\t\t<button class="${TW.kebabItem}" hx-delete={ fmt.Sprintf("${apiPath}/%d", item.Id) } hx-target={ fmt.Sprintf("#${config.idPrefix}-%d", item.Id) } hx-swap="outerHTML swap:0.3s" ${genHxConfirm(config)} @click="menuOpen = false">`);
   lines.push(`\t\t\t\t\t\t\t@ui.Icon("trash", "w-4 h-4")`);
   lines.push(`\t\t\t\t\t\t\t削除`);
   lines.push(`\t\t\t\t\t\t</button>`);
@@ -1798,7 +1809,7 @@ function genHeaderBodyViewsTempl(parentEntity: EntityDef, fm: FeatureMapping, hb
   lines.push(`\t\t\t\t\t\t@ui.Icon("ellipsis-vertical-solid", "w-5 h-5")`);
   lines.push(`\t\t\t\t\t</button>`);
   lines.push(`\t\t\t\t\t<div class="${TW.kebabMenu}" x-show="menuOpen" x-transition x-cloak>`);
-  lines.push(`\t\t\t\t\t\t<button class="${TW.kebabItem}" hx-delete={ fmt.Sprintf("${apiPath}/%d", item.Id) } hx-target={ fmt.Sprintf("#${config.idPrefix}-%d", item.Id) } hx-swap="outerHTML swap:0.3s" hx-confirm="${config.deleteConfirmTemplate}" @click="menuOpen = false">`);
+  lines.push(`\t\t\t\t\t\t<button class="${TW.kebabItem}" hx-delete={ fmt.Sprintf("${apiPath}/%d", item.Id) } hx-target={ fmt.Sprintf("#${config.idPrefix}-%d", item.Id) } hx-swap="outerHTML swap:0.3s" ${genHxConfirm(config)} @click="menuOpen = false">`);
   lines.push(`\t\t\t\t\t\t\t@ui.Icon("trash", "w-4 h-4")`);
   lines.push(`\t\t\t\t\t\t\t削除`);
   lines.push(`\t\t\t\t\t\t</button>`);
@@ -2196,7 +2207,7 @@ function generateFeature(featureName: string): void {
     idPrefix: "row", baseUrl: `/api/${featureName}`, bodyTargetId: "data-body",
     paginationId: "data-pagination", formTitle: `新規${featureName}登録`,
     emptyMessage: `${featureName}がありません`, deleteConfirmTemplate: "削除しますか？",
-    searchFields: [], searchContainerId: "row-search",
+    displayNameKey: "", searchFields: [], searchContainerId: "row-search",
   };
 
   fs.mkdirSync(featuresDir, { recursive: true });

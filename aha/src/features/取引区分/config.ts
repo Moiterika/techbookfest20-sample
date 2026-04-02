@@ -48,7 +48,7 @@ export const 取引区分エンティティ: EntityConfig = {
   bodyTargetId: "txtypes-body",
   paginationId: "txtypes-pagination",
   displayNameKey: "名称",
-  deleteConfirmTemplate: "「{名称}」を削除しますか？",
+  deleteConfirmTemplate: "「{name}」を削除しますか？",
   formTitle: "新規取引区分登録",
   formAfterRequest:
     "if($event.detail.successful && $event.detail.elt === $el) { $el.reset(); open = false }",

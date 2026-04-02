@@ -52,7 +52,7 @@ export const 品目エンティティ: EntityConfig = {
   bodyTargetId: "items-body",
   paginationId: "items-pagination",
   displayNameKey: "名称",
-  deleteConfirmTemplate: "「{名称}」を削除しますか？",
+  deleteConfirmTemplate: "「{name}」を削除しますか？",
   alpineInitEditRow: (record) =>
     `{ barcodeVal: '${(record.バーコード ?? "").replace(/'/g, "\\'")}' }`,
   alpineInitForm: "{ barcodeVal: '' }",

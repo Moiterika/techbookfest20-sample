@@ -287,6 +287,7 @@ export interface EntityConfigDef {
   formTitle: string;
   emptyMessage: string;
   deleteConfirmTemplate: string;
+  displayNameKey: string;
   searchFields: SearchFieldDef[];
   searchContainerId: string;
 }
@@ -398,6 +399,7 @@ function extractEntityConfigFromObj(obj: ObjectLiteralExpression, sf: SourceFile
     formTitle: getStringProp(obj, "formTitle") || "新規登録",
     emptyMessage: getStringProp(obj, "emptyMessage") || "データがありません",
     deleteConfirmTemplate: getStringProp(obj, "deleteConfirmTemplate") || "削除しますか？",
+    displayNameKey: getStringProp(obj, "displayNameKey") || "",
     searchFields,
     searchContainerId: getStringProp(obj, "searchContainerId") || `${idPrefix}-search`,
   };
@@ -412,6 +414,7 @@ function defaultEntityConfig(idPrefix: string): EntityConfigDef {
     formTitle: "新規登録",
     emptyMessage: "データがありません",
     deleteConfirmTemplate: "削除しますか？",
+    displayNameKey: "",
     searchFields: [],
     searchContainerId: `${idPrefix}-search`,
   };
@@ -511,6 +514,7 @@ export function parseHeaderBodyConfig(configPath: string, featureName: string): 
     formTitle: getStringProp(configObj, "formTitle") || `新規${featureName}登録`,
     emptyMessage: getStringProp(configObj, "emptyMessage") || `${featureName}がありません`,
     deleteConfirmTemplate: getStringProp(configObj, "deleteConfirmTemplate") || "削除しますか？",
+    displayNameKey: getStringProp(configObj, "displayNameKey") || "",
     searchFields: parseSearchFieldsFromAST(configObj, sf),
     searchContainerId: getStringProp(configObj, "searchContainerId") || `${idPrefix}-search`,
   };

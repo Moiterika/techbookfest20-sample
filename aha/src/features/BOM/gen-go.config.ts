@@ -27,7 +27,7 @@ export const BOMヘッダーボディ: HeaderBodyConfig = {
   baseUrl: "/api/BOM",
   bodyTargetId: "boms-body",
   paginationId: "boms-pagination",
-  deleteConfirmTemplate: "「{名称}」を削除しますか？",
+  deleteConfirmTemplate: "「{name}」を削除しますか？",
   displayNameKey: "名称",
   formTitle: "新規BOM登録",
   emptyMessage: "BOMがありません",

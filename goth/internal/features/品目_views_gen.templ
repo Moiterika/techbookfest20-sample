@@ -109,7 +109,7 @@ templ RenderRow品目(item Response品目) {
 						@ui.Icon("ellipsis-vertical-solid", "w-5 h-5")
 					</button>
 					<div class="absolute right-0 top-full z-20 mt-1 bg-white rounded-lg shadow-[0_10px_30px_-5px_rgba(18,28,42,0.08)] py-1 min-w-[120px]" x-show="menuOpen" x-transition x-cloak>
-						<button class="flex items-center gap-2 w-full text-left px-3 py-2 text-sm cursor-pointer text-error border-none bg-transparent hover:bg-error-container/30" hx-delete={ fmt.Sprintf("/api/品目/%d", item.Id) } hx-target={ fmt.Sprintf("#item-%d", item.Id) } hx-swap="outerHTML swap:0.3s" hx-confirm="「{名称}」を削除しますか？" @click="menuOpen = false">
+						<button class="flex items-center gap-2 w-full text-left px-3 py-2 text-sm cursor-pointer text-error border-none bg-transparent hover:bg-error-container/30" hx-delete={ fmt.Sprintf("/api/品目/%d", item.Id) } hx-target={ fmt.Sprintf("#item-%d", item.Id) } hx-swap="outerHTML swap:0.3s" hx-confirm={ fmt.Sprintf("「%s」を削除しますか？", item.名称) } @click="menuOpen = false">
 							@ui.Icon("trash", "w-4 h-4")
 							削除
 						</button>

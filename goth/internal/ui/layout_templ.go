@@ -42,7 +42,7 @@ func Base(title string) templ.Component {
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 2, " - aha</title><link rel=\"stylesheet\" href=\"/static/css/aha.css\"><script src=\"/static/js/htmx.min.js\"></script><script src=\"/static/js/alpine.min.js\" defer></script><script src=\"/static/js/crud.js\" defer></script><script src=\"/static/js/react-barcode.min.js\" defer></script><script>\n\t\t\tdocument.addEventListener('alpine:init', () => {});\n\t\t</script></head><body>")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 2, " - goth</title><link rel=\"stylesheet\" href=\"/static/css/aha.css\"><script src=\"/static/js/htmx.min.js\"></script><script src=\"/static/js/alpine.min.js\" defer></script><script src=\"/static/js/crud.js\" defer></script><script src=\"/static/js/react-barcode.min.js\" defer></script><script>\n\t\t\tdocument.addEventListener('alpine:init', () => {});\n\t\t</script></head><body>")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}

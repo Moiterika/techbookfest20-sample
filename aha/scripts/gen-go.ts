@@ -23,6 +23,8 @@
 
 import * as path from "path";
 import * as fs from "fs";
+import * as tsParser from "./ts-parser";
+import { toPascalCase } from "./ts-parser";
 
 // ─── CLI ──────────────────────────────────
 
@@ -70,25 +72,12 @@ function discoverFeatures(): Record<string, FeatureMapping> {
 
 /** config.ts または gen-go.config.ts から tableName を抽出 */
 function extractTableNameFromFeature(featuresRoot: string, dirName: string): string | null {
-  // 1. config.ts を試す（EntityConfig の tableName フィールド）
   const configPath = path.join(featuresRoot, dirName, "config.ts");
-  if (fs.existsSync(configPath)) {
-    const content = fs.readFileSync(configPath, "utf-8");
-    const m = content.match(/tableName:\s*"([^"]*)"/);
-    if (m) return m[1];
-  }
-  // 2. gen-go.config.ts を試す
   const genConfigPath = path.join(featuresRoot, dirName, "gen-go.config.ts");
-  if (fs.existsSync(genConfigPath)) {
-    const content = fs.readFileSync(genConfigPath, "utf-8");
-    const m = content.match(/tableName\s*=\s*"([^"]*)"/);
-    if (!m) {
-      const m2 = content.match(/tableName:\s*"([^"]*)"/);
-      if (m2) return m2[1];
-    }
-    if (m) return m[1];
-  }
-  return null;
+  return tsParser.extractTableNameFromFeature(
+    fs.existsSync(configPath) ? configPath : null,
+    fs.existsSync(genConfigPath) ? genConfigPath : null,
+  );
 }
 
 const FEATURE_MAP = discoverFeatures();
@@ -105,58 +94,16 @@ const featuresToGenerate = allMode
       ? [ALL_FEATURES[0]]
       : [];
 
-// ─── IR ──────────────────────────────────
-
-interface FieldDef {
-  name: string;
-  goName: string;
-  goType: string;
-  dbColumn: string;
-  isNotNull: boolean;
-  isPrimaryKey: boolean;
-  hasDefault: boolean;
-}
-
-interface EntityDef {
-  tableName: string;
-  structName: string;
-  fields: FieldDef[];
-}
-
-interface ColumnDef {
-  key: string;
-  label: string;
-  type: string; // text, number, date, select, barcode, itemCode, readonlyLookup, computed, actions
-  required: boolean;
-  format: boolean;
-  options: { value: string; label: string }[];
-  expression: string; // computed用
-  min?: number;
-  defaultValue?: string;
-  placeholder?: string;
-}
-
-interface SearchFieldDef {
-  searchType: "text" | "date" | "select";
-  param: string;
-  label: string;
-  placeholder: string;
-  flexClass: string;
-  dbColumns: string[];
-  options: { value: string; label: string }[];
-}
-
-interface EntityConfigDef {
-  idPrefix: string;
-  baseUrl: string; // /api/品目 等 — 日本語
-  bodyTargetId: string;
-  paginationId: string;
-  formTitle: string;
-  emptyMessage: string;
-  deleteConfirmTemplate: string;
-  searchFields: SearchFieldDef[];
-  searchContainerId: string;
-}
+// ─── IR (ts-parser.ts から re-export) ──────────────
+import type {
+  FieldDef,
+  EntityDef,
+  ColumnDef,
+  SearchFieldDef,
+  EntityConfigDef,
+  HeaderBodyChildDef,
+  HeaderBodyDef,
+} from "./ts-parser";
 
 // ─── Nav (Nav.astro から動的解析) ────────────────
 
@@ -239,59 +186,7 @@ function genNavTempl(): string {
 // ─── schema.ts パーサー ────────────────────
 
 function parseSchemaFile(): Map<string, EntityDef> {
-  const content = fs.readFileSync(path.join(srcRoot, "db/schema.ts"), "utf-8");
-  const entities = new Map<string, EntityDef>();
-
-  const tableStartRegex = /export const ([\w\u3000-\u9FFF\uFF00-\uFFEF]+) = pgTable\(\s*"([^"]+)",\s*\{/g;
-  let startMatch;
-
-  while ((startMatch = tableStartRegex.exec(content)) !== null) {
-    const [, , tableName] = startMatch;
-    const bodyStart = startMatch.index + startMatch[0].length;
-    let depth = 1;
-    let i = bodyStart;
-    while (i < content.length && depth > 0) {
-      if (content[i] === "{") depth++;
-      else if (content[i] === "}") depth--;
-      i++;
-    }
-    const body = content.slice(bodyStart, i - 1);
-    const fields = parseTableFields(body);
-
-    entities.set(tableName, {
-      tableName,
-      structName: toPascalCase(tableName) + "Row",
-      fields,
-    });
-  }
-  return entities;
-}
-
-function parseTableFields(body: string): FieldDef[] {
-  const fields: FieldDef[] = [];
-  const joined = body.replace(/\n\s+\./g, ".");
-  for (const line of joined.split("\n")) {
-    const trimmed = line.trim();
-    if (!trimmed || trimmed.startsWith("//") || trimmed.startsWith("/**") || trimmed.startsWith("*")) continue;
-
-    const m = trimmed.match(/^([\w\u3000-\u9FFF\uFF00-\uFFEF]+):\s*(serial|varchar|integer|numeric|timestamp|date)\("([^"]+)"[^)]*\)(.*)/);
-    if (!m) continue;
-    const [, fieldName, colType, dbColumn, rest] = m;
-    const isPK = rest.includes(".primaryKey()");
-    const isNotNull = rest.includes(".notNull()") || isPK;
-    const hasDefault = rest.includes(".default(") || rest.includes(".defaultNow()") || isPK;
-
-    fields.push({
-      name: fieldName,
-      goName: toPascalCase(fieldName),
-      goType: pgTypeToGoType(colType, isNotNull),
-      dbColumn,
-      isNotNull,
-      isPrimaryKey: isPK,
-      hasDefault,
-    });
-  }
-  return fields;
+  return tsParser.parseSchemaFile(path.join(srcRoot, "db/schema.ts"));
 }
 
 // ─── config.ts パーサー ────────────────────
@@ -299,207 +194,10 @@ function parseTableFields(body: string): FieldDef[] {
 function parseConfigFile(featureName: string): { columns: ColumnDef[]; entity: EntityConfigDef } | null {
   const configPath = path.join(srcRoot, `features/${featureName}/config.ts`);
   if (!fs.existsSync(configPath)) return null;
-  const content = fs.readFileSync(configPath, "utf-8");
-
-  const columns = parseColumns(content);
-  const entity = parseEntityConfig(content);
-  return { columns, entity };
-}
-
-function parseColumns(content: string): ColumnDef[] {
-  const columns: ColumnDef[] = [];
-
-  // Column[] の中身を抽出 (複数の Column[] 定義がある場合は最初のstaticなものを使う)
-  // const XxxカラムOrget取引カラム の中身からオブジェクトリテラルを抽出
-  const arrayMatch = content.match(/Column\[\]\s*=\s*\[([\s\S]*?)\];/);
-  // 関数内の return [...] パターンも試す
-  const funcMatch = content.match(/:\s*Column\[\]\s*\{[\s\S]*?return\s*\[([\s\S]*?)\];\s*\}/);
-  const body = arrayMatch?.[1] ?? funcMatch?.[1] ?? "";
-
-  // 各オブジェクトリテラル { ... } を抽出
-  const objRegex = /\{([^{}]*(?:\{[^{}]*\}[^{}]*)*)\}/g;
-  let objMatch;
-  while ((objMatch = objRegex.exec(body)) !== null) {
-    const obj = objMatch[1];
-    const col = parseColumnObject(obj, content);
-    if (col) columns.push(col);
-  }
-  return columns;
-}
-
-function parseColumnObject(obj: string, fileContent?: string): ColumnDef | null {
-  const key = extractString(obj, "key");
-  const label = extractString(obj, "label");
-  if (!key || (label === null && !obj.includes('"deleteAction"'))) return null;
-
-  const type = extractString(obj, "type") || "text";
-  const required = obj.includes("required: true");
-  const format = obj.includes("format: true");
-  const expression = extractString(obj, "expression") || "";
-  const placeholder = extractString(obj, "placeholder") || "";
-  const defaultValue = extractString(obj, "defaultValue") || extractNumber(obj, "defaultValue") || "";
-
-  const minMatch = obj.match(/min:\s*(\d+)/);
-  const min = minMatch ? Number(minMatch[1]) : undefined;
-
-  // options: リテラル配列をパース、変数参照も解決する
-  const options: { value: string; label: string }[] = [];
-  const optIdx = obj.indexOf("options:");
-  if (optIdx >= 0) {
-    const optBody = extractBracketContent(obj, optIdx);
-    if (optBody) {
-      const optRegex = /\{\s*value:\s*"([^"]*)",\s*label:\s*"([^"]*)"\s*\}/g;
-      let optMatch;
-      while ((optMatch = optRegex.exec(optBody)) !== null) {
-        options.push({ value: optMatch[1], label: optMatch[2] });
-      }
-    }
-    // インラインで見つからなかった場合、変数参照を解決
-    if (options.length === 0 && fileContent) {
-      const varRefMatch = obj.slice(optIdx).match(/options:\s*([A-Za-z_\u3000-\u9FFFぁ-んァ-ヶー]+)/);
-      if (varRefMatch) {
-        const varName = varRefMatch[1];
-        const varDefRegex = new RegExp(`(?:const|let|var)\\s+${varName}\\s*=\\s*\\[([\\s\\S]*?)\\];`);
-        const varDef = fileContent.match(varDefRegex);
-        if (varDef) {
-          const optRegex2 = /\{\s*value:\s*"([^"]*)",\s*label:\s*"([^"]*)"\s*\}/g;
-          let m;
-          while ((m = optRegex2.exec(varDef[1])) !== null) {
-            options.push({ value: m[1], label: m[2] });
-          }
-        }
-      }
-    }
-  }
-
-  return { key, label, type, required, format, options, expression, min, defaultValue, placeholder };
-}
-
-function extractString(obj: string, key: string): string | null {
-  const m = obj.match(new RegExp(`${key}:\\s*"([^"]*)"`));
-  return m?.[1] ?? null;
-}
-
-function extractNumber(obj: string, key: string): string | null {
-  const m = obj.match(new RegExp(`${key}:\\s*(\\d+)`));
-  return m?.[1] ?? null;
-}
-
-function parseEntityConfig(content: string): EntityConfigDef {
-  const idPrefix = extractFromConfig(content, "idPrefix") || "row";
-  return {
-    idPrefix,
-    baseUrl: extractFromConfig(content, "baseUrl") || "/api/unknown",
-    bodyTargetId: extractFromConfig(content, "bodyTargetId") || "data-body",
-    paginationId: extractFromConfig(content, "paginationId") || "data-pagination",
-    formTitle: extractFromConfig(content, "formTitle") || "新規登録",
-    emptyMessage: extractFromConfig(content, "emptyMessage") || "データがありません",
-    deleteConfirmTemplate: extractFromConfig(content, "deleteConfirmTemplate") || "削除しますか？",
-    searchFields: parseSearchFields(content),
-    searchContainerId: extractFromConfig(content, "searchContainerId") || `${idPrefix}-search`,
-  };
-}
-
-/** 文字列リテラルを考慮した bracket depth matching */
-function extractBracketContentStringSafe(s: string, offset: number, open = "[", close = "]"): string | null {
-  let start = s.indexOf(open, offset);
-  if (start < 0) return null;
-  start++;
-  let depth = 1;
-  let inString = false;
-  let strChar = "";
-  for (let i = start; i < s.length; i++) {
-    const ch = s[i];
-    if (inString) {
-      if (ch === "\\" ) { i++; continue; } // skip escaped
-      if (ch === strChar) inString = false;
-      continue;
-    }
-    if (ch === '"' || ch === "'" || ch === "`") { inString = true; strChar = ch; continue; }
-    if (ch === open) depth++;
-    else if (ch === close) {
-      depth--;
-      if (depth === 0) return s.slice(start, i);
-    }
-  }
-  return null;
-}
-
-/** searchFields 配列をパースする */
-function parseSearchFields(content: string): SearchFieldDef[] {
-  const fields: SearchFieldDef[] = [];
-  const startIdx = content.indexOf("searchFields:");
-  if (startIdx < 0) return fields;
-  const body = extractBracketContentStringSafe(content, startIdx, "[", "]") || "";
-  if (!body) return fields;
-
-  // 各オブジェクトを balanced braces (string-safe) でパース
-  let pos = 0;
-  while (pos < body.length) {
-    const objBody = extractBracketContentStringSafe(body, pos, "{", "}");
-    if (objBody === null) break;
-    // pos を進める
-    const braceStart = body.indexOf("{", pos);
-    pos = braceStart + objBody.length + 2; // skip { + body + }
-
-    const searchType = extractString(objBody, "searchType") as "text" | "date" | "select" | null;
-    const param = extractString(objBody, "param");
-    const label = extractString(objBody, "label");
-    if (!searchType || !param || !label) continue;
-
-    // dbColumns をパース
-    const dbColumns: string[] = [];
-    const dbColIdx = objBody.indexOf("dbColumns:");
-    if (dbColIdx >= 0) {
-      const dbColBody = extractBracketContentStringSafe(objBody, dbColIdx, "[", "]");
-      if (dbColBody) {
-        const colStrRegex = /"([^"]*)"/g;
-        let cm;
-        while ((cm = colStrRegex.exec(dbColBody)) !== null) {
-          dbColumns.push(cm[1]);
-        }
-      }
-    }
-
-    // options をパース (select 用)
-    const options: { value: string; label: string }[] = [];
-    const optIdx = objBody.indexOf("options:");
-    if (optIdx >= 0) {
-      const optBody = extractBracketContentStringSafe(objBody, optIdx, "[", "]");
-      if (optBody) {
-        const optRegex = /\{\s*value:\s*"([^"]*)",\s*label:\s*"([^"]*)"\s*\}/g;
-        let om;
-        while ((om = optRegex.exec(optBody)) !== null) {
-          options.push({ value: om[1], label: om[2] });
-        }
-      }
-    }
-
-    fields.push({
-      searchType,
-      param,
-      label,
-      placeholder: extractString(objBody, "placeholder") || "",
-      flexClass: extractString(objBody, "flexClass") || "",
-      dbColumns,
-      options,
-    });
-  }
-  return fields;
-}
-
-function extractFromConfig(content: string, key: string): string | null {
-  const m = content.match(new RegExp(`${key}:\\s*"([^"]*)"`));
-  return m?.[1] ?? null;
+  return tsParser.parseConfigFile(configPath);
 }
 
 // ─── ユーティリティ ────────────────────────
-
-function toPascalCase(s: string): string {
-  // 日本語を含む場合はそのまま返す（Go は Unicode 識別子をサポート）
-  if (/[\u3000-\u9FFF\uFF00-\uFFEF]/.test(s)) return s;
-  return s.split(/[-_]/).map((w) => w.charAt(0).toUpperCase() + w.slice(1)).join("");
-}
 
 /** 親テーブルへの FK カラムかどうかを判定 */
 function isParentFKColumn(f: FieldDef, parentTableName: string): boolean {
@@ -517,16 +215,6 @@ function sqlQ(name: string): string {
   // id, created_at, updated_at 等の ASCII 識別子はクォート不要
   if (/^[a-z_][a-z0-9_]*$/.test(name)) return name;
   return `"${name}"`;
-}
-
-function pgTypeToGoType(colType: string, isNotNull: boolean): string {
-  if (colType === "serial") return "int";
-  if (colType === "integer") return isNotNull ? "int" : "sql.NullInt64";
-  if (colType === "numeric") return "string";
-  if (colType === "varchar") return isNotNull ? "string" : "sql.NullString";
-  if (colType === "timestamp") return "time.Time";
-  if (colType === "date") return "string";
-  return "string";
 }
 
 function simpleGoType(goType: string): string {
@@ -1563,141 +1251,11 @@ func WriteXLSX(w http.ResponseWriter, filename string, headers []string, rows []
 
 // ─── Header-Body 設定パーサー ─────────────────
 
-interface HeaderBodyChildDef {
-  tableName: string;
-  sectionLabel: string;
-  discriminatorColumn?: string;
-  discriminatorValue?: string;
-  columns: ColumnDef[];
-}
-
-interface HeaderBodyDef {
-  headerColumns: ColumnDef[];
-  children: HeaderBodyChildDef[];
-  entityConfig: EntityConfigDef;
-}
-
 /** gen-go.config.ts から header-body 設定を抽出 */
 function parseHeaderBodyConfig(featureName: string): HeaderBodyDef | null {
   const configPath = path.join(srcRoot, `features/${featureName}/gen-go.config.ts`);
   if (!fs.existsSync(configPath)) return null;
-  const content = fs.readFileSync(configPath, "utf-8");
-
-  // type: "header-body" が存在するか
-  if (!content.includes('"header-body"')) return null;
-
-  // EntityConfig 部分を抽出
-  const idPrefix = extractFromConfig(content, "idPrefix") || "row";
-  const entityConfig: EntityConfigDef = {
-    idPrefix,
-    baseUrl: extractFromConfig(content, "baseUrl") || `/api/${featureName}`,
-    bodyTargetId: extractFromConfig(content, "bodyTargetId") || "data-body",
-    paginationId: extractFromConfig(content, "paginationId") || "data-pagination",
-    formTitle: extractFromConfig(content, "formTitle") || `新規${featureName}登録`,
-    emptyMessage: extractFromConfig(content, "emptyMessage") || `${featureName}がありません`,
-    deleteConfirmTemplate: extractFromConfig(content, "deleteConfirmTemplate") || "削除しますか？",
-    searchFields: parseSearchFields(content),
-    searchContainerId: extractFromConfig(content, "searchContainerId") || `${idPrefix}-search`,
-  };
-
-  // headerColumns を抽出
-  const headerColumnsMatch = content.match(/headerColumns:\s*\[([\s\S]*?)\],\s*children:/);
-  const headerColumns: ColumnDef[] = [];
-  if (headerColumnsMatch) {
-    const body = headerColumnsMatch[1];
-    const objRegex = /\{([^{}]*(?:\{[^{}]*\}[^{}]*)*)\}/g;
-    let objMatch;
-    while ((objMatch = objRegex.exec(body)) !== null) {
-      const col = parseColumnObject(objMatch[1]);
-      if (col) headerColumns.push(col);
-    }
-  }
-
-  // children を抽出
-  const children: HeaderBodyChildDef[] = [];
-  const childrenMatch = content.match(/children:\s*\[([\s\S]*)\]\s*[,;]?\s*\}\s*;?\s*$/);
-  if (childrenMatch) {
-    // 各 { ... } オブジェクトを抽出（ネスト対応）
-    const childrenBody = childrenMatch[1];
-    const childBlocks = extractTopLevelObjects(childrenBody);
-    for (const block of childBlocks) {
-      const childTableName = extractString(block, "tableName");
-      const sectionLabel = extractString(block, "sectionLabel");
-      if (!childTableName || !sectionLabel) continue;
-
-      // discriminator
-      const discMatch = block.match(/discriminator:\s*\{([^}]*)\}/);
-      let discriminatorColumn: string | undefined;
-      let discriminatorValue: string | undefined;
-      if (discMatch) {
-        discriminatorColumn = extractString(discMatch[1], "column") || undefined;
-        const numVal = extractNumber(discMatch[1], "value");
-        const strVal = extractString(discMatch[1], "value");
-        discriminatorValue = numVal || strVal || undefined;
-      }
-
-      // child columns — ネスト対応でブラケットを追跡
-      const childCols: ColumnDef[] = [];
-      const colsStart = block.indexOf("columns:");
-      if (colsStart >= 0) {
-        const colsBody = extractBracketContent(block, colsStart);
-        if (colsBody) {
-          // 各カラムオブジェクトを抽出（ネスト対応）
-          const colBlocks = extractTopLevelObjects(colsBody);
-          for (const cb of colBlocks) {
-            const col = parseColumnObject(cb);
-            if (col) childCols.push(col);
-          }
-        }
-      }
-
-      children.push({
-        tableName: childTableName,
-        sectionLabel,
-        discriminatorColumn,
-        discriminatorValue,
-        columns: childCols,
-      });
-    }
-  }
-
-  return { headerColumns, children, entityConfig };
-}
-
-/** 最上位レベルの {} ブロックを抽出（ネスト対応） */
-function extractTopLevelObjects(s: string): string[] {
-  const results: string[] = [];
-  let depth = 0;
-  let start = -1;
-  for (let i = 0; i < s.length; i++) {
-    if (s[i] === "{") {
-      if (depth === 0) start = i + 1;
-      depth++;
-    } else if (s[i] === "}") {
-      depth--;
-      if (depth === 0 && start >= 0) {
-        results.push(s.slice(start, i));
-        start = -1;
-      }
-    }
-  }
-  return results;
-}
-
-/** offset 以降の最初の `[` から対応する `]` までの中身を返す（ネスト対応） */
-function extractBracketContent(s: string, offset: number): string | null {
-  let start = s.indexOf("[", offset);
-  if (start < 0) return null;
-  start++;
-  let depth = 1;
-  for (let i = start; i < s.length; i++) {
-    if (s[i] === "[") depth++;
-    else if (s[i] === "]") {
-      depth--;
-      if (depth === 0) return s.slice(start, i);
-    }
-  }
-  return null;
+  return tsParser.parseHeaderBodyConfig(configPath, featureName);
 }
 
 // ─── Header-Body Go コード生成 ────────────────
